@@ -1,0 +1,33 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Outer circle -->
+    <path
+        android:fillColor="@color/primary_color"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10s10,-4.48 10,-10S17.52,2 12,2z" />
+
+    <!-- Inner circle -->
+    <path
+        android:fillColor="@color/primary_light_color"
+        android:pathData="M12,4c-4.41,0 -8,3.59 -8,8s3.59,8 8,8s8,-3.59 8,-8S16.41,4 12,4z" />
+
+    <!-- Flashcard symbol -->
+    <path
+        android:fillColor="@color/accent_color"
+        android:pathData="M15,8H9c-0.55,0 -1,0.45 -1,1v6c0,0.55 0.45,1 1,1h6c0.55,0 1,-0.45 1,-1V9C16,8.45 15.55,8 15,8z" />
+
+    <!-- Smaller flashcard offset to create stacked effect -->
+    <path
+        android:fillColor="@color/secondary_color"
+        android:pathData="M16,7h-6c-0.55,0 -1,0.45 -1,1v0.5h6.5c0.55,0 1,0.45 1,1V16h0.5c0.55,0 1,-0.45 1,-1V9C18,7.9 17.1,7 16,7z" />
+
+    <!-- Brain-like connections -->
+    <path
+        android:strokeColor="@color/accent_dark_color"
+        android:strokeWidth="0.75"
+        android:strokeLineCap="round"
+        android:pathData="M10,12 L14,12 M12,10 L12,14" />
+</vector>

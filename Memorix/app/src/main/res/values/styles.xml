@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary_color</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/accent_color</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+
+    <!-- Button styles -->
+    <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/primary_color</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="SecondaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/secondary_color</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AccentButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/accent_color</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- Text styles -->
+    <style name="Title">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Subtitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="Body">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:alpha">0.7</item>
+    </style>
+</resources>

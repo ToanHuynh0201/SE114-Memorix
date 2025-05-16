@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="240dp"
+    android:viewportWidth="360"
+    android:viewportHeight="240">
+
+    <!-- Circle shapes -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,60 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0"
+        android:fillAlpha="0.3" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M280,40 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0"
+        android:fillAlpha="0.2" />
+
+    <!-- Triangle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M310,140 l30,50 l-60,50 z"
+        android:fillAlpha="0.15" />
+
+    <!-- Rectangle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,140 h60 v60 h-60 z"
+        android:fillAlpha="0.1" />
+
+    <!-- Rounded rectangle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M150,20 h100 a15,15 0 0 1 15,15 v30 a15,15 0 0 1 -15,15 h-100 a15,15 0 0 1 -15,-15 v-30 a15,15 0 0 1 15,-15 z"
+        android:fillAlpha="0.2" />
+
+    <!-- Plus sign -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M150,150 h15 v-15 h15 v15 h15 v15 h-15 v15 h-15 v-15 h-15 z"
+        android:fillAlpha="0.25" />
+
+    <!-- Dots pattern -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M200,180 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M230,180 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M260,180 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M200,210 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M230,210 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M260,210 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"
+        android:fillAlpha="0.2" />
+</vector>
