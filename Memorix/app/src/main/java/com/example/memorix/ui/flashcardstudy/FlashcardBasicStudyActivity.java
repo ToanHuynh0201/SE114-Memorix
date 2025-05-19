@@ -90,11 +90,6 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Học flashcard");
-
         tvSetTitle = findViewById(R.id.tv_set_title);
         progressBar = findViewById(R.id.progress_bar);
         tvProgress = findViewById(R.id.tv_progress);

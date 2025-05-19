@@ -5,9 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.flashcardstudy.FlashcardBasicStudyActivity">
-
-    <!-- Header with Set Title -->
+    tools:context=".ui.flashcardstudy.FlashcardMultipleChoiceStudyActivity">
     <TextView
         android:id="@+id/tv_set_title"
         android:layout_width="0dp"
@@ -73,106 +71,124 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <!-- Front Side -->
+            <!-- Front of the Card (Question & Options) -->
             <androidx.cardview.widget.CardView
-                android:id="@+id/card_front"
+                android:id="@+id/mc_front_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
                 android:visibility="visible">
 
-                <TextView
-                    android:id="@+id/tv_card_front"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="Chọn đáp án đúng"
+                        android:textColor="@color/primary_color"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_question"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:gravity="center"
+                        android:text="Câu hỏi trắc nghiệm sẽ hiển thị ở đây"
+                        android:textColor="@color/text_color"
+                        android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/btn_option_1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:backgroundTint="@color/option_default_color"
+                            android:text="Lựa chọn 1"
+                            android:textColor="@android:color/white" />
+
+                        <Button
+                            android:id="@+id/btn_option_2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:backgroundTint="@color/option_default_color"
+                            android:text="Lựa chọn 2"
+                            android:textColor="@android:color/white" />
+
+                        <Button
+                            android:id="@+id/btn_option_3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:backgroundTint="@color/option_default_color"
+                            android:text="Lựa chọn 3"
+                            android:textColor="@android:color/white" />
+
+                        <Button
+                            android:id="@+id/btn_option_4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/option_default_color"
+                            android:text="Lựa chọn 4"
+                            android:textColor="@android:color/white" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Back of the Card (Answer Result) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mc_back_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:padding="24dp"
-                    android:text="Present Simple"
-                    android:textColor="@color/text_color"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:visibility="visible"
-                    tools:ignore="HardcodedText" />
-            </androidx.cardview.widget.CardView>
-
-            <!-- Back Side -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_back"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp"
-                android:visibility="gone">
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="visible">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tv_card_back"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:gravity="center"
-                        android:padding="24dp"
-                        android:text="Thì hiện tại đơn, diễn tả thói quen hoặc sự thật hiển nhiên"
-                        android:textColor="@color/text_color"
-                        android:textSize="22sp"
-                        android:visibility="visible"
-                        app:layout_constraintBottom_toTopOf="@+id/difficulty_buttons_layout"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="HardcodedText" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="Kết quả"
+                        android:textColor="@color/primary_color"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-                    <!-- Difficulty Buttons Layout -->
-                    <LinearLayout
-                        android:id="@+id/difficulty_buttons_layout"
+                    <TextView
+                        android:id="@+id/tv_answer_result"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginEnd="24dp"
-                        android:layout_marginBottom="16dp"
-                        android:orientation="horizontal"
-                        android:visibility="visible"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent">
+                        android:gravity="center"
+                        android:text="Đáp án đúng sẽ hiển thị ở đây"
+                        android:textColor="@color/text_color"
+                        android:textSize="20sp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_hard"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#F44336"
-                            android:text="Khó"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_medium"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/accent_color"
-                            android:text="Vừa"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_easy"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/secondary_color"
-                            android:text="Dễ"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
-                    </LinearLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="32dp"
+                        android:text="Nhấn để quay lại câu hỏi"
+                        android:textColor="@color/secondary_text_color"
+                        android:textSize="14sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
             </androidx.cardview.widget.CardView>
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
