@@ -130,8 +130,8 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         cardFront.setCameraDistance(8000 * scale);
         cardBack.setCameraDistance(8000 * scale);
 
-        frontAnimation = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.anim.card_flip_right_out);
-        backAnimation = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.anim.card_flip_right_in);
+        frontAnimation = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.card_flip_right_out);
+        backAnimation = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.card_flip_right_in);
     }
 
     private void setupSlideAnimations() {
@@ -238,8 +238,8 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             difficultyButtonsLayout.setVisibility(View.VISIBLE);
         } else {
             // Lật từ mặt sau sang mặt trước
-            @SuppressLint("ResourceType") AnimatorSet frontAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.anim.card_flip_left_in);
-            @SuppressLint("ResourceType") AnimatorSet backAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.anim.card_flip_left_out);
+            @SuppressLint("ResourceType") AnimatorSet frontAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.card_flip_left_in);
+            @SuppressLint("ResourceType") AnimatorSet backAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.card_flip_left_out);
 
             frontAnimator.setTarget(cardFront);
             backAnimator.setTarget(cardBack);
