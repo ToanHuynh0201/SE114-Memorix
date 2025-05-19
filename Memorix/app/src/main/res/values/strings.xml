@@ -56,4 +56,16 @@
     <string name="no_decks_message">Bạn chưa có bộ thẻ nào. Nhấn nút + để thêm bộ thẻ mới.</string>
     <string name="card_count">Số thẻ</string>
     <string name="mastered_count">Đã thành thạo</string>
+
+
+    <string name="account_management">Quản lý tài khoản</string>
+    <string name="account_information">Thông tin tài khoản</string>
+    <string name="account_settings">Cài đặt tài khoản</string>
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="english">Tiếng Anh</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="change_photo">Thay đổi ảnh đại diện</string>
 </resources>
