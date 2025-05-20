@@ -84,6 +84,7 @@
     <string name="my_decks">Bộ thẻ của tôi</string>
     <string name="add_new_deck">Thêm bộ thẻ mới</string>
     <string name="no_decks_yet">Chưa có bộ thẻ nào</string>
+    <string name="empty_state">Trạng thái trống</string>
 
     <!-- Chuỗi cho BottomNavigationView -->
     <string name="nav_decks">Bộ thẻ</string>
@@ -98,6 +99,4 @@
     <string name="deck_description">Mô tả</string>
     <string name="save">Lưu</string>
     <string name="cancel">Hủy</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

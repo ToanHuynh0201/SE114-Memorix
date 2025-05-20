@@ -51,20 +51,19 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     private void setupBottomNavigation() {
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
-        loadFragment(new ManageDeckFragment());
+        loadFragment(new HomeFragment());
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.nav_home:
+                    loadFragment(new HomeFragment());
                     return true;
-                case R.id.nav_sets:
+                case R.id.nav_decks:
+                    loadFragment(new ManageDeckFragment());
                     return true;
                 case R.id.nav_groups:
-                    // Navigate to Groups Screen
-                    Toast.makeText(MainActivity.this, "Chuyển tới Nhóm", Toast.LENGTH_SHORT).show();
                     return true;
                 case R.id.nav_profile:
                     loadFragment(new AccountManagementFragment());
-                    Toast.makeText(MainActivity.this, "Chuyển tới Hồ sơ", Toast.LENGTH_SHORT).show();
                     return true;
                 default:
                     return false;

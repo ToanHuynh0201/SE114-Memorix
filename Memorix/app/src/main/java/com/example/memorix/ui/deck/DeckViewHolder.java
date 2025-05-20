@@ -1,5 +1,6 @@
 package com.example.memorix.ui.deck;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 import android.widget.ImageButton;
@@ -69,6 +70,7 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         popupMenu.show();
     }
 
+    @SuppressLint("SetTextI18n")
     public void bind(Deck deck, int position) {
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
