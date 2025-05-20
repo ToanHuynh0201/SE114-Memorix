@@ -2,9 +2,14 @@ package com.example.memorix.ui.deck;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +28,8 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
     private ProgressBar progressBar;
     private ImageButton btnOverflowMenu;
     private Context context;
+    private int currentPosition;
+    private DeckActionListener listener;
     public DeckViewHolder(@NonNull View itemView, DeckActionListener listener) {
         super(itemView);
         context = itemView.getContext();
@@ -38,36 +45,70 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
     }
 
     private void showPopupMenu() {
-        PopupMenu popupMenu = new PopupMenu(context, btnOverflowMenu);
-        popupMenu.inflate(R.menu.menu_deck_options);
+        // Inflate layout cho custom menu
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View customMenuView = inflater.inflate(R.layout.menu_deck_options, null);
 
-        // Thiết lập sự kiện khi chọn một mục trong menu
-        popupMenu.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
+        // Tạo PopupWindow với shadow và góc bo tròn
+        final PopupWindow popupWindow = new PopupWindow(
+                customMenuView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true);
 
-            if (itemId == R.id.action_edit) {
-                // Xử lý khi chọn Chỉnh sửa
-                Toast.makeText(context, "Chỉnh sửa bộ thẻ", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.action_share) {
-                // Xử lý khi chọn Chia sẻ
-                Toast.makeText(context, "Chia sẻ bộ thẻ", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.action_reset_progress) {
-                // Xử lý khi chọn Đặt lại tiến độ
-                Toast.makeText(context, "Đặt lại tiến độ", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.action_delete) {
-                // Xử lý khi chọn Xóa
-                Toast.makeText(context, "Xóa bộ thẻ", Toast.LENGTH_SHORT).show();
-                return true;
+        // Thiết lập animation
+        popupWindow.setAnimationStyle(R.style.PopupAnimation);
+
+        // Thiết lập background cho shadow effect
+        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        popupWindow.setElevation(10f);
+
+        // Tìm các view item trong custom layout
+        TextView itemEdit = customMenuView.findViewById(R.id.menu_item_edit);
+        TextView itemShare = customMenuView.findViewById(R.id.menu_item_share);
+        TextView itemResetProgress = customMenuView.findViewById(R.id.menu_item_reset_progress);
+        TextView itemDelete = customMenuView.findViewById(R.id.menu_item_delete);
+
+        // Thiết lập sự kiện click cho từng item
+        itemEdit.setOnClickListener(v -> {
+            // Xử lý khi chọn Chỉnh sửa
+            Toast.makeText(context, "Chỉnh sửa bộ thẻ", Toast.LENGTH_SHORT).show();
+            if (listener != null) {
+                listener.onEditDeck(currentPosition);
             }
-
-            return false;
+            popupWindow.dismiss();
         });
 
-        // Hiển thị menu
-        popupMenu.show();
+        itemShare.setOnClickListener(v -> {
+            // Xử lý khi chọn Chia sẻ
+            Toast.makeText(context, "Chia sẻ bộ thẻ", Toast.LENGTH_SHORT).show();
+            if (listener != null) {
+                listener.onShareDeck(currentPosition);
+            }
+            popupWindow.dismiss();
+        });
+
+        itemResetProgress.setOnClickListener(v -> {
+            // Xử lý khi chọn Đặt lại tiến độ
+            Toast.makeText(context, "Đặt lại tiến độ", Toast.LENGTH_SHORT).show();
+            if (listener != null) {
+                listener.onResetProgress(currentPosition);
+            }
+            popupWindow.dismiss();
+        });
+
+        itemDelete.setOnClickListener(v -> {
+            // Xử lý khi chọn Xóa
+            Toast.makeText(context, "Xóa bộ thẻ", Toast.LENGTH_SHORT).show();
+            if (listener != null) {
+                listener.onDeleteDeck(currentPosition);
+            }
+            popupWindow.dismiss();
+        });
+
+        // Hiển thị popup menu
+        // Để hiển thị menu bên dưới và phải của button
+        popupWindow.showAsDropDown(btnOverflowMenu, -150, 0);
     }
 
     @SuppressLint("SetTextI18n")
