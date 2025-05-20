@@ -68,4 +68,36 @@
     <string name="english">Tiếng Anh</string>
     <string name="logout">Đăng xuất</string>
     <string name="change_photo">Thay đổi ảnh đại diện</string>
+
+    <!-- Các chuỗi cho menu -->
+    <string name="menu">Menu</string>
+    <string name="edit_deck">Chỉnh sửa bộ thẻ</string>
+    <string name="share_deck">Chia sẻ bộ thẻ</string>
+    <string name="reset_progress">Đặt lại tiến độ</string>
+    <string name="delete_deck">Xóa bộ thẻ</string>
+
+    <!-- Chuỗi định dạng -->
+    <string name="cards_count_format">%d cards</string>
+    <string name="mastered_count_format">%d mastered</string>
+
+    <!-- Chuỗi màn hình danh sách -->
+    <string name="my_decks">Bộ thẻ của tôi</string>
+    <string name="add_new_deck">Thêm bộ thẻ mới</string>
+    <string name="no_decks_yet">Chưa có bộ thẻ nào</string>
+
+    <!-- Chuỗi cho BottomNavigationView -->
+    <string name="nav_decks">Bộ thẻ</string>
+    <string name="nav_study">Học tập</string>
+    <string name="nav_statistics">Thống kê</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- Chuỗi cho màn hình chỉnh sửa -->
+    <string name="edit_deck_title">Chỉnh sửa bộ thẻ</string>
+    <string name="create_deck_title">Tạo bộ thẻ mới</string>
+    <string name="deck_name">Tên bộ thẻ</string>
+    <string name="deck_description">Mô tả</string>
+    <string name="save">Lưu</string>
+    <string name="cancel">Hủy</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

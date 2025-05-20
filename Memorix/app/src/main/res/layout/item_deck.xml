@@ -22,10 +22,23 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/text_color"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_overflow_menu"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tiếng Việt" />
+
+        <!-- Nút 3 chấm (Overflow menu) -->
+        <ImageButton
+            android:id="@+id/btn_overflow_menu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu"
+            android:src="@drawable/ic_more_vert"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_deck_name"
+            app:tint="@color/secondary_color" />
 
         <TextView
             android:id="@+id/tv_deck_description"
