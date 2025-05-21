@@ -17,4 +17,13 @@
     <color name="option_default_color">#3F51B5</color>
     <color name="option_correct_color">#4CAF50</color>
     <color name="option_wrong_color">#F44336</color>
+
+    <color name="purple">#7047F5</color>
+    <color name="green">#4CAF50</color>
+    <color name="magenta">#BC2BC9</color>
+    <color name="blue">#3F71DC</color>
+    <color name="red">#F0425F</color>
+    <color name="cyan">#2DB6F5</color>
+    <color name="gold">#FFD700</color>
+    <color name="gray">#AAAAAA</color>
 </resources>

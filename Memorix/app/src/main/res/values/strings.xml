@@ -99,4 +99,10 @@
     <string name="deck_description">Mô tả</string>
     <string name="save">Lưu</string>
     <string name="cancel">Hủy</string>
+
+    <string name="create_new">Tạo mới</string>
+    <string name="create_deck">Tạo bộ thẻ</string>
+    <string name="create_folder">Tạo folder</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

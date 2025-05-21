@@ -57,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_home:
                     loadFragment(new HomeFragment());
                     return true;
-                case R.id.nav_decks:
-                    loadFragment(new ManageDeckFragment());
+                case R.id.nav_library:
                     return true;
                 case R.id.nav_groups:
                     return true;
