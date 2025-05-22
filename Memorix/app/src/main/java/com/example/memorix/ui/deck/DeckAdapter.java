@@ -32,6 +32,11 @@ public class DeckAdapter extends RecyclerView.Adapter<DeckViewHolder>{
     public void onBindViewHolder(@NonNull DeckViewHolder holder, int position) {
         Deck deck = deckList.get(position);
         holder.bind(deck, position);
+        holder.itemView.setOnClickListener(v -> {
+            if(listener != null){
+                listener.onDeckClick(deck, position);
+            }
+        });
     }
 
     @Override

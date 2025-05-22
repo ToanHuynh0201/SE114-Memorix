@@ -13,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.memorix.R;
+import com.example.memorix.data.Deck;
+import com.example.memorix.ui.deck.DeckLibraryFragment;
 import com.example.memorix.ui.deck.ManageDeckFragment;
 import com.example.memorix.ui.profile.AccountManagementFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -55,9 +57,10 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.nav_home:
-                    loadFragment(new HomeFragment());
+                    loadFragment(new ManageDeckFragment());
                     return true;
                 case R.id.nav_library:
+                    loadFragment(new DeckLibraryFragment());
                     return true;
                 case R.id.nav_groups:
                     return true;

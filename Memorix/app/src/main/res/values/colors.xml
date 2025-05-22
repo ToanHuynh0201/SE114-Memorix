@@ -26,4 +26,8 @@
     <color name="cyan">#2DB6F5</color>
     <color name="gold">#FFD700</color>
     <color name="gray">#AAAAAA</color>
+
+    <color name="input_background">#3D3D3D</color>
+    <color name="hint_color">#8A8A8A</color>
+    <color name="bottom_sheet_background">#2D2D2D</color>
 </resources>

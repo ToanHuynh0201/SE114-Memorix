@@ -33,6 +33,8 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
     public DeckViewHolder(@NonNull View itemView, DeckActionListener listener) {
         super(itemView);
         context = itemView.getContext();
+        this.listener = listener;
+        context = itemView.getContext();
         tvDeckName = itemView.findViewById(R.id.tv_deck_name);
         tvDeckDescription = itemView.findViewById(R.id.tv_deck_description);
         tvCardCount = itemView.findViewById(R.id.tv_card_count);
@@ -41,7 +43,9 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         btnOverflowMenu = itemView.findViewById(R.id.btn_overflow_menu);
 
         // Thiết lập sự kiện bấm vào nút 3 chấm
-        btnOverflowMenu.setOnClickListener(v -> showPopupMenu());
+        btnOverflowMenu.setOnClickListener(v -> {
+            showPopupMenu();
+        });
     }
 
     private void showPopupMenu() {
@@ -113,6 +117,7 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
 
     @SuppressLint("SetTextI18n")
     public void bind(Deck deck, int position) {
+        this.currentPosition = position;
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
         tvCardCount.setText(deck.getCardCount() + " cards");

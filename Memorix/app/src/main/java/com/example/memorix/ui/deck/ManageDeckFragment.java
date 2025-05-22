@@ -19,7 +19,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManageDeckFragment extends Fragment implements DeckActionListener,  AddOptionsBottomSheet.OptionClickListener {
+public class ManageDeckFragment extends Fragment implements DeckActionListener,
+        AddOptionsBottomSheet.OptionClickListener,
+        CreateDeckBottomSheet.CreateDeckListener,
+        CreateFolderBottomSheet.CreateFolderListener{
     private RecyclerView recyclerView;
     private DeckAdapter deckAdapter;
     private List<Deck> deckList;
@@ -71,14 +74,43 @@ public class ManageDeckFragment extends Fragment implements DeckActionListener, 
     // Interface implementation của AddOptionsBottomSheet.OptionClickListener
     @Override
     public void onCreateDeckClicked() {
-        Toast.makeText(getContext(), "Tạo bộ thẻ mới", Toast.LENGTH_SHORT).show();
-        // TODO: Mở màn hình tạo bộ thẻ mới
+        // Đóng bottom sheet hiện tại và mở CreateDeckBottomSheet
+        CreateDeckBottomSheet createDeckBottomSheet = CreateDeckBottomSheet.newInstance();
+        createDeckBottomSheet.setCreateDeckListener(this);
+        createDeckBottomSheet.show(getParentFragmentManager(), "CreateDeckBottomSheet");
     }
 
     @Override
     public void onCreateFolderClicked() {
-        Toast.makeText(getContext(), "Tạo folder mới", Toast.LENGTH_SHORT).show();
-        // TODO: Mở màn hình tạo folder mới
+        // Đóng bottom sheet hiện tại và mở CreateFolderBottomSheet
+        CreateFolderBottomSheet createFolderBottomSheet = CreateFolderBottomSheet.newInstance();
+        createFolderBottomSheet.setCreateFolderListener(this);
+        createFolderBottomSheet.show(getParentFragmentManager(), "CreateFolderBottomSheet");
+    }
+
+    @Override
+    public void onDeckCreated(String deckName) {
+        // Tạo bộ thẻ mới và thêm vào danh sách
+        int newId = deckList.size() + 1;
+        Deck newDeck = new Deck(newId, deckName, "Created by user", 0, 0);
+        deckList.add(newDeck);
+        deckAdapter.notifyItemInserted(deckList.size() - 1);
+
+        // Cập nhật trạng thái empty state
+        updateEmptyState();
+
+        Toast.makeText(getContext(), "Đã tạo bộ thẻ: " + deckName, Toast.LENGTH_SHORT).show();
+
+        // TODO: Lưu bộ thẻ vào cơ sở dữ liệu
+    }
+
+    // Interface implementation của CreateFolderBottomSheet.CreateFolderListener
+    @Override
+    public void onFolderCreated(String folderName) {
+        Toast.makeText(getContext(), "Đã tạo thư mục: " + folderName, Toast.LENGTH_SHORT).show();
+
+        // TODO: Xử lý tạo folder - thêm vào danh sách folder hoặc navigate đến folder mới
+        // Có thể cần tạo một danh sách riêng cho folder hoặc cấu trúc dữ liệu khác
     }
 
     // Interface implementation để xử lý các hành động từ menu
@@ -116,6 +148,11 @@ public class ManageDeckFragment extends Fragment implements DeckActionListener, 
         updateEmptyState();
 
         // TODO: Xóa bộ thẻ từ cơ sở dữ liệu
+    }
+
+    @Override
+    public void onDeckClick(Deck deck, int position) {
+
     }
 
     // Tạo dữ liệu mẫu
