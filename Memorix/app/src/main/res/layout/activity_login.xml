@@ -121,18 +121,18 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_subtitle"
-                app:startIconDrawable="@drawable/ic_email"
+                app:startIconDrawable="@drawable/ic_person"
                 app:startIconTint="@color/primary_color">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_text_email"
+                    android:id="@+id/edit_text_account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/email"
-                    android:inputType="textEmailAddress"
+                    android:hint="@string/account"
+                    android:inputType="textVisiblePassword"
                     android:paddingVertical="16dp"
                     android:textColor="@color/text_color"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password input with animated outline -->
@@ -164,7 +164,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/password"
-                    android:inputType="textPassword"
+                    android:inputType="text"
                     android:paddingVertical="16dp"
                     android:textColor="@color/text_color"
                     android:textSize="16sp" />

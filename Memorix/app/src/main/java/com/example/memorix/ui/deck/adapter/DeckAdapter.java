@@ -1,4 +1,4 @@
-package com.example.memorix.ui.deck;
+package com.example.memorix.ui.deck.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

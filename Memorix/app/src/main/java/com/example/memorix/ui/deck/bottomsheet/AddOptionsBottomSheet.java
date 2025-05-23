@@ -1,4 +1,4 @@
-package com.example.memorix.ui.deck;
+package com.example.memorix.ui.deck.bottomsheet;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;

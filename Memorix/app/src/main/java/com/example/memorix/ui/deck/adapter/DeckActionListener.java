@@ -1,4 +1,4 @@
-package com.example.memorix.ui.deck;
+package com.example.memorix.ui.deck.adapter;
 
 import com.example.memorix.data.Deck;
 

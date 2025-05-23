@@ -1,7 +1,6 @@
 package com.example.memorix.ui.deck;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Card;
+import com.example.memorix.ui.deck.adapter.CardAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

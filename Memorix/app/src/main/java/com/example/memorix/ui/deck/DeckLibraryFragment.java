@@ -19,11 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Deck;
+import com.example.memorix.ui.deck.adapter.DeckActionListener;
+import com.example.memorix.ui.deck.adapter.DeckAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeckLibraryFragment extends Fragment implements DeckActionListener{
+public class DeckLibraryFragment extends Fragment implements DeckActionListener {
     private EditText etSearch;
     private RecyclerView rvEnglishDecks;
     private RecyclerView rvPopularDecks;
