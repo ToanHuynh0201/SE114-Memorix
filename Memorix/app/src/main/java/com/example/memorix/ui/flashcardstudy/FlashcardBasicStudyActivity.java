@@ -12,8 +12,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.memorix.data.Flashcard;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,12 +21,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
+import com.example.memorix.data.Card;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private Toolbar toolbar;
@@ -43,7 +43,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private boolean isShowingFront = true;
 
     // List of flashcards
-    private List<Flashcard> flashcardList;
+    private List<Card> flashcardList;
     // Current position in the list
     private int currentPosition = 0;
     // Animations for slide transition
@@ -81,12 +81,16 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         // Initialize the flashcard list (replace with actual data from database)
         flashcardList = new ArrayList<>();
 
-        // Add sample flashcards
-        flashcardList.add(new Flashcard("Present Simple", "Thì hiện tại đơn, diễn tả thói quen hoặc sự thật hiển nhiên"));
-        flashcardList.add(new Flashcard("Present Continuous", "Thì hiện tại tiếp diễn, diễn tả hành động đang xảy ra"));
-        flashcardList.add(new Flashcard("Present Perfect", "Thì hiện tại hoàn thành, diễn tả hành động đã hoàn thành ở hiện tại"));
-        flashcardList.add(new Flashcard("Past Simple", "Thì quá khứ đơn, diễn tả hành động đã xảy ra trong quá khứ"));
-        flashcardList.add(new Flashcard("Past Continuous", "Thì quá khứ tiếp diễn, diễn tả hành động đang xảy ra trong quá khứ"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the chemical symbol for water?", "H2O"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What year did World War II end?", "1945"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who painted the Mona Lisa?", "Leonardo da Vinci"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the square root of 64?", "8"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the freezing point of water in Celsius?", "0"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Which language is primarily spoken in Brazil?", "Portuguese"));
+        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
     }
 
     private void initViews() {
@@ -183,9 +187,9 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
         // Hiển thị flashcard hiện tại
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Flashcard currentCard = flashcardList.get(currentPosition);
-            tvCardFront.setText(currentCard.getFront());
-            tvCardBack.setText(currentCard.getBack());
+            Card currentCard = flashcardList.get(currentPosition);
+            tvCardFront.setText(currentCard.getQuestion());
+            tvCardBack.setText(currentCard.getAnswer());
 
             // Đảm bảo layout đánh giá độ khó ẩn khi hiển thị mặt trước
             difficultyButtonsLayout.setVisibility(View.GONE);
@@ -315,7 +319,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private void markCardAsDifficulty(String difficulty) {
         // TODO: Thực hiện lưu trữ đánh giá độ khó của thẻ
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Flashcard currentCard = flashcardList.get(currentPosition);
+            Card currentCard = flashcardList.get(currentPosition);
             // currentCard.setDifficulty(difficulty);
             // Lưu đánh giá vào cơ sở dữ liệu
         }
