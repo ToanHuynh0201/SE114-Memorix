@@ -1,9 +1,10 @@
-package com.example.memorix.ui.deck;
+package com.example.memorix.ui.deck.card;
 
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.memorix.data.Card;
+import com.example.memorix.data.CardType;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class AddCardActivity extends AppCompatActivity {
     private EditText etCorrectAnswer;
 
     // Action buttons
-    private Button btnSave, btnCancel;
+    private AppCompatButton btnSave, btnCancel;
 
     // Data
     private String deckId;

@@ -3,6 +3,7 @@ package com.example.memorix.ui.flashcardstudy;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -22,11 +23,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Card;
+import com.example.memorix.helper.StudyStatisticsHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -48,6 +52,12 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private int currentPosition = 0;
     // Animations for slide transition
     private Animation slideOutLeft, slideInRight, slideOutRight, slideInLeft;
+
+    private String deckName = "Sample Flashcard Set"; // Có thể lấy từ Intent
+    private List<Card> studiedCardsList = new ArrayList<>();
+    private long studyStartTime;
+    private Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
+    private Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +68,9 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        studyStartTime = System.currentTimeMillis();
+
         // Khởi tạo danh sách flashcard (có thể được thay thế bằng dữ liệu thực tế từ database)
         initFlashcardList();
 
@@ -84,12 +97,6 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
         flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
         flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the chemical symbol for water?", "H2O"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What year did World War II end?", "1945"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who painted the Mona Lisa?", "Leonardo da Vinci"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the square root of 64?", "8"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the freezing point of water in Celsius?", "0"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Which language is primarily spoken in Brazil?", "Portuguese"));
         flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
     }
 
@@ -112,15 +119,28 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         // Set progress bar max value
         progressBar.setMax(flashcardList.size());
 
+        // Set deck name
+        tvSetTitle.setText(deckName);
+
         setupCard();
     }
 
     private void setupCard(){
+        cardBack.clearAnimation();
+        cardFront.clearAnimation();
+
         cardFront.setVisibility(View.VISIBLE);
         cardFront.setAlpha(1.0f);
+        cardFront.setRotationY(0f);
+
         cardBack.setVisibility(View.GONE);
         cardBack.setAlpha(0.0f);
+        cardBack.setRotationY(0f);
+
         isShowingFront = true;
+
+        // Đảm bảo difficulty buttons bị ẩn
+        difficultyButtonsLayout.setVisibility(View.GONE);
     }
 
     @SuppressLint("ResourceType")
@@ -147,12 +167,18 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Chuyển đến thẻ tiếp theo và bắt đầu animation slide in
+                // Chuyển đến thẻ tiếp theo
                 currentPosition++;
                 if (currentPosition >= flashcardList.size()) {
                     currentPosition = flashcardList.size() - 1;
+                    return;
                 }
+
+                // Reset thẻ về trạng thái ban đầu trước khi hiển thị
+                setupCard();
                 displayCurrentFlashcard();
+
+                // Bắt đầu animation slide in
                 flashcardView.startAnimation(slideInRight);
             }
 
@@ -166,12 +192,18 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Chuyển đến thẻ trước đó và bắt đầu animation slide in
+                // Chuyển đến thẻ trước đó
                 currentPosition--;
                 if (currentPosition < 0) {
                     currentPosition = 0;
+                    return;
                 }
+
+                // Reset thẻ về trạng thái ban đầu trước khi hiển thị
+                setupCard();
                 displayCurrentFlashcard();
+
+                // Bắt đầu animation slide in
                 flashcardView.startAnimation(slideInLeft);
             }
 
@@ -182,17 +214,10 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-        // Đảm bảo thẻ hiển thị mặt trước
-        setupCard();
-
-        // Hiển thị flashcard hiện tại
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
             Card currentCard = flashcardList.get(currentPosition);
             tvCardFront.setText(currentCard.getQuestion());
             tvCardBack.setText(currentCard.getAnswer());
-
-            // Đảm bảo layout đánh giá độ khó ẩn khi hiển thị mặt trước
-            difficultyButtonsLayout.setVisibility(View.GONE);
 
             // Cập nhật thanh tiến độ và số thẻ
             updateProgressBar();
@@ -287,40 +312,60 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         // Xử lý các nút đánh giá mức độ khó
         btnEasy.setOnClickListener(v -> {
             // Xử lý khi người dùng đánh giá "Dễ"
-            markCardAsDifficulty("easy");
-            if (currentPosition < flashcardList.size() - 1) {
-                moveToNextCard();
+            markCardAsDifficulty("easy", true);
+
+            // Kiểm tra xem có phải thẻ cuối cùng không
+            if (currentPosition >= flashcardList.size() - 1) {
+                // Thẻ cuối cùng - kết thúc session
+                finishStudySession();
             } else {
-                Toast.makeText(this, "Đã hoàn thành tất cả các thẻ!", Toast.LENGTH_SHORT).show();
+                // Chưa phải thẻ cuối - chuyển tiếp
+                moveToNextCard();
             }
         });
 
         btnMedium.setOnClickListener(v -> {
             // Xử lý khi người dùng đánh giá "Vừa"
-            markCardAsDifficulty("medium");
-            if (currentPosition < flashcardList.size() - 1) {
-                moveToNextCard();
+            markCardAsDifficulty("medium", true);
+
+            if (currentPosition >= flashcardList.size() - 1) {
+                finishStudySession();
             } else {
-                Toast.makeText(this, "Đã hoàn thành tất cả các thẻ!", Toast.LENGTH_SHORT).show();
+                moveToNextCard();
             }
         });
 
         btnHard.setOnClickListener(v -> {
             // Xử lý khi người dùng đánh giá "Khó"
-            markCardAsDifficulty("hard");
-            if (currentPosition < flashcardList.size() - 1) {
-                moveToNextCard();
+            markCardAsDifficulty("hard", false);
+
+            if (currentPosition >= flashcardList.size() - 1) {
+                finishStudySession();
             } else {
-                Toast.makeText(this, "Đã hoàn thành tất cả các thẻ!", Toast.LENGTH_SHORT).show();
+                moveToNextCard();
             }
         });
     }
 
-    private void markCardAsDifficulty(String difficulty) {
-        // TODO: Thực hiện lưu trữ đánh giá độ khó của thẻ
+    private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
             Card currentCard = flashcardList.get(currentPosition);
-            // currentCard.setDifficulty(difficulty);
+
+            // Lưu độ khó và trạng thái đúng/sai
+            cardDifficultyMap.put(currentCard.getId(), difficulty);
+            cardCorrectMap.put(currentCard.getId(), isCorrect);
+
+            // Thêm thẻ vào danh sách đã học nếu chưa có
+            if (!studiedCardsList.contains(currentCard)) {
+                studiedCardsList.add(currentCard);
+            }
+
+            // Cập nhật thông tin thẻ (nếu Card class có các phương thức này)
+            // currentCard.incrementReviewCount();
+            // if (isCorrect) {
+            //     currentCard.incrementCorrectCount();
+            // }
+
             // Lưu đánh giá vào cơ sở dữ liệu
         }
     }
@@ -365,5 +410,49 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             // Bắt đầu animation trượt ra ngoài sang phải
             flashcardView.startAnimation(slideOutRight);
         }
+    }
+
+    private void finishStudySession() {
+        try {
+            // Tính toán các thống kê cần thiết
+            long studyEndTime = System.currentTimeMillis();
+            int totalCorrectAnswers = 0;
+            int totalReviewedCards = studiedCardsList.size();
+
+            // Đếm số câu trả lời đúng
+            for (Card card : studiedCardsList) {
+                Boolean isCorrect = cardCorrectMap.get(card.getId());
+                if (isCorrect != null && isCorrect) {
+                    totalCorrectAnswers++;
+                }
+            }
+
+//             Kiểm tra StudyStatisticsHelper có tồn tại không
+             StudyStatisticsHelper.StudySessionStats stats =
+                     StudyStatisticsHelper.calculateStats(studiedCardsList, studyStartTime, studyEndTime);
+
+            // Navigate to StudySummaryActivity với proper error handling
+            Intent intent = new Intent(this, StudySummaryActivity.class);
+            intent.putExtra("deck_name", deckName);
+            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList)); // Đảm bảo Serializable
+            intent.putExtra("study_start_time", studyStartTime);
+            intent.putExtra("study_end_time", studyEndTime);
+            intent.putExtra("total_correct", totalCorrectAnswers);
+            intent.putExtra("total_reviewed", totalReviewedCards);
+
+            startActivity(intent);
+            finish(); // Optional: finish current activity
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Có thể hiển thị dialog xác nhận trước khi thoát
+        super.onBackPressed();
     }
 }

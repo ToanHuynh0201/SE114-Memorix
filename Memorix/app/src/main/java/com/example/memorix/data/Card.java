@@ -1,13 +1,9 @@
 package com.example.memorix.data;
-import static com.example.memorix.ui.deck.CardType.BASIC;
-import static com.example.memorix.ui.deck.CardType.FILL_IN_BLANK;
-import static com.example.memorix.ui.deck.CardType.MULTIPLE_CHOICE;
 
-import com.example.memorix.ui.deck.CardType;
-
+import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
-public class Card {
+public class Card implements Serializable {
     private String id;
     private String deckId;
     private CardType type;

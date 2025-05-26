@@ -1,4 +1,4 @@
-package com.example.memorix.ui.deck;
+package com.example.memorix.data;
 
 public enum CardType {
     BASIC("BASIC", "2 Mặt"),

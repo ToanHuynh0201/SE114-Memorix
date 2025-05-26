@@ -1,6 +1,7 @@
 package com.example.memorix.ui.deck;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Card;
+import com.example.memorix.data.CardType;
 import com.example.memorix.ui.deck.adapter.CardAdapter;
+import com.example.memorix.ui.deck.card.AddCardActivity;
+import com.example.memorix.ui.deck.card.EditCardActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,21 +159,8 @@ public class DeckManagementActivity extends AppCompatActivity {
     }
 
     private void addSampleCard() {
-        // Tạo thẻ mới ngẫu nhiên
-        String[] questions = {"Thank you", "Please", "Sorry", "Excuse me"};
-        String[] answers = {"Cảm ơn", "Làm ơn", "Xin lỗi", "Xin phép"};
-
-        int randomIndex = (int) (Math.random() * questions.length);
-        String newId = String.valueOf(allCards.size() + 1);
-
-        Card newCard = new Card(newId, "deck1", questions[randomIndex], answers[randomIndex]);
-        allCards.add(newCard);
-
-        // Cập nhật UI
-        tvTotalCards.setText(String.valueOf(allCards.size()));
-        filterCards(spinnerCardType.getSelectedItemPosition());
-
-        Toast.makeText(this, "Đã thêm thẻ mới!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, AddCardActivity.class);
+        startActivity(intent);
     }
 
     private void filterCards(int filterType) {
@@ -241,7 +232,12 @@ public class DeckManagementActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Chi tiết thẻ")
                 .setMessage(card.getDisplayContent())
-                .setPositiveButton("OK", null)
+                .setPositiveButton("Chỉnh sửa", (dialog, which) -> {
+                    Intent intent = new Intent(this, EditCardActivity.class);
+                    intent.putExtra("card", card);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Đóng", null)
                 .show();
     }
 
@@ -258,5 +254,8 @@ public class DeckManagementActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+    private void updateCardCount() {
+        tvTotalCards.setText(String.valueOf(allCards.size()));
     }
 }
