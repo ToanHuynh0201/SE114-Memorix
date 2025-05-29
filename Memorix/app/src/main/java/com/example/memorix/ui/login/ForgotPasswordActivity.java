@@ -35,9 +35,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        imageViewBack.setOnClickListener(v -> {
-            finish();
-        });
+        imageViewBack.setOnClickListener(v -> finish());
 
         buttonResetPassword.setOnClickListener(v -> {
 

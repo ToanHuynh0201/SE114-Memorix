@@ -1,5 +1,6 @@
 package com.example.memorix.ui.deck;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -102,6 +103,7 @@ public class DeckManagementActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void loadSampleData() {
         // Tạo dữ liệu mẫu cho deck
         tvDeckName.setText("Tiếng Anh Cơ Bản");
@@ -163,6 +165,7 @@ public class DeckManagementActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void filterCards(int filterType) {
         filteredCards.clear();
 
@@ -216,7 +219,7 @@ public class DeckManagementActivity extends AppCompatActivity {
     }
 
     private void showCardInfo(Card card) {
-        String info = "Loại: " + card.getType().getDisplayName() + "\n" +
+        @SuppressLint("DefaultLocale") String info = "Loại: " + card.getType().getDisplayName() + "\n" +
                 "Câu hỏi: " + card.getQuestion() + "\n" +
                 "Số lần ôn: " + card.getReviewCount() + "\n" +
                 "Tỷ lệ đúng: " + String.format("%.1f", card.getAccuracyRate()) + "%";
@@ -254,8 +257,5 @@ public class DeckManagementActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
-    }
-    private void updateCardCount() {
-        tvTotalCards.setText(String.valueOf(allCards.size()));
     }
 }

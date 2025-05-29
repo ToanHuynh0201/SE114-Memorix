@@ -380,19 +380,6 @@ public class AddCardActivity extends AppCompatActivity {
     }
 
     private void saveCardToDatabase(Card card) {
-        // TODO: Implement database save logic
-        // This would typically involve:
-        // 1. Getting database instance (Room, SQLite, etc.)
-        // 2. Inserting the card using DAO
-        // 3. Handling success/error cases
-
-        // Example with Room database:
-        // CardDatabase.getInstance(this).cardDao().insertCard(card);
-
-        // Or with your custom database manager:
-        // DatabaseManager.getInstance().insertCard(card);
-
-        // For now, just log the card details for testing
         System.out.println("Saving card: " + card.toString());
         System.out.println("Card type: " + card.getType().getDisplayName());
         System.out.println("Card content: " + card.getDisplayContent());

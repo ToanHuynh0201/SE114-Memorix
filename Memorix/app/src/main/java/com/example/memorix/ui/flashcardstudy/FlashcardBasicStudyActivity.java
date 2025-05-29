@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -15,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -23,7 +23,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Card;
-import com.example.memorix.helper.StudyStatisticsHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
@@ -35,7 +34,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class FlashcardBasicStudyActivity extends AppCompatActivity {
-    private Toolbar toolbar;
     private ProgressBar progressBar;
     private MaterialCardView flashcardView;
     private CardView cardFront, cardBack;
@@ -53,11 +51,11 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     // Animations for slide transition
     private Animation slideOutLeft, slideInRight, slideOutRight, slideInLeft;
 
-    private String deckName = "Sample Flashcard Set"; // Có thể lấy từ Intent
-    private List<Card> studiedCardsList = new ArrayList<>();
+    private final String deckName = "Sample Flashcard Set"; // Có thể lấy từ Intent
+    private final List<Card> studiedCardsList = new ArrayList<>();
     private long studyStartTime;
-    private Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
-    private Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
+    private final Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
+    private final Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -286,9 +284,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         // Click vào flashcard để lật
-        flashcardView.setOnClickListener(v -> {
-            flipCard();
-        });
+        flashcardView.setOnClickListener(v -> flipCard());
 
         // Xử lý các nút điều hướng
         btnNext.setOnClickListener(v -> {
@@ -428,8 +424,8 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             }
 
 //             Kiểm tra StudyStatisticsHelper có tồn tại không
-             StudyStatisticsHelper.StudySessionStats stats =
-                     StudyStatisticsHelper.calculateStats(studiedCardsList, studyStartTime, studyEndTime);
+//             StudyStatisticsHelper.StudySessionStats stats =
+//                     StudyStatisticsHelper.calculateStats(studiedCardsList, studyStartTime, studyEndTime);
 
             // Navigate to StudySummaryActivity với proper error handling
             Intent intent = new Intent(this, StudySummaryActivity.class);
@@ -444,15 +440,9 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             finish(); // Optional: finish current activity
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("error", Objects.requireNonNull(e.getMessage()));
             Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Có thể hiển thị dialog xác nhận trước khi thoát
-        super.onBackPressed();
     }
 }

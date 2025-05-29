@@ -1,6 +1,5 @@
 package com.example.memorix.ui.login;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,8 +15,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class RegisterActivity extends AppCompatActivity {
-    //image_view_back, edit_text_full_name, edit_text_email,
-    //edit_text_password, edit_text_confirm_password, button_register, text_view_login
     private ImageView imageViewBack;
     private TextInputEditText editTextFullName;
     private TextInputEditText editTextEmail;
@@ -51,11 +48,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        imageViewBack.setOnClickListener(v -> {
-            finish();
-        });
-        textViewLogin.setOnClickListener(v -> {
-            finish();
-        });
+        imageViewBack.setOnClickListener(v -> finish());
+        textViewLogin.setOnClickListener(v -> finish());
     }
 }

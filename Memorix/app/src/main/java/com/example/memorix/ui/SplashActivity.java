@@ -83,12 +83,11 @@ public class SplashActivity extends AppCompatActivity {
         // Tạo AnimatorSet riêng cho từng loại animation
         AnimatorSet flashcardAnimSet = new AnimatorSet();
         AnimatorSet logoAnimSet = new AnimatorSet();
-        AnimatorSet textAnimSet = new AnimatorSet();
+        AnimatorSet textAnimSet;
 
         // List animator cho từng nhóm
         List<Animator> flashcardAnimators = new ArrayList<>();
         List<Animator> logoAnimators = new ArrayList<>();
-        List<Animator> textAnimators = new ArrayList<>();
 
         // Flashcard animations
         for (int i = 0; i < flashcards.size(); i++) {
