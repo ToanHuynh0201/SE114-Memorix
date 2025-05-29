@@ -1,9 +1,9 @@
 package com.example.memorix.ui.flashcardstudy;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
 import com.example.memorix.data.Card;
+import com.example.memorix.ui.MainActivity;
 
 import java.util.List;
 import java.util.Locale;
@@ -125,6 +126,7 @@ public class StudySummaryActivity extends AppCompatActivity {
         displayCardTypeBreakdown();
     }
 
+    @SuppressLint("SetTextI18n")
     private void displayStudyTime() {
         long studyDuration = studyEndTime - studyStartTime;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(studyDuration);
@@ -204,17 +206,15 @@ public class StudySummaryActivity extends AppCompatActivity {
     private void setupClickListeners() {
         btnStudyAgain.setOnClickListener(v -> {
             // Restart study session
-            Intent intent = new Intent();
-            intent.putExtra("action", "study_again");
-            setResult(RESULT_OK, intent);
-            finish();
+//            Intent intent = new Intent();
+//            intent.putExtra("action", "study_again");
+//            finish();
         });
         btnBackToDeck.setOnClickListener(v -> {
             // Go back to deck
-            Intent intent = new Intent();
-            intent.putExtra("action", "back_to_deck");
-            setResult(RESULT_OK, intent);
-            finish();
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+//            finish();
         });
     }
     public static Intent createIntent(android.content.Context context, String deckName,
@@ -228,14 +228,5 @@ public class StudySummaryActivity extends AppCompatActivity {
         intent.putExtra("total_correct", totalCorrect);
         intent.putExtra("total_reviewed", totalReviewed);
         return intent;
-    }
-    @Override
-    public void onBackPressed() {
-        // Same as back to deck button
-        super.onBackPressed();
-        Intent intent = new Intent();
-        intent.putExtra("action", "back_to_deck");
-        setResult(RESULT_OK, intent);
-        finish();
     }
 }

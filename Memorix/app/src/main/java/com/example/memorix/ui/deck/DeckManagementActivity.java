@@ -8,12 +8,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,6 +31,8 @@ import com.example.memorix.ui.deck.card.AddCardActivity;
 import com.example.memorix.ui.deck.card.EditCardActivity;
 
 import java.util.ArrayList;
+import java.util.List;
+import android.graphics.Typeface;
 import java.util.List;
 
 public class DeckManagementActivity extends AppCompatActivity {
@@ -219,43 +224,324 @@ public class DeckManagementActivity extends AppCompatActivity {
     }
 
     private void showCardInfo(Card card) {
-        @SuppressLint("DefaultLocale") String info = "Loại: " + card.getType().getDisplayName() + "\n" +
-                "Câu hỏi: " + card.getQuestion() + "\n" +
-                "Số lần ôn: " + card.getReviewCount() + "\n" +
-                "Tỷ lệ đúng: " + String.format("%.1f", card.getAccuracyRate()) + "%";
-
-        new AlertDialog.Builder(this)
-                .setTitle("Thông tin thẻ")
-                .setMessage(info)
-                .setPositiveButton("OK", null)
-                .show();
+//        @SuppressLint("DefaultLocale") String info = "Loại: " + card.getType().getDisplayName() + "\n" +
+//                "Câu hỏi: " + card.getQuestion() + "\n" +
+//                "Số lần ôn: " + card.getReviewCount() + "\n" +
+//                "Tỷ lệ đúng: " + String.format("%.1f", card.getAccuracyRate()) + "%";
+//
+//        new AlertDialog.Builder(this)
+//                .setTitle("Thông tin thẻ")
+//                .setMessage(info)
+//                .setPositiveButton("OK", null)
+//                .show();
+        Intent intent = new Intent(this, EditCardActivity.class);
+        intent.putExtra("card", card);
+        startActivity(intent);
     }
 
+    @SuppressLint("SetTextI18n")
     private void showCardDetail(Card card) {
-        new AlertDialog.Builder(this)
-                .setTitle("Chi tiết thẻ")
-                .setMessage(card.getDisplayContent())
-                .setPositiveButton("Chỉnh sửa", (dialog, which) -> {
-                    Intent intent = new Intent(this, EditCardActivity.class);
-                    intent.putExtra("card", card);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Đóng", null)
-                .show();
+//        new AlertDialog.Builder(this)
+//                .setTitle("Chi tiết thẻ")
+//                .setMessage(card.getDisplayContent())
+//                .setPositiveButton("Chỉnh sửa", (dialog, which) -> {
+//                    Intent intent = new Intent(this, EditCardActivity.class);
+//                    intent.putExtra("card", card);
+//                    startActivity(intent);
+//                })
+//                .setNegativeButton("Đóng", null)
+//                .show();
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_card_detail, null);
+
+        // Find views
+        TextView tvCardType = dialogView.findViewById(R.id.tvCardType);
+        TextView tvQuestion = dialogView.findViewById(R.id.tvQuestion);
+        TextView tvAnswerLabel = dialogView.findViewById(R.id.tvAnswerLabel);
+        TextView tvAnswer = dialogView.findViewById(R.id.tvAnswer);
+        LinearLayout layoutOptions = dialogView.findViewById(R.id.layoutOptions);
+        LinearLayout layoutOptionsList = dialogView.findViewById(R.id.layoutOptionsList);
+        TextView tvReviewCount = dialogView.findViewById(R.id.tvReviewCount);
+        TextView tvCorrectCount = dialogView.findViewById(R.id.tvCorrectCount);
+        TextView tvAccuracy = dialogView.findViewById(R.id.tvAccuracy);
+        AppCompatButton btnClose = dialogView.findViewById(R.id.btnClose);
+        AppCompatButton btnEdit = dialogView.findViewById(R.id.btnEdit);
+
+        // Set card type and its color
+        String cardTypeText;
+        int cardTypeColor;
+        switch (card.getType()) {
+            case BASIC:
+                cardTypeText = "2 Mặt";
+                cardTypeColor = getResources().getColor(R.color.primary_color);
+                break;
+            case MULTIPLE_CHOICE:
+                cardTypeText = "Trắc nghiệm";
+                cardTypeColor = getResources().getColor(R.color.secondary_color);
+                break;
+            case FILL_IN_BLANK:
+                cardTypeText = "Điền từ";
+                cardTypeColor = getResources().getColor(R.color.accent_color);
+                break;
+            default:
+                cardTypeText = "Không xác định";
+                cardTypeColor = getResources().getColor(R.color.secondary_text_color);
+                break;
+        }
+
+        tvCardType.setText(cardTypeText);
+        tvCardType.getBackground().setTint(cardTypeColor);
+
+        // Set question
+        tvQuestion.setText(card.getQuestion());
+
+        // Handle different card types
+        if (card.getType() == CardType.MULTIPLE_CHOICE) {
+            // For multiple choice cards
+            tvAnswerLabel.setText("Đáp án đúng");
+            tvAnswer.setText(card.getCorrectAnswer());
+
+            // Show options
+            layoutOptions.setVisibility(View.VISIBLE);
+            layoutOptionsList.removeAllViews();
+
+            List<String> options = card.getOptions();
+            if (options != null) {
+                for (int i = 0; i < options.size(); i++) {
+                    String option = options.get(i);
+
+                    // Create option view
+                    LinearLayout optionLayout = new LinearLayout(this);
+                    optionLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    optionLayout.setPadding(16, 12, 16, 12);
+                    optionLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+                    // Set background
+                    optionLayout.setBackgroundResource(R.drawable.bg_option_item);
+
+                    // Add margin
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    layoutParams.setMargins(0, 0, 0, 8);
+                    optionLayout.setLayoutParams(layoutParams);
+
+                    // Option letter (A, B, C, D)
+                    TextView tvOptionLetter = new TextView(this);
+                    tvOptionLetter.setText(String.valueOf((char)('A' + i)));
+                    tvOptionLetter.setTextColor(getResources().getColor(R.color.text_color));
+                    tvOptionLetter.setTextSize(14);
+                    tvOptionLetter.setTypeface(tvOptionLetter.getTypeface(), Typeface.BOLD);
+                    tvOptionLetter.setPadding(0, 0, 16, 0);
+
+                    // Option text
+                    TextView tvOptionText = new TextView(this);
+                    tvOptionText.setText(option);
+                    tvOptionText.setTextColor(getResources().getColor(R.color.text_color));
+                    tvOptionText.setTextSize(14);
+                    tvOptionText.setLayoutParams(new LinearLayout.LayoutParams(
+                            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+                    // Highlight correct answer
+                    if (option.equals(card.getCorrectAnswer())) {
+                        optionLayout.getBackground().setTint(getResources().getColor(R.color.primary_light_color));
+                        tvOptionLetter.setTextColor(getResources().getColor(R.color.primary_dark_color));
+                        tvOptionText.setTextColor(getResources().getColor(R.color.primary_dark_color));
+                        tvOptionText.setTypeface(tvOptionText.getTypeface(), Typeface.BOLD);
+
+                        // Add checkmark
+                        TextView tvCheckmark = new TextView(this);
+                        tvCheckmark.setText("✓");
+                        tvCheckmark.setTextColor(getResources().getColor(R.color.secondary_color));
+                        tvCheckmark.setTextSize(16);
+                        tvCheckmark.setTypeface(tvCheckmark.getTypeface(), Typeface.BOLD);
+                        optionLayout.addView(tvCheckmark);
+                    }
+
+                    optionLayout.addView(tvOptionLetter);
+                    optionLayout.addView(tvOptionText);
+                    layoutOptionsList.addView(optionLayout);
+                }
+            }
+        } else if (card.getType() == CardType.FILL_IN_BLANK) {
+            // For fill in blank cards
+            tvAnswerLabel.setText("Từ cần điền");
+            tvAnswer.setText(card.getCorrectAnswer());
+            layoutOptions.setVisibility(View.GONE);
+        } else {
+            // For basic cards
+            tvAnswerLabel.setText("Mặt sau");
+            tvAnswer.setText(card.getAnswer());
+            layoutOptions.setVisibility(View.GONE);
+        }
+
+        // Set statistics
+        tvReviewCount.setText(String.valueOf(card.getReviewCount()));
+        tvCorrectCount.setText(String.valueOf(card.getCorrectCount()));
+
+        // Calculate and set accuracy
+        int accuracy = 0;
+        if (card.getReviewCount() > 0) {
+            accuracy = (int) Math.round((double) card.getCorrectCount() / card.getReviewCount() * 100);
+        }
+        tvAccuracy.setText(accuracy + "%");
+
+        // Set accuracy color based on percentage
+        int accuracyColor;
+        if (accuracy >= 80) {
+            accuracyColor = getResources().getColor(R.color.secondary_color);
+        } else if (accuracy >= 60) {
+            accuracyColor = getResources().getColor(R.color.accent_color);
+        } else {
+            accuracyColor = getResources().getColor(R.color.secondary_text_color);
+        }
+        tvAccuracy.setTextColor(accuracyColor);
+
+        // Create dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        // Set button listeners
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        btnEdit.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(this, EditCardActivity.class);
+            intent.putExtra("card", card);
+            startActivity(intent);
+        });
+
+        // Show dialog
+        dialog.show();
+
+        // Optional: Set dialog window properties for better appearance
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
+        }
     }
 
+    @SuppressLint("SetTextI18n")
     private void showDeleteConfirmDialog(Card card) {
-        new AlertDialog.Builder(this)
-                .setTitle("Xóa thẻ")
-                .setMessage("Bạn có chắc chắn muốn xóa thẻ này?\n\n" + card.getQuestion())
-                .setPositiveButton("Xóa", (dialog, which) -> {
-                    // Xóa thẻ khỏi danh sách
-                    allCards.remove(card);
-                    tvTotalCards.setText(String.valueOf(allCards.size()));
-                    filterCards(spinnerCardType.getSelectedItemPosition());
-                    Toast.makeText(this, "Đã xóa thẻ!", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
+//        new AlertDialog.Builder(this)
+//                .setTitle("Xóa thẻ")
+//                .setMessage("Bạn có chắc chắn muốn xóa thẻ này?\n\n" + card.getQuestion())
+//                .setPositiveButton("Xóa", (dialog, which) -> {
+//                    // Xóa thẻ khỏi danh sách
+//                    allCards.remove(card);
+//                    tvTotalCards.setText(String.valueOf(allCards.size()));
+//                    filterCards(spinnerCardType.getSelectedItemPosition());
+//                    Toast.makeText(this, "Đã xóa thẻ!", Toast.LENGTH_SHORT).show();
+//                })
+//                .setNegativeButton("Hủy", null)
+//                .show();
+
+        // Inflate custom dialog layout
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_card, null);
+
+        // Find views
+        TextView tvCardTypeBadge = dialogView.findViewById(R.id.tvCardTypeBadge);
+        TextView tvCardQuestion = dialogView.findViewById(R.id.tvCardQuestion);
+        TextView tvCardAnswer = dialogView.findViewById(R.id.tvCardAnswer);
+        TextView tvReviewCountValue = dialogView.findViewById(R.id.tvReviewCountValue);
+        TextView tvCorrectCountValue = dialogView.findViewById(R.id.tvCorrectCountValue);
+        TextView tvAccuracyValue = dialogView.findViewById(R.id.tvAccuracyValue);
+        AppCompatButton btnCancel = dialogView.findViewById(R.id.btnCancel);
+        AppCompatButton btnDelete = dialogView.findViewById(R.id.btnDelete);
+
+        // Set card type and its color
+        String cardTypeText;
+        int cardTypeColor;
+        switch (card.getType()) {
+            case BASIC:
+                cardTypeText = "2 Mặt";
+                cardTypeColor = ContextCompat.getColor(this, R.color.primary_color);
+                break;
+            case MULTIPLE_CHOICE:
+                cardTypeText = "Trắc nghiệm";
+                cardTypeColor = ContextCompat.getColor(this, R.color.secondary_color);
+                break;
+            case FILL_IN_BLANK:
+                cardTypeText = "Điền từ";
+                cardTypeColor = ContextCompat.getColor(this, R.color.accent_color);
+                break;
+            default:
+                cardTypeText = "Không xác định";
+                cardTypeColor = ContextCompat.getColor(this, R.color.secondary_text_color);
+                break;
+        }
+
+        tvCardTypeBadge.setText(cardTypeText);
+        tvCardTypeBadge.getBackground().setTint(cardTypeColor);
+
+        // Set card content
+        tvCardQuestion.setText(card.getQuestion());
+
+        // Set answer based on card type
+        if (card.getType() == CardType.MULTIPLE_CHOICE) {
+            tvCardAnswer.setText(card.getCorrectAnswer());
+        } else if (card.getType() == CardType.FILL_IN_BLANK) {
+            tvCardAnswer.setText(card.getCorrectAnswer());
+        } else {
+            tvCardAnswer.setText(card.getAnswer());
+        }
+
+        // Set statistics
+        tvReviewCountValue.setText(String.valueOf(card.getReviewCount()));
+        tvCorrectCountValue.setText(String.valueOf(card.getCorrectCount()));
+
+        // Calculate and set accuracy with color
+        int accuracy = 0;
+        if (card.getReviewCount() > 0) {
+            accuracy = (int) Math.round((double) card.getCorrectCount() / card.getReviewCount() * 100);
+        }
+        tvAccuracyValue.setText(accuracy + "%");
+
+        // Set accuracy color based on percentage
+        int accuracyColor;
+        if (accuracy >= 80) {
+            accuracyColor = ContextCompat.getColor(this, R.color.secondary_color);
+        } else if (accuracy >= 60) {
+            accuracyColor = ContextCompat.getColor(this, R.color.accent_color);
+        } else {
+            accuracyColor = ContextCompat.getColor(this, R.color.secondary_text_color);
+        }
+        tvAccuracyValue.setTextColor(accuracyColor);
+
+        // Create dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        // Set button listeners
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnDelete.setOnClickListener(v -> {
+            // Delete card from list
+            allCards.remove(card);
+            tvTotalCards.setText(String.valueOf(allCards.size()));
+            filterCards(spinnerCardType.getSelectedItemPosition());
+
+            // Show success message
+            Toast.makeText(this, "Đã xóa thẻ: " + card.getQuestion(), Toast.LENGTH_SHORT).show();
+
+            // Dismiss dialog
+            dialog.dismiss();
+        });
+
+        // Show dialog
+        dialog.show();
+
+        // Optional: Set dialog window properties for better appearance
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
+
+            // Set dialog width (optional)
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
+            dialog.getWindow().setLayout(width, LinearLayout.LayoutParams.WRAP_CONTENT);
+        }
     }
 }
