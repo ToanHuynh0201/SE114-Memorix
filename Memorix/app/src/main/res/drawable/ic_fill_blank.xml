@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+
+    <!-- Document background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#616161"
+        android:strokeWidth="1"
+        android:pathData="M4,2L20,2A2,2 0,0 1,22 4L22,20A2,2 0,0 1,20 22L4,22A2,2 0,0 1,2 20L2,4A2,2 0,0 1,4 2z" />
+
+    <!-- Text lines -->
+    <path
+        android:fillColor="#616161"
+        android:pathData="M5,6L19,6A0.5,0.5 0,0 1,19.5 6.5L19.5,6.5A0.5,0.5 0,0 1,19 7L5,7A0.5,0.5 0,0 1,4.5 6.5L4.5,6.5A0.5,0.5 0,0 1,5 6z" />
+
+    <path
+        android:fillColor="#616161"
+        android:pathData="M5,9L19,9A0.5,0.5 0,0 1,19.5 9.5L19.5,9.5A0.5,0.5 0,0 1,19 10L5,10A0.5,0.5 0,0 1,4.5 9.5L4.5,9.5A0.5,0.5 0,0 1,5 9z" />
+
+    <!-- Blank line with dashes (fill in the blank) -->
+    <path
+        android:strokeColor="#2196F3"
+        android:strokeWidth="2"
+        android:pathData="M8,13L16,13" />
+
+    <!-- Text after blank -->
+    <path
+        android:fillColor="#616161"
+        android:pathData="M17,12L19,12A0.5,0.5 0,0 1,19.5 12.5L19.5,12.5A0.5,0.5 0,0 1,19 13L17,13A0.5,0.5 0,0 1,16.5 12.5L16.5,12.5A0.5,0.5 0,0 1,17 12z" />
+
+    <!-- More text lines -->
+    <path
+        android:fillColor="#616161"
+        android:pathData="M5,15L19,15A0.5,0.5 0,0 1,19.5 15.5L19.5,15.5A0.5,0.5 0,0 1,19 16L5,16A0.5,0.5 0,0 1,4.5 15.5L4.5,15.5A0.5,0.5 0,0 1,5 15z" />
+
+    <path
+        android:fillColor="#616161"
+        android:pathData="M5,18L15,18A0.5,0.5 0,0 1,15.5 18.5L15.5,18.5A0.5,0.5 0,0 1,15 19L5,19A0.5,0.5 0,0 1,4.5 18.5L4.5,18.5A0.5,0.5 0,0 1,5 18z" />
+
+    <!-- Pencil icon in corner -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M17,3L21,7L19,9L15,5L17,3z" />
+
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M15,5L19,9L12,16L8,16L8,12L15,5z" />
+
+</vector>

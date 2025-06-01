@@ -3,7 +3,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@drawable/bg_dialog">
+    android:background="@drawable/bg_dialog_rounded">
 
     <!-- Header -->
     <LinearLayout
@@ -234,7 +234,7 @@
             android:id="@+id/btnEdit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_primary_background"
+            android:background="@drawable/bg_button_primary"
             android:text="Chỉnh sửa"
             android:textColor="@android:color/white"
             android:paddingHorizontal="24dp" />

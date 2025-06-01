@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+
+    <!-- Background circle for option A -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M4,6m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+
+    <!-- Background circle for option B -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M4,12m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+
+    <!-- Background circle for option C -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M4,18m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+
+    <!-- Text lines for options -->
+    <path
+        android:fillColor="#616161"
+        android:pathData="M8,5L20,5A1,1 0,0 1,21 6L21,6A1,1 0,0 1,20 7L8,7A1,1 0,0 1,7 6L7,6A1,1 0,0 1,8 5z" />
+
+    <path
+        android:fillColor="#616161"
+        android:pathData="M8,11L18,11A1,1 0,0 1,19 12L19,12A1,1 0,0 1,18 13L8,13A1,1 0,0 1,7 12L7,12A1,1 0,0 1,8 11z" />
+
+    <path
+        android:fillColor="#616161"
+        android:pathData="M8,17L16,17A1,1 0,0 1,17 18L17,18A1,1 0,0 1,16 19L8,19A1,1 0,0 1,7 18L7,18A1,1 0,0 1,8 17z" />
+
+    <!-- Checkmark in the selected option -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3.2,6.8L3.8,6.2L5.2,7.6L5.8,6.8L4.8,5.2L3.2,6.8z"
+        android:strokeWidth="0.5"
+        android:strokeColor="#FFFFFF" />
+
+</vector>

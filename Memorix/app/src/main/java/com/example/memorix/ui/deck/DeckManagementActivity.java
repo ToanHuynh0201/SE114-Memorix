@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
@@ -29,11 +31,15 @@ import com.example.memorix.data.CardType;
 import com.example.memorix.ui.deck.adapter.CardAdapter;
 import com.example.memorix.ui.deck.card.AddCardActivity;
 import com.example.memorix.ui.deck.card.EditCardActivity;
+import com.example.memorix.ui.flashcardstudy.FlashcardBasicStudyActivity;
+import com.example.memorix.ui.flashcardstudy.FlashcardFillBlankStudyActivity;
+import com.example.memorix.ui.flashcardstudy.FlashcardMultipleChoiceStudyActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 import android.graphics.Typeface;
 import java.util.List;
+import java.util.Objects;
 
 public class DeckManagementActivity extends AppCompatActivity {
     private TextView tvDeckName, tvDeckDescription, tvTotalCards;
@@ -104,8 +110,81 @@ public class DeckManagementActivity extends AppCompatActivity {
 
         btnStudyDeck.setOnClickListener(v -> {
             // Demo: Hiển thị toast
-            Toast.makeText(this, "Bắt đầu học " + allCards.size() + " thẻ!", Toast.LENGTH_SHORT).show();
+            showStudyOptionsDialog();
         });
+    }
+    private void showStudyOptionsDialog() {
+        // Kiểm tra xem có thẻ nào để học không
+        if (allCards.isEmpty()) {
+            Toast.makeText(this, "Chưa có thẻ nào để học!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Tạo dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Inflate custom layout
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_study_options, null);
+        builder.setView(dialogView);
+
+        // Tạo dialog
+        AlertDialog dialog = builder.create();
+
+        // Set dialog properties
+        dialog.setCancelable(true);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+
+        // Lấy references đến các view
+        LinearLayout layoutTwoSided = dialogView.findViewById(R.id.layoutTwoSided);
+        LinearLayout layoutMultipleChoice = dialogView.findViewById(R.id.layoutMultipleChoice);
+        LinearLayout layoutFillBlank = dialogView.findViewById(R.id.layoutFillBlank);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+
+        // Set click listeners
+        layoutTwoSided.setOnClickListener(v -> {
+            dialog.dismiss();
+            startFlashcardBasicStudy();
+        });
+
+        layoutMultipleChoice.setOnClickListener(v -> {
+            dialog.dismiss();
+            startMultipleChoiceStudy();
+        });
+
+        layoutFillBlank.setOnClickListener(v -> {
+            dialog.dismiss();
+            startFillBlankStudy();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        // Hiển thị dialog
+        dialog.show();
+    }
+
+    private void startFlashcardBasicStudy() {
+        Intent intent = new Intent(this, FlashcardBasicStudyActivity.class);
+        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("card_count", allCards.size());
+        // Có thể truyền thêm dữ liệu khác nếu cần
+        startActivity(intent);
+    }
+
+    private void startMultipleChoiceStudy() {
+        Intent intent = new Intent(this, FlashcardMultipleChoiceStudyActivity.class);
+        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("card_count", allCards.size());
+        // Có thể truyền thêm dữ liệu khác nếu cần
+        startActivity(intent);
+    }
+
+    private void startFillBlankStudy() {
+        Intent intent = new Intent(this, FlashcardFillBlankStudyActivity.class);
+        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("card_count", allCards.size());
+        // Có thể truyền thêm dữ liệu khác nếu cần
+        startActivity(intent);
     }
 
     @SuppressLint("SetTextI18n")
@@ -310,21 +389,7 @@ public class DeckManagementActivity extends AppCompatActivity {
                     String option = options.get(i);
 
                     // Create option view
-                    LinearLayout optionLayout = new LinearLayout(this);
-                    optionLayout.setOrientation(LinearLayout.HORIZONTAL);
-                    optionLayout.setPadding(16, 12, 16, 12);
-                    optionLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
-
-                    // Set background
-                    optionLayout.setBackgroundResource(R.drawable.bg_option_item);
-
-                    // Add margin
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    layoutParams.setMargins(0, 0, 0, 8);
-                    optionLayout.setLayoutParams(layoutParams);
+                    LinearLayout optionLayout = getLinearLayout();
 
                     // Option letter (A, B, C, D)
                     TextView tvOptionLetter = new TextView(this);
@@ -420,6 +485,26 @@ public class DeckManagementActivity extends AppCompatActivity {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
         }
+    }
+
+    @NonNull
+    private LinearLayout getLinearLayout() {
+        LinearLayout optionLayout = new LinearLayout(this);
+        optionLayout.setOrientation(LinearLayout.HORIZONTAL);
+        optionLayout.setPadding(16, 12, 16, 12);
+        optionLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+        // Set background
+        optionLayout.setBackgroundResource(R.drawable.bg_option_item);
+
+        // Add margin
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.setMargins(0, 0, 0, 8);
+        optionLayout.setLayoutParams(layoutParams);
+        return optionLayout;
     }
 
     @SuppressLint("SetTextI18n")

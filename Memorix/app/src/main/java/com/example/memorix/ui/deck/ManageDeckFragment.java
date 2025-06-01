@@ -1,5 +1,6 @@
 package com.example.memorix.ui.deck;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -106,16 +107,12 @@ public class ManageDeckFragment extends Fragment implements DeckActionListener,
 
         Toast.makeText(getContext(), "Đã tạo bộ thẻ: " + deckName, Toast.LENGTH_SHORT).show();
 
-        // TODO: Lưu bộ thẻ vào cơ sở dữ liệu
     }
 
     // Interface implementation của CreateFolderBottomSheet.CreateFolderListener
     @Override
     public void onFolderCreated(String folderName) {
         Toast.makeText(getContext(), "Đã tạo thư mục: " + folderName, Toast.LENGTH_SHORT).show();
-
-        // TODO: Xử lý tạo folder - thêm vào danh sách folder hoặc navigate đến folder mới
-        // Có thể cần tạo một danh sách riêng cho folder hoặc cấu trúc dữ liệu khác
     }
 
     // Interface implementation để xử lý các hành động từ menu
@@ -123,14 +120,12 @@ public class ManageDeckFragment extends Fragment implements DeckActionListener,
     public void onEditDeck(int position) {
         Deck deck = deckList.get(position);
         Toast.makeText(getContext(), "Chỉnh sửa bộ thẻ: " + deck.getName(), Toast.LENGTH_SHORT).show();
-        // TODO: Mở màn hình chỉnh sửa bộ thẻ
     }
 
     @Override
     public void onShareDeck(int position) {
         Deck deck = deckList.get(position);
         Toast.makeText(getContext(), "Chia sẻ bộ thẻ: " + deck.getName(), Toast.LENGTH_SHORT).show();
-        // TODO: Mở dialog chia sẻ
     }
 
     @Override
@@ -151,13 +146,13 @@ public class ManageDeckFragment extends Fragment implements DeckActionListener,
 
         // Cập nhật trạng thái trống
         updateEmptyState();
-
-        // TODO: Xóa bộ thẻ từ cơ sở dữ liệu
     }
 
     @Override
     public void onDeckClick(Deck deck, int position) {
-
+        Intent intent = new Intent(getContext(), DeckManagementActivity.class);
+        intent.putExtra("deck_id", deck.getId());
+        startActivity(intent);
     }
 
     // Tạo dữ liệu mẫu
