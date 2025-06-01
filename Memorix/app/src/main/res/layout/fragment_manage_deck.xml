@@ -35,6 +35,9 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/add_new_deck"
         android:src="@drawable/ic_add"
+        android:backgroundTint="@color/primary_color"
+        app:tint="@android:color/white"
+        app:rippleColor="@color/primary_light_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

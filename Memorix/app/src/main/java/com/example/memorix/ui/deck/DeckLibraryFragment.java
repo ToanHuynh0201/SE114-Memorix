@@ -2,6 +2,8 @@ package com.example.memorix.ui.deck;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,10 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -153,8 +158,52 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
 
     @Override
     public void onDeckClick(Deck deck, int position) {
-        Intent intent = new Intent(getContext(), DeckManagementActivity.class);
-        intent.putExtra("deck_id", deck.getId());
-        startActivity(intent);
+        showDeckInfoDialog(deck);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showDeckInfoDialog(Deck deck) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        // Inflate custom layout
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_preview_deck, null);
+        builder.setView(dialogView);
+
+        // Create dialog
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // Get views
+        TextView tvDeckName = dialogView.findViewById(R.id.tv_deck_name);
+        TextView tvCardCount = dialogView.findViewById(R.id.tv_card_count);
+        TextView tvDeckDescription = dialogView.findViewById(R.id.tv_deck_description);
+        AppCompatButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        AppCompatButton btnStartLearning = dialogView.findViewById(R.id.btn_start_learning);
+
+        // Set data
+        tvDeckName.setText(deck.getName());
+        tvCardCount.setText(deck.getCardCount() + " thẻ");
+
+        // Set description, nếu không có mô tả thì hiển thị text mặc định
+        String description = deck.getDescription();
+        if (description == null || description.trim().isEmpty()) {
+            tvDeckDescription.setText("Không có mô tả cho bộ flashcard này.");
+        } else {
+            tvDeckDescription.setText(description);
+        }
+
+        // Set click listeners
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnStartLearning.setOnClickListener(v -> {
+            dialog.dismiss();
+            // Chuyển đến activity học
+            Intent intent = new Intent(getContext(), DeckManagementActivity.class);
+            intent.putExtra("deck_id", deck.getId());
+            startActivity(intent);
+        });
+
+        dialog.show();
     }
 }
