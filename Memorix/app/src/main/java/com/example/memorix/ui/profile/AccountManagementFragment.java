@@ -190,8 +190,16 @@ public class AccountManagementFragment extends Fragment {
     private void logout() {
         if (getContext() == null || getActivity() == null) return;
 
-        SharedPreferences.Editor editor = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE).edit();
-        editor.clear();  // xóa hết token và dữ liệu liên quan
+        SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // Xóa token, refresh token
+        editor.remove("access_token");
+        editor.remove("refresh_token");
+
+        // Giữ lại saved_email, saved_password và remember_password để nhớ mật khẩu
+        // Nếu muốn logout mà không nhớ mật khẩu thì mới xóa 3 cái dưới đây
+
         editor.apply();
 
         Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();

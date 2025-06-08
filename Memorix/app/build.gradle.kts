@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
+    implementation(libs.biometric)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.retrofit)

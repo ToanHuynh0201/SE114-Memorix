@@ -3,12 +3,16 @@ package com.example.memorix.ui.login;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Patterns;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -36,31 +40,74 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText editTextPassword;
     private MaterialCheckBox checkboxRememberPassword;
     private MaterialButton buttonLogin;
+
+    private boolean biometricPromptShown = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        String savedToken = sharedPreferences.getString("access_token", null);
+        initViews();
+
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String savedToken = prefs.getString("access_token", null);
+        boolean remember = prefs.getBoolean("remember_password", false);
+
         if (savedToken != null) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
+            return;
         }
 
-        initViews();
+//        if (remember) {
+//            String savedEmail = prefs.getString("saved_email", "");
+//            String savedPassword = prefs.getString("saved_password", "");
+//
+//            if (!savedEmail.isEmpty()) {
+//                editTextAccount.setText(savedEmail);
+//                if (!savedPassword.isEmpty()) {
+//                    editTextPassword.setText(savedPassword);
+//                }
+//            }
+//        }
 
-        // Thiết lập click listeners
         setupClickListeners();
-    }
 
+        // Thêm TextWatcher cho editTextAccount để khi nhập đúng email đã lưu thì load password
+        editTextAccount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String inputEmail = s.toString().trim();
+                if (Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches()) {
+                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                    String savedEmail = prefs.getString("saved_email", "");
+                    String savedPassword = prefs.getString("saved_password", "");
+
+                    if (inputEmail.equals(savedEmail) && !savedPassword.isEmpty()) {
+                        editTextPassword.setText(savedPassword);
+                    } else {
+                        editTextPassword.setText("");
+                    }
+                } else {
+                    editTextPassword.setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+    }
     private void initViews() {
         textViewRegister = findViewById(R.id.text_view_register);
         textViewForgotPassword = findViewById(R.id.text_view_forgot_password);
@@ -81,15 +128,27 @@ public class LoginActivity extends AppCompatActivity {
 
                     String accessToken = loginResponse.getAccess_token();
                     String refreshToken = loginResponse.getRefresh_token();
+
                     SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
+
                     editor.putString("access_token", accessToken);
-                    editor.putString("refresh_token", refreshToken); // nếu cần
+                    editor.putString("refresh_token", refreshToken);
+
+                    if (checkboxRememberPassword.isChecked()) {
+                        editor.putString("saved_email", email);
+                        editor.putString("saved_password", password);  // lưu tạm thời, nhớ mã hóa nếu cần bảo mật
+                        editor.putBoolean("remember_password", true);
+                    } else {
+                        editor.remove("saved_email");
+                        editor.remove("saved_password");
+                        editor.putBoolean("remember_password", false);
+                    }
+
                     editor.apply();
 
                     Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
-                    // Chuyển sang MainActivity
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
