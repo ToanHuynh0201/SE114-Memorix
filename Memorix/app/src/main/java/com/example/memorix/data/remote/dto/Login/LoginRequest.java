@@ -1,4 +1,4 @@
-package com.example.memorix.data.remote.dto;
+package com.example.memorix.data.remote.dto.Login;
 
 public class LoginRequest {
     private String email;
