@@ -1,37 +1,38 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Memorix</string>
-    <!-- Login Activityy-->
-    <string name="app_logo">App Logo</string>
+    <!-- Splash Activityy-->
+    <string name="app_logo">Logo ứng dụng</string>
     <string name="app_slogan">Memorize Smarter, Not Harder</string>
-    <string name="welcome_to_flashcard">Welcome to Memorix</string>
+    <string name="app_tagline">Memory, Mastered</string>
+    <!-- Login Activityy-->
+    <string name="welcome_to_flashcard">Chào mừng tới Memorix</string>
+    <string name="password">Mật khẩu</string>
+    <string name="login">Đăng nhập</string>
     <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="login">Login</string>
-    <string name="register">Register</string>
-    <string name="forgot_password">Forgot Password?</string>
-    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register">Đăng kí</string>
+    <string name="remember_password">Nhớ mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="dont_have_account">Bạn chưa có tài khoản?</string>
     <string name="decorative_elements">Decorative elements</string>
     <string name="decorative_wave">Decorative wave effect</string>
-    <string name="remember_password">Remember password</string>
-    <string name="login_to_continue">Login to continue"</string>
-    <string name="app_version">Version 1.0.0</string>
-    <string name="account">Account</string>
+    <string name="login_to_continue">Đăng nhập để tiếp tục"</string>
+    <string name="app_version">Phiên bản 1.0.0</string>
+    <string name="account">Tài khoản</string>
 
     <!-- RegisterActivity -->
-    <string name="create_account">Create Account</string>
-    <string name="full_name">Full Name</string>
-    <string name="confirm_password">Confirm Password</string>
-    <string name="already_have_account">Already have an account?</string>
-    <string name="back">Back</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="full_name">Họ và tên</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="already_have_account">Đã có tài khoản?</string>
+    <string name="back">Trở về</string>
 
     <!-- ForgetPasswordActivity -->
-    <string name="forgot_password_icon">Forgot Password Icon</string>
-    <string name="reset_password_instruction">Enter your email address and we\'ll send you a link to reset your password</string>
-    <string name="send_reset_link">Send Reset Link</string>
+    <string name="forgot_password_icon">Icon quên mật khẩu</string>
+    <string name="reset_password_instruction">Nhập email của bạn và chúng tôi sẽ gửi mã xác nhận cho bạn</string>
+    <string name="send_reset_link">Gửi mã xác nhận</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="app_tagline">Ghi nhớ thông minh</string>
 
     <!-- Menu Items -->
     <string name="search">Tìm kiếm</string>
@@ -104,6 +105,44 @@
     <string name="create_new">Tạo mới</string>
     <string name="create_deck">Tạo bộ thẻ</string>
     <string name="create_folder">Tạo folder</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Add Card Activity -->
+    <string name="add_flashcard_title">Thêm Flashcard Mới</string>
+    <string name="card_type_label">Loại thẻ</string>
+    <string name="question_label">Câu hỏi</string>
+    <string name="question_hint" tools:ignore="TypographyEllipsis">Nhập câu hỏi...</string>
+    <string name="answer_label">Câu trả lời</string>
+    <string name="answer_hint" tools:ignore="TypographyEllipsis">Nhập câu trả lời...</string>
+    <string name="options_label">Các lựa chọn</string>
+    <string name="option_a_label">A.</string>
+    <string name="option_b_label">B.</string>
+    <string name="option_c_label">C.</string>
+    <string name="option_d_label">D.</string>
+    <string name="option_a_hint" tools:ignore="TypographyEllipsis">Nhập lựa chọn A...</string>
+    <string name="option_b_hint" tools:ignore="TypographyEllipsis">Nhập lựa chọn B...</string>
+    <string name="option_c_hint" tools:ignore="TypographyEllipsis">Nhập lựa chọn C...</string>
+    <string name="option_d_hint" tools:ignore="TypographyEllipsis">Nhập lựa chọn D...</string>
+    <string name="correct_answer_label">Đáp án đúng</string>
+    <string name="correct_answer_hint" tools:ignore="TypographyEllipsis">Nhập đáp án đúng...</string>
+    <string name="multiple_choice_instruction">Chọn đáp án đúng bằng cách nhấn vào radio button tương ứng</string>
+    <string name="fill_blank_instruction">Sử dụng dấu gạch dưới _ để đánh dấu chỗ trống trong câu hỏi</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="btn_save">Lưu</string>
+
+    <!-- Change Password Activity -->
+    <string name="change_password_title">Đổi mật khẩu</string>
+    <string name="current_password_hint">Mật khẩu hiện tại</string>
+    <string name="new_password_hint">Mật khẩu mới</string>
+    <string name="confirm_password_hint">Xác nhận mật khẩu mới</string>
+    <string name="btn_confirm">Xác nhận</string>
+
+    <!-- Deck Management Activity -->
+    <string name="deck_name_placeholder">Tên Deck</string>
+    <string name="deck_description_placeholder">Mô tả deck</string>
+    <string name="total_cards_label">Tổng số thẻ:</string>
+    <string name="total_cards_default">0</string>
+    <string name="btn_add_card">Thêm Thẻ</string>
+    <string name="btn_study_deck">Học Ngay</string>
+    <string name="cards_list_header">Danh sách thẻ</string>
+
 </resources>

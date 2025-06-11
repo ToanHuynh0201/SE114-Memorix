@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AnkiPro decks library"
+            android:text="Decks library"
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -263,6 +263,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvSeeAllEnglish"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="See all"

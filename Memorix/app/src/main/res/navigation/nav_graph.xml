@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.memorix.ui.deck.ManageDeckFragment"
+        android:name="com.example.memorix.ui.HomeFragment"
         android:label="Manage Deck"
         tools:layout="@layout/fragment_manage_deck">
 

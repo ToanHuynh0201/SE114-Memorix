@@ -38,6 +38,7 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
     private DeckAdapter englishAdapter;
     private DeckAdapter popularAdapter;
     private DeckAdapter lawAdapter;
+    private TextView tvSeeAllEnglish;
 
     private List<Deck> englishDecks;
     private List<Deck> popularDecks;
@@ -63,6 +64,12 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
         rvEnglishDecks = view.findViewById(R.id.rv_english_decks);
         rvPopularDecks = view.findViewById(R.id.rv_popular_decks);
         rvLawDecks = view.findViewById(R.id.rv_law_decks);
+        tvSeeAllEnglish = view.findViewById(R.id.tvSeeAllEnglish);
+
+        tvSeeAllEnglish.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ManageDeckActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void setupRecyclerViews() {

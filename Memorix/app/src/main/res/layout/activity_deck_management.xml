@@ -31,7 +31,7 @@
                     android:id="@+id/tvDeckName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tên Deck"
+                    android:text="@string/deck_name_placeholder"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_color"
@@ -41,10 +41,11 @@
                     android:id="@+id/tvDeckDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Mô tả deck"
-                    android:textSize="14sp"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/deck_description_placeholder"
                     android:textColor="@color/secondary_text_color"
-                    android:layout_marginBottom="12dp" />
+                    android:textSize="14sp"
+                    tools:ignore="TextContrastCheck" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -55,7 +56,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Tổng số thẻ:"
+                        android:text="@string/total_cards_label"
                         android:textColor="@color/text_color"
                         android:textSize="16sp" />
 
@@ -63,10 +64,11 @@
                         android:id="@+id/tvTotalCards"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/total_cards_default"
                         android:textColor="@color/primary_color"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:ignore="TextContrastCheck" />
 
                 </LinearLayout>
 
@@ -85,21 +87,23 @@
                 android:id="@+id/btnAddCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Thêm Thẻ"
+                android:layout_weight="1"
                 android:backgroundTint="@color/primary_color"
-                android:textColor="@android:color/white" />
+                android:text="@string/btn_add_card"
+                android:textColor="@android:color/white"
+                tools:ignore="ButtonStyle,TextContrastCheck,VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btnStudyDeck"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Học Ngay"
+                android:layout_weight="1"
                 android:backgroundTint="@color/secondary_color"
-                android:textColor="@android:color/white" />
+                android:text="@string/btn_study_deck"
+                android:textColor="@android:color/white"
+                tools:ignore="ButtonStyle,TextContrastCheck,VisualLintButtonSize" />
 
         </LinearLayout>
 
@@ -114,7 +118,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Danh sách thẻ"
+                android:text="@string/cards_list_header"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_color" />
@@ -123,7 +127,8 @@
                 android:id="@+id/spinnerCardType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_color" />
+                android:backgroundTint="@color/primary_color"
+                tools:ignore="TouchTargetSizeCheck" />
 
         </LinearLayout>
 

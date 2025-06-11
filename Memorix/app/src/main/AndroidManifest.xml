@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.deck.ManageDeckActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.flashcardstudy.StudySummaryActivity"
             android:exported="true" />
         <activity
@@ -44,7 +47,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.SplashActivity"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".ui.login.RegisterActivity"
             android:exported="false" />
@@ -56,9 +59,10 @@
             android:exported="false" />
         <activity
             android:name=".ui.login.LoginActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
