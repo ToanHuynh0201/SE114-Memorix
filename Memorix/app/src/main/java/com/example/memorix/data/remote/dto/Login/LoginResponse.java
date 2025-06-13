@@ -1,6 +1,6 @@
 package com.example.memorix.data.remote.dto.Login;
 
-import com.example.memorix.data.User;
+import com.example.memorix.model.User;
 
 public class LoginResponse {
     private String access_token;

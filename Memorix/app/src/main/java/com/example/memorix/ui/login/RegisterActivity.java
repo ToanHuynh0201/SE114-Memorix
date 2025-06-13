@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,7 +19,7 @@ import com.example.memorix.R;
 import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.Register.RegisterRequest;
 import com.example.memorix.data.remote.dto.Register.RegisterResponse;
-import com.example.memorix.network.ApiClient;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
