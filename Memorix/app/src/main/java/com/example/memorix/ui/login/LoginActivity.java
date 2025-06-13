@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 
 import com.example.memorix.R;
+import com.example.memorix.helper.HideSoftKeyboard;
 import com.example.memorix.ui.MainActivity;
 import com.example.memorix.network.ApiClient;
 import com.example.memorix.data.remote.api.AuthApi;
@@ -51,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        HideSoftKeyboard.setupHideKeyboard(this, findViewById(R.id.main));
         initViews();
 
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);

@@ -19,26 +19,29 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.deck.ManageDeckActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.flashcardstudy.StudySummaryActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.deck.card.AddCardActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.deck.card.EditCardActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.deck.DeckManagementActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.flashcardstudy.FlashcardFillBlankStudyActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.flashcardstudy.FlashcardMultipleChoiceStudyActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.flashcardstudy.FlashcardBasicStudyActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".ui.profile.EditProfileActivity"
             android:exported="false" />
@@ -47,7 +50,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.SplashActivity"
-            android:exported="true"/>
+            android:exported="false" />
         <activity
             android:name=".ui.login.RegisterActivity"
             android:exported="false" />
@@ -56,12 +59,13 @@
             android:exported="false" />
         <activity
             android:name=".ui.MainActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.login.LoginActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
