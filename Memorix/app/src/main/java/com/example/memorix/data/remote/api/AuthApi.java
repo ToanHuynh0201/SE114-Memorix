@@ -25,9 +25,8 @@ public interface AuthApi {
     @POST("/api/auth/refresh-token")
     Call<LoginResponse> refreshToken(@Body RefreshTokenRequest request);
 
-    @POST("auth/logout")
+    @POST("/api/auth/logout")
     Call<Void> logout(
-            @Header("Authorization") String accessToken,
             @Body LogoutRequest request
     );
 }

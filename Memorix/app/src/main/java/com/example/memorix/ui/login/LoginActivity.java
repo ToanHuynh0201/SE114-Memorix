@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.memorix.R;
 import com.example.memorix.helper.HideSoftKeyboard;
 import com.example.memorix.ui.MainActivity;
-import com.example.memorix.network.ApiClient;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.Login.LoginRequest;
 import com.example.memorix.data.remote.dto.Login.LoginResponse;
