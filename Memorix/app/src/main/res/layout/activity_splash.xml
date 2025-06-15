@@ -27,7 +27,8 @@
             android:text="A"
             android:textColor="@android:color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -49,7 +50,8 @@
             android:text="B"
             android:textColor="@android:color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -72,7 +74,8 @@
             android:text="C"
             android:textColor="@android:color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
     </androidx.cardview.widget.CardView>
 
     <!-- Central Logo Area -->
@@ -97,7 +100,8 @@
             android:text="X"
             android:textColor="@android:color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -120,7 +124,8 @@
             android:text="Y"
             android:textColor="@android:color/white"
             android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView

@@ -10,9 +10,8 @@ import android.widget.Toast;
 import android.util.Patterns;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.biometric.BiometricPrompt;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,6 +27,8 @@ import com.example.memorix.data.remote.dto.LoginResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -121,9 +122,9 @@ public class LoginActivity extends AppCompatActivity {
         AuthApi authApi = ApiClient.getClient().create(AuthApi.class);
         LoginRequest request = new LoginRequest(email, password);
 
-        authApi.login(request).enqueue(new Callback<LoginResponse>() {
+        authApi.login(request).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+            public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
 
@@ -159,7 +160,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 Toast.makeText(LoginActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -179,8 +180,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         buttonLogin.setOnClickListener(v -> {
-            String email = editTextAccount.getText().toString().trim();
-            String password = editTextPassword.getText().toString().trim();
+            String email = Objects.requireNonNull(editTextAccount.getText()).toString().trim();
+            String password = Objects.requireNonNull(editTextPassword.getText()).toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ email và mật khẩu", Toast.LENGTH_SHORT).show();

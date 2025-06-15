@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -10,7 +11,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chọn phương thức học"
+        android:text="@string/dialog_title_choose_study_method"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/text_color"
@@ -40,7 +41,8 @@
                 android:layout_height="30dp"
                 android:src="@drawable/ic_cards"
                 android:layout_marginEnd="15dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -51,7 +53,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Học 2 mặt"
+                    android:text="@string/study_option_two_sided"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_color" />
@@ -59,7 +61,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lật thẻ để xem câu trả lời"
+                    android:text="@string/study_option_two_sided_description"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color"
                     android:layout_marginTop="2dp" />
@@ -85,7 +87,8 @@
                 android:layout_height="30dp"
                 android:src="@drawable/ic_multiple_choice"
                 android:layout_marginEnd="15dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -96,7 +99,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Trắc nghiệm"
+                    android:text="@string/study_option_multiple_choice"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_color" />
@@ -104,7 +107,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chọn đáp án đúng từ 4 lựa chọn"
+                    android:text="@string/study_option_multiple_choice_description"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color"
                     android:layout_marginTop="2dp" />
@@ -130,7 +133,8 @@
                 android:layout_height="30dp"
                 android:src="@drawable/ic_fill_blank"
                 android:layout_marginEnd="15dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -141,7 +145,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Điền khuyết"
+                    android:text="@string/study_option_fill_blank"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_color" />
@@ -149,7 +153,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nhập câu trả lời vào ô trống"
+                    android:text="@string/study_option_fill_blank_description"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color"
                     android:layout_marginTop="2dp" />
@@ -165,7 +169,7 @@
         android:id="@+id/btnCancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đóng"
+        android:text="@string/btn_close"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_button_cancel"
         android:textColor="@color/secondary_text_color"

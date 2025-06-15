@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -21,13 +22,14 @@
             android:layout_gravity="center"
             android:src="@drawable/ic_deck"
             app:tint="@android:color/white"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/tv_deck_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tên bộ flashcard"
+            android:text="@string/deck_name"
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -64,7 +66,8 @@
                     android:src="@drawable/ic_cards"
                     app:tint="@color/secondary_color"
                     android:layout_marginEnd="12dp"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -75,7 +78,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Số lượng thẻ"
+                        android:text="@string/card_count"
                         android:textColor="@color/secondary_text_color"
                         android:textSize="12sp" />
 
@@ -86,7 +89,8 @@
                         android:text="0"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -96,7 +100,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mô tả"
+                android:text="@string/deck_description"
                 android:textColor="@color/text_color"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -106,7 +110,7 @@
                 android:id="@+id/tv_deck_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mô tả về bộ flashcard..."
+                android:text="@string/deck_description_hint"
                 android:textColor="@color/secondary_text_color"
                 android:textSize="14sp"
                 android:lineSpacingExtra="4dp"
@@ -135,7 +139,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Đóng"
+            android:text="@string/close"
             android:textColor="@color/secondary_text_color"
             android:textAllCaps="false"
             android:layout_marginEnd="8dp" />
@@ -145,7 +149,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Bắt đầu học"
+            android:text="@string/start_study"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_button_primary"
             android:textAllCaps="false"

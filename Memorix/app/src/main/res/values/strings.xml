@@ -18,7 +18,8 @@
     <string name="login_to_continue">Đăng nhập để tiếp tục"</string>
     <string name="app_version">Phiên bản 1.0.0</string>
     <string name="account">Tài khoản</string>
-
+    <string name="phone">Số điện thoại</string>
+    <string name="bio">Giới thiệu bản thân</string>
     <!-- RegisterActivity -->
     <string name="create_account">Tạo tài khoản</string>
     <string name="full_name">Họ và tên</string>
@@ -145,4 +146,117 @@
     <string name="btn_study_deck">Học Ngay</string>
     <string name="cards_list_header">Danh sách thẻ</string>
 
+    <!-- Edit Card Activity-->
+    <string name="card_type_basic">2 Mặt</string>
+    <string name="card_type_multiple_choice">Trắc nghiệm</string>
+    <string name="card_type_fill_in_blank">Điền từ</string>
+    <string name="basic_front_label">Mặt trước (Câu hỏi)</string>
+    <string name="basic_back_label">Mặt sau (Câu trả lời)</string>
+    <string name="basic_question_hint">Nhập câu hỏi...</string>
+    <string name="basic_answer_hint">Nhập câu trả lời...</string>
+    <string name="mc_question_label">Câu hỏi</string>
+    <string name="mc_question_hint">Nhập câu hỏi...</string>
+    <string name="mc_options_label">Các lựa chọn</string>
+    <string name="mc_option_a_label">A. </string>
+    <string name="mc_option_b_label">B. </string>
+    <string name="mc_option_c_label">C. </string>
+    <string name="mc_option_d_label">D. </string>
+    <string name="mc_option_a_hint">Lựa chọn A</string>
+    <string name="mc_option_b_hint">Lựa chọn B</string>
+    <string name="mc_option_c_hint">Lựa chọn C</string>
+    <string name="mc_option_d_hint">Lựa chọn D</string>
+    <string name="mc_correct_answer_label">Đáp án đúng</string>
+    <string name="mc_correct_a">A</string>
+    <string name="mc_correct_b">B</string>
+    <string name="mc_correct_c">C</string>
+    <string name="mc_correct_d">D</string>
+    <string name="fib_question_label">Câu hỏi (sử dụng _ để đánh dấu chỗ trống)</string>
+    <string name="fib_question_hint">Ví dụ: I ___ a student</string>
+    <string name="fib_answer_label">Đáp án</string>
+    <string name="fib_answer_hint">Nhập đáp án đúng...</string>
+    <string name="btn_save_card">Lưu thẻ</string>
+    <string name="medium">Vừa</string>
+    <string name="hard">Khó</string>
+    <string name="easy">Dễ</string>
+    <string name="fill_in_the_blank">Điền từ vào chỗ trống</string>
+    <string name="enter_your_answer">Nhập đáp án của bạn</string>
+    <string name="show_result">Nhập đáp án và nhấn vào thẻ để xem kết quả</string>
+    <string name="correct">Chính xác!</string>
+    <string name="incorrect">Chưa chính xác!</string>
+    <string name="your_answer_is">Câu trả lời của bạn</string>
+    <string name="explain">Giải thích</string>
+    <string name="result">Kết quả</string>
+    <string name="correct_answer_is">Đáp án đúng sẽ hiển thị ở đây</string>
+    <string name="return_question">Nhấn để quay lại câu hỏi</string>
+    <string name="choose_correct_answer">Chọn đáp án đúng</string>
+    <string name="answer_show_here">Câu hỏi trắc nghiệm sẽ hiển thị ở đây</string>
+    <string name="complete_study">Hoàn thành học tập!</string>
+    <string name="overview">Tổng quan</string>
+    <string name="total_cards">Tổng thẻ</string>
+    <string name="right">Đúng</string>
+    <string name="correct_rate">Độ chính xác</string>
+    <string name="learning_progress">Tiến độ học tập</string>
+    <string name="card_sorting">Phân loại thẻ</string>
+    <string name="study_time">Thời gian học</string>
+    <string name="re_study">Học lại</string>
+    <string name="return_home">Quay về bộ thẻ</string>
+    <string name="add_deck_description">Tạo bộ bài của riêng bạn. Bạn sẽ nhận được kết quả tốt nhất từ thẻ do chính bạn tạo ra.</string>
+    <string name="card_detail">Chi tiết thẻ</string>
+    <string name="close">Đóng</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="delete_card">Xóa thẻ học</string>
+    <string name="delete_card_ask_for_sure">Bạn có chắc chắn muốn xóa thẻ này không?</string>
+    <string name="number_of_revisions">Lần ôn</string>
+    <string name="correct_answer">Trả lời đúng</string>
+    <string name="delete_card_ask_for_sure_dialog">Thao tác này không thể hoàn tác. Tất cả dữ liệu học tập của thẻ sẽ bị mất.</string>
+    <string name="deck_description_hint">Mô tả về bộ flashcard...</string>
+    <string name="start_study">Bắt đầu học</string>
+
+    <string name="dialog_title_choose_study_method">Chọn phương thức học</string>
+
+    <!-- Study Options -->
+    <string name="study_option_two_sided">Học 2 mặt</string>
+    <string name="study_option_two_sided_description">Lật thẻ để xem câu trả lời</string>
+
+    <string name="study_option_multiple_choice">Trắc nghiệm</string>
+    <string name="study_option_multiple_choice_description">Chọn đáp án đúng từ 4 lựa chọn</string>
+
+    <string name="study_option_fill_blank">Điền khuyết</string>
+    <string name="study_option_fill_blank_description">Nhập câu trả lời vào ô trống</string>
+
+    <!-- Buttons -->
+    <string name="btn_close">Đóng</string>
+
+    <!-- Deck Library Screen -->
+    <string name="deck_library_title">Thư viện Deck</string>
+    <string name="deck_library_subtitle">Khám phá các deck được chia sẻ bởi cộng đồng</string>
+    <string name="search_decks_hint">Tìm kiếm deck</string>
+    <string name="see_all">Xem tất cả</string>
+
+    <!-- Categories -->
+    <string name="category_law">Luật</string>
+    <string name="category_geography">Địa lý</string>
+    <string name="category_math">Toán</string>
+    <string name="category_science">Khoa học</string>
+
+    <!-- Sections -->
+    <string name="section_english">Tiếng Anh (%d)</string>
+    <string name="section_popular">Phổ biến (%d)</string>
+    <string name="section_law">Luật (%d)</string>
+
+    <string name="my_sets">Bộ thẻ của tôi</string>
+    <string name="empty_state_title">Bạn chưa có bộ thẻ nào</string>
+    <string name="empty_state_description">Tạo bộ thẻ đầu tiên để bắt đầu hành trình học tập của bạn!</string>
+    <string name="btn_create_first_set">Tạo bộ thẻ đầu tiên</string>
+
+    <!-- Card Type -->
+    <string name="card_type_two_sided">2 Mặt</string>
+
+    <!-- Content Descriptions -->
+    <string name="edit_card_description">Sửa thẻ</string>
+    <string name="delete_card_description">Xóa thẻ</string>
+
+    <!-- Card Content -->
+    <string name="card_content_placeholder">Nội dung thẻ...</string>
+    <string name="delete">Xóa</string>
 </resources>

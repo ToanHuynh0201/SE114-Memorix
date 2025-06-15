@@ -331,15 +331,15 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
             // Hiển thị trạng thái đúng/sai
             if (isCorrect) {
-                tvResultStatus.setText("Chính xác!");
+                tvResultStatus.setText(getString(R.string.correct));
                 tvResultStatus.setTextColor(getResources().getColor(R.color.secondary_color, null));
             } else {
-                tvResultStatus.setText("Chưa chính xác!");
+                tvResultStatus.setText(getString(R.string.incorrect));
                 tvResultStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
             }
 
             // Hiển thị câu trả lời của người dùng
-            tvUserAnswer.setText("Câu trả lời của bạn: " + userAnswer);
+            tvUserAnswer.setText(getString(R.string.your_answer_is) + " " + userAnswer);
 //
 //            // Hiển thị giải thích nếu có
 //            String explanation = currentCard.getExplanation();
