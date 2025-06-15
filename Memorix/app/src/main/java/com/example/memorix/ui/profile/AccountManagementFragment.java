@@ -19,11 +19,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.memorix.R;
+import com.example.memorix.data.remote.api.AuthApi;
+import com.example.memorix.data.remote.dto.LogOut.LogoutRequest;
+import com.example.memorix.network.ApiClient;
 import com.example.memorix.ui.login.ChangePasswordActivity;
 import com.example.memorix.ui.login.LoginActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -191,21 +198,47 @@ public class AccountManagementFragment extends Fragment {
         if (getContext() == null || getActivity() == null) return;
 
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        String accessToken = prefs.getString("access_token", null);
+        String refreshToken = prefs.getString("refresh_token", null);
+
+        if (accessToken == null || refreshToken == null) {
+            // Nếu thiếu token thì logout luôn
+            clearTokenAndNavigateToLogin();
+            return;
+        }
+
+        AuthApi apiService = ApiClient.getClient().create(AuthApi.class);
+        Call<Void> call = apiService.logout("Bearer " + accessToken, new LogoutRequest(refreshToken));
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                // Server xác nhận logout -> xóa token và quay lại login
+                if (response.isSuccessful()) {
+                    clearTokenAndNavigateToLogin();
+                } else {
+                    Toast.makeText(getContext(), "Logout thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Lỗi kết nối khi logout", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void clearTokenAndNavigateToLogin() {
+        SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
-        // Xóa token, refresh token
         editor.remove("access_token");
         editor.remove("refresh_token");
-
-        // Giữ lại saved_email, saved_password và remember_password để nhớ mật khẩu
-        // Nếu muốn logout mà không nhớ mật khẩu thì mới xóa 3 cái dưới đây
-
         editor.apply();
 
         Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(getActivity(), LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);  // xóa stack
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         getActivity().finish();
     }

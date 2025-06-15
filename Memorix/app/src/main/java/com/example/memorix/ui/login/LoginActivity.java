@@ -22,8 +22,8 @@ import com.example.memorix.helper.HideSoftKeyboard;
 import com.example.memorix.ui.MainActivity;
 import com.example.memorix.network.ApiClient;
 import com.example.memorix.data.remote.api.AuthApi;
-import com.example.memorix.data.remote.dto.LoginRequest;
-import com.example.memorix.data.remote.dto.LoginResponse;
+import com.example.memorix.data.remote.dto.Login.LoginRequest;
+import com.example.memorix.data.remote.dto.Login.LoginResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
@@ -114,6 +114,10 @@ public class LoginActivity extends AppCompatActivity {
         textViewRegister = findViewById(R.id.text_view_register);
         textViewForgotPassword = findViewById(R.id.text_view_forgot_password);
         editTextAccount = findViewById(R.id.edit_text_account);
+        String emailFromRegister = getIntent().getStringExtra("email");
+        if (emailFromRegister != null) {
+            editTextAccount.setText(emailFromRegister);
+        }
         editTextPassword = findViewById(R.id.edit_text_password);
         checkboxRememberPassword = findViewById(R.id.checkbox_remember_password);
         buttonLogin = findViewById(R.id.button_login);
