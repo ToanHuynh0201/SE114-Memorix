@@ -1,4 +1,4 @@
-package com.example.memorix.network;
+package com.example.memorix.data.remote.network;
 
 import android.content.Context;
 

@@ -5,11 +5,14 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
+import com.example.memorix.data.remote.dto.Token.RefreshTokenRequest;
+import com.example.memorix.helper.LogoutHelper;
 import com.example.memorix.ui.login.LoginActivity;
 import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.Login.LoginResponse;
-import com.example.memorix.data.remote.dto.Token.RefreshTokenRequest;
-import com.example.memorix.network.ApiClient;
+
+import com.example.memorix.data.remote.dto.Token.TokenManager;
+import com.example.memorix.data.remote.network.ApiClient;
 
 import java.io.IOException;
 
@@ -17,23 +20,23 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Retrofit;
 
 public class AuthInterceptor implements Interceptor {
 
-    private Context context;
+    private final Context context;
+    private final TokenManager tokenManager;
 
     public AuthInterceptor(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
+        this.tokenManager = new TokenManager(context);
     }
 
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         Request originalRequest = chain.request();
 
-        // Thêm header Authorization vào request nếu có access token
-        SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-        String accessToken = prefs.getString("access_token", null);
+        // Lấy access token từ TokenManager
+        String accessToken = tokenManager.getAccessToken();
 
         Request requestWithToken = originalRequest;
         if (accessToken != null) {
@@ -44,44 +47,42 @@ public class AuthInterceptor implements Interceptor {
 
         Response response = chain.proceed(requestWithToken);
 
+        // Kiểm tra nếu access token đã hết hạn
         if (response.code() == 401) {
-            // Đọc body trả về để check lỗi token expired + action refresh
             String responseBody = response.peekBody(Long.MAX_VALUE).string();
 
             if (responseBody.contains("\"msg\":\"Access token expired\"") && responseBody.contains("\"action\":\"refresh\"")) {
-                // Gọi refresh token synchronously
-                String refreshToken = prefs.getString("refresh_token", null);
+                String refreshToken = tokenManager.getRefreshToken();
                 if (refreshToken == null) {
                     logoutAndRedirect();
                     return response;
                 }
 
+                // Gọi API refresh token
                 AuthApi authApi = ApiClient.getClient().create(AuthApi.class);
                 Call<LoginResponse> call = authApi.refreshToken(new RefreshTokenRequest(refreshToken));
+
                 try {
                     retrofit2.Response<LoginResponse> refreshResponse = call.execute();
+
                     if (refreshResponse.isSuccessful() && refreshResponse.body() != null) {
                         String newAccessToken = refreshResponse.body().getAccess_token();
                         String newRefreshToken = refreshResponse.body().getRefresh_token();
 
-                        // Lưu token mới
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("access_token", newAccessToken);
-                        editor.putString("refresh_token", newRefreshToken);
-                        editor.apply();
+                        tokenManager.saveTokens(newAccessToken, newRefreshToken); // Lưu lại token mới
 
-                        // Thực hiện lại request với token mới
+                        // Tạo lại request với token mới
                         Request newRequest = originalRequest.newBuilder()
                                 .header("Authorization", "Bearer " + newAccessToken)
                                 .build();
 
-                        response.close(); // Đóng response cũ
+                        response.close();
                         return chain.proceed(newRequest);
-                    } else if (refreshResponse.code() == 401) {
-                        // Refresh token hết hạn, logout user
+                    } else {
                         logoutAndRedirect();
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     logoutAndRedirect();
                 }
             }
@@ -91,13 +92,8 @@ public class AuthInterceptor implements Interceptor {
     }
 
     private void logoutAndRedirect() {
-        // Xoá token khỏi SharedPreferences
-        SharedPreferences.Editor editor = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE).edit();
-        editor.remove("access_token");
-        editor.remove("refresh_token");
-        editor.apply();
+        tokenManager.clear();
 
-        // Chuyển về LoginActivity (bắt buộc phải gọi trên main thread, xử lý bên ngoài nếu cần)
         Intent intent = new Intent(context, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
