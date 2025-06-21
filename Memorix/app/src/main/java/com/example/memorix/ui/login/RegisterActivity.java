@@ -2,6 +2,7 @@ package com.example.memorix.ui.login;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ImageView;
@@ -106,12 +107,14 @@ public class RegisterActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 buttonRegister.setEnabled(true);
                 if (response.isSuccessful() && response.body() != null) {
-                    String welcomeMsg = "Welcome, " + response.body().getUsername();
-                    showToast(welcomeMsg);
-                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                    intent.putExtra("email", email); // truyền email
+                    String msg = "Verification code sent to " + response.body().getEmail();
+                    showToast(msg);
+
+                    Intent intent = new Intent(RegisterActivity.this, VerifyEmailActivity.class);
+                    intent.putExtra("USER_ID", response.body().getUser_id());
+                    intent.putExtra("EMAIL", response.body().getEmail());
+// 👈 truyền user_id
                     startActivity(intent);
-                    finish(); // Quay lại màn đăng nhập
                 } else if (response.code() == 400 && response.errorBody() != null) {
                     try {
                         String errorBody = response.errorBody().string();

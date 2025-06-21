@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Patterns;
@@ -54,7 +55,10 @@ public class LoginActivity extends AppCompatActivity {
         });
         HideSoftKeyboard.setupHideKeyboard(this, findViewById(R.id.main));
         initViews();
-
+        String passedEmail = getIntent().getStringExtra("EMAIL");
+        if (passedEmail != null) {
+            editTextAccount.setText(passedEmail);
+        }
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String savedToken = prefs.getString("access_token", null);
         boolean remember = prefs.getBoolean("remember_password", false);
@@ -126,6 +130,10 @@ public class LoginActivity extends AppCompatActivity {
         authApi.login(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.code() == 403) {
+                    Toast.makeText(LoginActivity.this, "Email not verified. Please check your email.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
 

@@ -233,7 +233,7 @@ public class AccountManagementFragment extends Fragment {
         }
 
         AuthApi apiService = ApiClient.getClient().create(AuthApi.class);
-        Call<Void> call = apiService.logout(new LogoutRequest(refreshToken));
+        Call<Void> call = apiService.logout("Bearer " + accessToken ,new LogoutRequest(refreshToken));
 
 
 
