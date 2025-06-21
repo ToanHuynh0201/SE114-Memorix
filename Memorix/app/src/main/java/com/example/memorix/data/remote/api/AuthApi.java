@@ -9,6 +9,8 @@ import com.example.memorix.data.remote.dto.Register.VerifyEmailRequest;
 import com.example.memorix.data.remote.dto.Register.VerifyEmailResponse;
 import com.example.memorix.data.remote.dto.ResetPassword.ForgotPasswordRequest;
 import com.example.memorix.data.remote.dto.ResetPassword.ForgotPasswordResponse;
+import com.example.memorix.data.remote.dto.ResetPassword.ResetPasswordRequest;
+import com.example.memorix.data.remote.dto.ResetPassword.ResetPasswordResponse;
 import com.example.memorix.data.remote.dto.Token.RefreshTokenRequest;
 
 import retrofit2.Call;
@@ -40,5 +42,8 @@ public interface AuthApi {
 
     @POST("/api/auth/forgot-password")
     Call<ForgotPasswordResponse> forgotPassword(@Body ForgotPasswordRequest request);
+
+    @POST("/api/auth/reset-password")
+    Call<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest request);
 }
 

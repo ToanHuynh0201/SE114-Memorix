@@ -1,5 +1,6 @@
 package com.example.memorix.ui.login;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -68,6 +69,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 public void onResponse(Call<ForgotPasswordResponse> call, Response<ForgotPasswordResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Toast.makeText(ForgotPasswordActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+                        intent.putExtra("EMAIL", email); // truyền email nếu cần dùng lại
+                        startActivity(intent);
                         finish(); // Quay lại màn hình trước (tùy chọn)
                     } else {
                         try {
