@@ -1,7 +1,7 @@
 package com.example.memorix;
 
 import android.app.Application;
-import com.example.memorix.network.ApiClient;
+import com.example.memorix.data.remote.network.ApiClient;
 public class MemorixApplication extends Application {
     @Override
     public void onCreate() {

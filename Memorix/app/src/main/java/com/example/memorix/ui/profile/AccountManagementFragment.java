@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +22,12 @@ import android.widget.Toast;
 import com.example.memorix.R;
 import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.LogOut.LogoutRequest;
-import com.example.memorix.network.ApiClient;
+import com.example.memorix.data.remote.dto.Token.TokenManager;
+import com.example.memorix.data.remote.network.ApiClient;
+import com.example.memorix.helper.LogoutHelper;
 import com.example.memorix.ui.login.ChangePasswordActivity;
 import com.example.memorix.ui.login.LoginActivity;
+import com.example.memorix.viewmodel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.Objects;
@@ -38,6 +42,9 @@ import retrofit2.Response;
  * create an instance of this fragment.
  */
 public class AccountManagementFragment extends Fragment {
+
+    private UserViewModel userViewModel;
+    private TokenManager tokenManager;
     private TextView userNameTextView;
     private TextView userEmailTextView;
     private TextView userPhoneTextView;
@@ -77,7 +84,10 @@ public class AccountManagementFragment extends Fragment {
         initViews(view);
 
         // Lấy thông tin người dùng từ SharedPreferences hoặc UserModel
-        loadUserData();
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        observeUser();
+        userViewModel.fetchUser();
+
 
         // Thiết lập các sự kiện click
         setupClickListeners();
@@ -99,6 +109,22 @@ public class AccountManagementFragment extends Fragment {
         }
     }
 
+    private void observeUser(){
+        userViewModel.user().observe(getViewLifecycleOwner(),u->{
+            if(u!=null){
+                userNameTextView .setText(u.getUsername());
+                userEmailTextView.setText(u.getEmail());
+
+                // cache xuống SharedPreferences
+                SharedPreferences.Editor ed = requireContext()
+                        .getSharedPreferences("UserPrefs",Context.MODE_PRIVATE).edit();
+                ed.putString("user_name",u.getUsername());
+                ed.putString("user_email",u.getEmail());
+                ed.apply();
+            }
+        });
+    }
+
     private void initViews(View view) {
         userNameTextView = view.findViewById(R.id.user_name);
         userEmailTextView = view.findViewById(R.id.user_email);
@@ -113,19 +139,17 @@ public class AccountManagementFragment extends Fragment {
     private void loadUserData() {
         // Đây là nơi bạn sẽ lấy dữ liệu từ SharedPreferences, Database hoặc API
         // Ví dụ:
-        if (getContext() != null) {
-            SharedPreferences prefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-            String userName = prefs.getString("user_name", "Nguyen Van A");
-            String userEmail = prefs.getString("user_email", "nguyenvana@example.com");
-            String userPhone = prefs.getString("user_phone", "+84 123 456 789");
-            String language = prefs.getString("language", getString(R.string.vietnamese));
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
-            // Hiển thị dữ liệu lên UI
-            userNameTextView.setText(userName);
-            userEmailTextView.setText(userEmail);
-            userPhoneTextView.setText(userPhone);
-            currentLanguageTextView.setText(language);
-        }
+        userViewModel.fetchUser(); // gọi API lấy thông tin user
+
+        userViewModel.user().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                userNameTextView.setText(user.getUsername());
+                userEmailTextView.setText(user.getEmail());
+
+            }
+        });
     }
 
     private void setupClickListeners() {
@@ -195,6 +219,7 @@ public class AccountManagementFragment extends Fragment {
     }
 
     private void logout() {
+
         if (getContext() == null || getActivity() == null) return;
 
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
@@ -208,7 +233,9 @@ public class AccountManagementFragment extends Fragment {
         }
 
         AuthApi apiService = ApiClient.getClient().create(AuthApi.class);
-        Call<Void> call = apiService.logout("Bearer " + accessToken, new LogoutRequest(refreshToken));
+        Call<Void> call = apiService.logout("Bearer " + accessToken ,new LogoutRequest(refreshToken));
+
+
 
         call.enqueue(new Callback<Void>() {
             @Override
@@ -217,7 +244,8 @@ public class AccountManagementFragment extends Fragment {
                 if (response.isSuccessful()) {
                     clearTokenAndNavigateToLogin();
                 } else {
-                    Toast.makeText(getContext(), "Logout thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
+                    LogoutHelper.safeLogout(requireContext());
+                    //Toast.makeText(getContext(), "Logout thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -242,4 +270,10 @@ public class AccountManagementFragment extends Fragment {
         startActivity(intent);
         getActivity().finish();
     }
+
+    @Override public void onResume(){
+        super.onResume();
+        userViewModel.fetchUser();
+    }
+
 }
