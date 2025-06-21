@@ -34,12 +34,13 @@
                     android:layout_height="64dp"
                     android:layout_marginBottom="12dp"
                     android:src="@drawable/ic_check_circle"
-                    app:tint="@color/white" />
+                    app:tint="@color/white"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hoàn thành học tập!"
+                    android:text="@string/complete_study"
                     android:textColor="@android:color/white"
                     android:textSize="24sp"
                     android:textStyle="bold"
@@ -49,7 +50,7 @@
                     android:id="@+id/tv_deck_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tên bộ thẻ"
+                    android:text="@string/deck_name"
                     android:textColor="@color/primary_light_color"
                     android:textSize="16sp" />
 
@@ -74,7 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tổng quan"
+                    android:text="@string/overview"
                     android:textColor="@color/text_color"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -83,6 +84,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:baselineAligned="false"
                     android:orientation="horizontal"
                     android:weightSum="3">
 
@@ -100,12 +102,13 @@
                             android:text="0"
                             android:textColor="@color/primary_color"
                             android:textSize="28sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="HardcodedText" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tổng thẻ"
+                            android:text="@string/total_cards"
                             android:textColor="@color/secondary_text_color"
                             android:textSize="12sp" />
 
@@ -125,12 +128,13 @@
                             android:text="0"
                             android:textColor="@color/secondary_color"
                             android:textSize="28sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="HardcodedText" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đúng"
+                            android:text="@string/right"
                             android:textColor="@color/secondary_text_color"
                             android:textSize="12sp" />
 
@@ -150,12 +154,13 @@
                             android:text="0%"
                             android:textColor="@color/accent_color"
                             android:textSize="28sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="HardcodedText" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Độ chính xác"
+                            android:text="@string/correct_rate"
                             android:textColor="@color/secondary_text_color"
                             android:textSize="12sp" />
 
@@ -173,7 +178,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tiến độ học tập"
+                        android:text="@string/learning_progress"
                         android:textColor="@color/text_color"
                         android:textSize="14sp"
                         android:layout_marginBottom="8dp" />
@@ -210,7 +215,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Phân loại thẻ"
+                    android:text="@string/card_sorting"
                     android:textColor="@color/text_color"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -233,7 +238,8 @@
                         android:src="@drawable/ic_flip_card"
                         app:tint="@color/primary_color"
                         android:layout_marginEnd="12dp"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        tools:ignore="ContentDescription" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -244,7 +250,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Thẻ 2 mặt"
+                            android:text="@string/card_type_multiple_choice"
                             android:textColor="@color/text_color"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -255,7 +261,8 @@
                             android:layout_height="wrap_content"
                             android:text="0 thẻ • 0% chính xác"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText" />
 
                     </LinearLayout>
 
@@ -267,7 +274,8 @@
                         android:textColor="@color/secondary_color"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -288,7 +296,8 @@
                         android:src="@drawable/ic_list"
                         android:layout_marginEnd="12dp"
                         android:layout_gravity="center_vertical"
-                        app:tint="@color/accent_color" />
+                        app:tint="@color/accent_color"
+                        tools:ignore="ContentDescription" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -299,7 +308,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Trắc nghiệm"
+                            android:text="@string/card_type_multiple_choice"
                             android:textColor="@color/text_color"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -310,7 +319,8 @@
                             android:layout_height="wrap_content"
                             android:text="0 thẻ • 0% chính xác"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText" />
 
                     </LinearLayout>
 
@@ -322,7 +332,8 @@
                         android:textColor="@color/secondary_color"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -342,7 +353,8 @@
                         android:src="@drawable/ic_edit"
                         android:layout_marginEnd="12dp"
                         android:layout_gravity="center_vertical"
-                        app:tint="@color/primary_dark_color" />
+                        app:tint="@color/primary_dark_color"
+                        tools:ignore="ContentDescription" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -353,7 +365,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Điền khuyết"
+                            android:text="@string/card_type_fill_in_blank"
                             android:textColor="@color/text_color"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -364,7 +376,8 @@
                             android:layout_height="wrap_content"
                             android:text="0 thẻ • 0% chính xác"
                             android:textColor="@color/secondary_text_color"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText" />
 
                     </LinearLayout>
 
@@ -376,7 +389,8 @@
                         android:textColor="@color/secondary_color"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -404,7 +418,8 @@
                     android:layout_height="32dp"
                     android:src="@drawable/ic_access_time"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/accent_color" />
+                    app:tint="@color/accent_color"
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -415,7 +430,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Thời gian học"
+                        android:text="@string/study_time"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -426,7 +441,8 @@
                         android:layout_height="wrap_content"
                         android:text="0 phút 0 giây"
                         android:textColor="@color/secondary_text_color"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        tools:ignore="HardcodedText" />
 
                 </LinearLayout>
 
@@ -437,7 +453,8 @@
                     android:text="~0s/thẻ"
                     android:textColor="@color/accent_color"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
 
             </LinearLayout>
 
@@ -455,7 +472,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:text="Học lại"
+                android:text="@string/re_study"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -466,7 +483,7 @@
                 android:id="@+id/btn_back_to_deck"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Quay về bộ thẻ"
+                android:text="@string/return_home"
                 android:textColor="@color/primary_color"
                 android:textSize="16sp"
                 android:background="@drawable/bg_button_outline"

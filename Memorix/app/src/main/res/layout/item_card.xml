@@ -25,8 +25,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10sp"
-                android:text="2 Mặt"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/card_type_two_sided"
                 android:textSize="12sp"
                 android:textColor="@color/white"
                 android:textStyle="bold"
@@ -40,7 +41,7 @@
                 android:layout_marginEnd="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_edit"
-                android:contentDescription="Sửa thẻ"
+                android:contentDescription="@string/edit_card_description"
                 app:tint="@color/primary_color" />
 
             <ImageButton
@@ -49,7 +50,7 @@
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_delete"
-                android:contentDescription="Xóa thẻ"
+                android:contentDescription="@string/delete_card_description"
                 app:tint="@color/accent_dark_color" />
 
         </LinearLayout>
@@ -59,7 +60,7 @@
             android:id="@+id/tvCardContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nội dung thẻ..."
+            android:text="@string/card_content_placeholder"
             android:textSize="14sp"
             android:textColor="@color/text_color"
             android:maxLines="2"

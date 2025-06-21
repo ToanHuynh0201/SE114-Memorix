@@ -19,7 +19,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/main" />
+        app:layout_constraintTop_toTopOf="@+id/main"
+        tools:ignore="HardcodedText" />
 
     <!-- Progress Bar -->
     <ProgressBar
@@ -46,7 +47,8 @@
         android:textColor="@color/text_color"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progress_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/progress_bar"
+        tools:ignore="HardcodedText" />
 
     <!-- Flashcard View -->
     <com.google.android.material.card.MaterialCardView
@@ -89,7 +91,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Chọn đáp án đúng"
+                        android:text="@string/choose_correct_answer"
                         android:textColor="@color/primary_color"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -100,7 +102,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="24dp"
                         android:gravity="center"
-                        android:text="Câu hỏi trắc nghiệm sẽ hiển thị ở đây"
+                        android:text="@string/answer_show_here"
                         android:textColor="@color/text_color"
                         android:textSize="18sp" />
 
@@ -117,7 +119,8 @@
                             android:layout_marginBottom="8dp"
                             android:backgroundTint="@color/option_default_color"
                             android:text="Lựa chọn 1"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/white"
+                            tools:ignore="HardcodedText" />
 
                         <Button
                             android:id="@+id/btn_option_2"
@@ -126,7 +129,8 @@
                             android:layout_marginBottom="8dp"
                             android:backgroundTint="@color/option_default_color"
                             android:text="Lựa chọn 2"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/white"
+                            tools:ignore="HardcodedText" />
 
                         <Button
                             android:id="@+id/btn_option_3"
@@ -135,7 +139,8 @@
                             android:layout_marginBottom="8dp"
                             android:backgroundTint="@color/option_default_color"
                             android:text="Lựa chọn 3"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/white"
+                            tools:ignore="HardcodedText" />
 
                         <Button
                             android:id="@+id/btn_option_4"
@@ -143,7 +148,8 @@
                             android:layout_height="wrap_content"
                             android:backgroundTint="@color/option_default_color"
                             android:text="Lựa chọn 4"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/white"
+                            tools:ignore="HardcodedText" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -166,7 +172,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Kết quả"
+                        android:text="@string/result"
                         android:textColor="@color/primary_color"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -176,7 +182,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="Đáp án đúng sẽ hiển thị ở đây"
+                        android:text="@string/correct_answer_is"
                         android:textColor="@color/text_color"
                         android:textSize="20sp" />
 
@@ -184,7 +190,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="32dp"
-                        android:text="Nhấn để quay lại câu hỏi"
+                        android:text="@string/return_question"
                         android:textColor="@color/secondary_text_color"
                         android:textSize="14sp"
                         android:textStyle="italic" />

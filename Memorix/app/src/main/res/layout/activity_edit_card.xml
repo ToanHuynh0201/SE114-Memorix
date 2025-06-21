@@ -31,7 +31,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Loại thẻ"
+                android:text="@string/card_type_label"
                 android:textColor="@color/text_color"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -49,7 +49,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="2 Mặt"
+                    android:text="@string/card_type_basic"
                     android:textColor="@color/text_color"
                     android:buttonTint="@color/primary_color" />
 
@@ -58,7 +58,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Trắc nghiệm"
+                    android:text="@string/card_type_multiple_choice"
                     android:textColor="@color/text_color"
                     android:buttonTint="@color/primary_color" />
 
@@ -67,7 +67,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Điền từ"
+                    android:text="@string/card_type_fill_in_blank"
                     android:textColor="@color/text_color"
                     android:buttonTint="@color/primary_color" />
 
@@ -84,7 +84,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mặt trước (Câu hỏi)"
+                    android:text="@string/basic_front_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -94,8 +94,10 @@
                     android:id="@+id/etBasicQuestion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints=""
                     android:background="@drawable/bg_edittext"
-                    android:hint="Nhập câu hỏi..."
+                    android:hint="@string/basic_question_hint"
+                    android:inputType="text"
                     android:minLines="2"
                     android:padding="12dp"
                     android:textColor="@color/text_color"
@@ -105,7 +107,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mặt sau (Câu trả lời)"
+                    android:text="@string/basic_back_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -115,8 +117,10 @@
                     android:id="@+id/etBasicAnswer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints=""
                     android:background="@drawable/bg_edittext"
-                    android:hint="Nhập câu trả lời..."
+                    android:hint="@string/basic_answer_hint"
+                    android:inputType="text"
                     android:minLines="2"
                     android:padding="12dp"
                     android:textColor="@color/text_color"
@@ -135,7 +139,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Câu hỏi"
+                    android:text="@string/mc_question_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -145,8 +149,10 @@
                     android:id="@+id/etMcQuestion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints=""
                     android:background="@drawable/bg_edittext"
-                    android:hint="Nhập câu hỏi..."
+                    android:hint="@string/mc_question_hint"
+                    android:inputType="text"
                     android:minLines="2"
                     android:padding="12dp"
                     android:textColor="@color/text_color"
@@ -156,7 +162,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Các lựa chọn"
+                    android:text="@string/mc_options_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -172,7 +178,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="A. "
+                        android:text="@string/mc_option_a_label"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
                         android:layout_gravity="center_vertical"
@@ -183,8 +189,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:autofillHints=""
                         android:background="@drawable/bg_edittext"
-                        android:hint="Lựa chọn A"
+                        android:hint="@string/mc_option_a_hint"
+                        android:inputType="text"
                         android:padding="12dp"
                         android:textColor="@color/text_color"
                         android:textColorHint="@color/secondary_text_color" />
@@ -201,7 +209,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="B. "
+                        android:text="@string/mc_option_b_label"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
                         android:layout_gravity="center_vertical"
@@ -212,8 +220,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:autofillHints=""
                         android:background="@drawable/bg_edittext"
-                        android:hint="Lựa chọn B"
+                        android:hint="@string/mc_option_b_hint"
+                        android:inputType="text"
                         android:padding="12dp"
                         android:textColor="@color/text_color"
                         android:textColorHint="@color/secondary_text_color" />
@@ -230,7 +240,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="C. "
+                        android:text="@string/mc_option_c_label"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
                         android:layout_gravity="center_vertical"
@@ -241,8 +251,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:autofillHints=""
                         android:background="@drawable/bg_edittext"
-                        android:hint="Lựa chọn C"
+                        android:hint="@string/mc_option_c_hint"
+                        android:inputType="text"
                         android:padding="12dp"
                         android:textColor="@color/text_color"
                         android:textColorHint="@color/secondary_text_color" />
@@ -259,7 +271,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="D. "
+                        android:text="@string/mc_option_d_label"
                         android:textColor="@color/text_color"
                         android:textSize="16sp"
                         android:layout_gravity="center_vertical"
@@ -270,8 +282,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:autofillHints=""
                         android:background="@drawable/bg_edittext"
-                        android:hint="Lựa chọn D"
+                        android:hint="@string/mc_option_d_hint"
+                        android:inputType="text"
                         android:padding="12dp"
                         android:textColor="@color/text_color"
                         android:textColorHint="@color/secondary_text_color" />
@@ -281,7 +295,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Đáp án đúng"
+                    android:text="@string/mc_correct_answer_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -298,7 +312,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="A"
+                        android:text="@string/mc_correct_a"
                         android:textColor="@color/text_color"
                         android:buttonTint="@color/secondary_color" />
 
@@ -307,7 +321,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="B"
+                        android:text="@string/mc_correct_b"
                         android:textColor="@color/text_color"
                         android:buttonTint="@color/secondary_color" />
 
@@ -316,7 +330,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="C"
+                        android:text="@string/mc_correct_c"
                         android:textColor="@color/text_color"
                         android:buttonTint="@color/secondary_color" />
 
@@ -325,7 +339,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="D"
+                        android:text="@string/mc_correct_d"
                         android:textColor="@color/text_color"
                         android:buttonTint="@color/secondary_color" />
 
@@ -344,7 +358,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Câu hỏi (sử dụng _ để đánh dấu chỗ trống)"
+                    android:text="@string/fib_question_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -354,8 +368,10 @@
                     android:id="@+id/etFibQuestion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints=""
                     android:background="@drawable/bg_edittext"
-                    android:hint="Ví dụ: I ___ a student"
+                    android:hint="@string/fib_question_hint"
+                    android:inputType="text"
                     android:minLines="2"
                     android:padding="12dp"
                     android:textColor="@color/text_color"
@@ -365,7 +381,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Đáp án"
+                    android:text="@string/fib_answer_label"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -375,8 +391,10 @@
                     android:id="@+id/etFibAnswer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints=""
                     android:background="@drawable/bg_edittext"
-                    android:hint="Nhập đáp án đúng..."
+                    android:hint="@string/fib_answer_hint"
+                    android:inputType="text"
                     android:padding="12dp"
                     android:textColor="@color/text_color"
                     android:textColorHint="@color/secondary_text_color" />
@@ -402,7 +420,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/bg_button_secondary"
-            android:text="Hủy"
+            android:text="@string/btn_cancel"
             android:textColor="@color/text_color"
             android:layout_marginEnd="8dp" />
 
@@ -412,7 +430,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/bg_button_primary"
-            android:text="Lưu thẻ"
+            android:text="@string/btn_save_card"
             android:textColor="@android:color/white"
             android:layout_marginStart="8dp" />
 

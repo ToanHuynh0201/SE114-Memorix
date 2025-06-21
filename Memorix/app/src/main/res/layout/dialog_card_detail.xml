@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -17,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Chi tiết thẻ"
+            android:text="@string/card_detail"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#263238" />
@@ -29,7 +30,7 @@
             android:background="@drawable/card_type_badge"
             android:paddingHorizontal="12dp"
             android:paddingVertical="6dp"
-            android:text="2 Mặt"
+            android:text="@string/card_type_basic"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -47,7 +48,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Câu hỏi"
+        android:text="@string/question_label"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#00796B"
@@ -64,14 +65,15 @@
         android:textColor="#263238"
         android:layout_marginBottom="16dp"
         android:minHeight="60dp"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        tools:ignore="HardcodedText" />
 
     <!-- Answer Section -->
     <TextView
         android:id="@+id/tvAnswerLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đáp án"
+        android:text="@string/answer_label"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#00796B"
@@ -88,7 +90,8 @@
         android:textColor="#263238"
         android:layout_marginBottom="16dp"
         android:minHeight="60dp"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        tools:ignore="HardcodedText" />
 
     <!-- Multiple Choice Options (will be hidden for other card types) -->
     <LinearLayout
@@ -101,7 +104,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Các lựa chọn"
+            android:text="@string/options_label"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="#00796B"
@@ -139,14 +142,16 @@
                 android:text="5"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#009688" />
+                android:textColor="#009688"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Lần ôn"
                 android:textSize="12sp"
-                android:textColor="#757575" />
+                android:textColor="#757575"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
@@ -170,14 +175,16 @@
                 android:text="4"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#8BC34A" />
+                android:textColor="#8BC34A"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Đúng"
                 android:textSize="12sp"
-                android:textColor="#757575" />
+                android:textColor="#757575"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
@@ -201,12 +208,13 @@
                 android:text="80%"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#FF9800" />
+                android:textColor="#FF9800"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Độ chính xác"
+                android:text="@string/correct_rate"
                 android:textSize="12sp"
                 android:textColor="#757575" />
 
@@ -226,7 +234,7 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đóng"
+            android:text="@string/close"
             android:textColor="#757575"
             android:layout_marginEnd="8dp" />
 
@@ -235,7 +243,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_button_primary"
-            android:text="Chỉnh sửa"
+            android:text="@string/edit"
             android:textColor="@android:color/white"
             android:paddingHorizontal="24dp" />
 

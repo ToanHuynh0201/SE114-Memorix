@@ -17,13 +17,13 @@
             android:id="@+id/menu_item_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_edit"
             android:drawablePadding="16dp"
             android:padding="16dp"
-            android:text="Chỉnh sửa"
+            android:text="@string/edit"
             android:textSize="14sp"
             android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            app:drawableStartCompat="@drawable/ic_edit" />
 
         <View
             android:layout_width="match_parent"
@@ -34,13 +34,13 @@
             android:id="@+id/menu_item_share"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_share"
             android:drawablePadding="16dp"
             android:padding="16dp"
-            android:text="Chia sẻ"
+            android:text="@string/share_deck"
             android:textSize="14sp"
             android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            app:drawableStartCompat="@drawable/ic_share" />
 
         <View
             android:layout_width="match_parent"
@@ -51,13 +51,13 @@
             android:id="@+id/menu_item_reset_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_refresh"
             android:drawablePadding="16dp"
             android:padding="16dp"
-            android:text="Đặt lại tiến độ"
+            android:text="@string/reset_progress"
             android:textSize="14sp"
             android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            app:drawableStartCompat="@drawable/ic_refresh" />
 
         <View
             android:layout_width="match_parent"
@@ -68,13 +68,13 @@
             android:id="@+id/menu_item_delete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_delete"
             android:drawablePadding="16dp"
             android:padding="16dp"
-            android:text="Xóa"
+            android:text="@string/delete"
             android:textSize="14sp"
             android:textColor="#F44336"
             android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            app:drawableStartCompat="@drawable/ic_delete" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

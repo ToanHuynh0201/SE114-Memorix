@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -21,13 +22,14 @@
             android:textSize="24sp"
             android:gravity="center"
             android:background="@drawable/bg_warning_circle"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="16dp"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Xóa thẻ học"
+            android:text="@string/delete_card"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/text_color" />
@@ -38,7 +40,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Bạn có chắc chắn muốn xóa thẻ này không?"
+        android:text="@string/delete_card_ask_for_sure"
         android:textSize="16sp"
         android:textColor="@color/text_color"
         android:layout_marginBottom="16dp"
@@ -58,7 +60,7 @@
             android:id="@+id/tvCardTypeBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2 Mặt"
+            android:text="@string/card_type_basic"
             android:textSize="12sp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
@@ -71,7 +73,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Câu hỏi:"
+            android:text="@string/question_label"
             android:textSize="12sp"
             android:textColor="@color/secondary_text_color"
             android:textStyle="bold"
@@ -86,13 +88,14 @@
             android:textColor="@color/text_color"
             android:layout_marginBottom="12dp"
             android:background="@drawable/bg_question_highlight"
-            android:padding="12dp" />
+            android:padding="12dp"
+            tools:ignore="HardcodedText" />
 
         <!-- Answer -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Đáp án:"
+            android:text="@string/answer_label"
             android:textSize="12sp"
             android:textColor="@color/secondary_text_color"
             android:textStyle="bold"
@@ -106,7 +109,8 @@
             android:textSize="16sp"
             android:textColor="@color/text_color"
             android:background="@drawable/bg_answer_highlight"
-            android:padding="12dp" />
+            android:padding="12dp"
+            tools:ignore="HardcodedText" />
 
         <!-- Statistics -->
         <LinearLayout
@@ -129,12 +133,13 @@
                     android:text="5"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/primary_color" />
+                    android:textColor="@color/primary_color"
+                    tools:ignore="HardcodedText" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lần ôn"
+                    android:text="@string/number_of_revisions"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color" />
 
@@ -160,12 +165,13 @@
                     android:text="4"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/secondary_color" />
+                    android:textColor="@color/secondary_color"
+                    tools:ignore="HardcodedText" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Trả lời đúng"
+                    android:text="@string/correct_answer"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color" />
 
@@ -191,12 +197,13 @@
                     android:text="80%"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/accent_color" />
+                    android:textColor="@color/accent_color"
+                    tools:ignore="HardcodedText" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Độ chính xác"
+                    android:text="@string/correct_rate"
                     android:textSize="12sp"
                     android:textColor="@color/secondary_text_color" />
 
@@ -221,13 +228,14 @@
             android:text="ⓘ"
             android:textSize="16sp"
             android:textColor="@color/accent_color"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Thao tác này không thể hoàn tác. Tất cả dữ liệu học tập của thẻ sẽ bị mất."
+            android:text="@string/delete_card_ask_for_sure_dialog"
             android:textSize="13sp"
             android:textColor="@color/text_color"
             android:lineSpacingExtra="2dp" />
@@ -245,7 +253,7 @@
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="Hủy"
+            android:text="@string/cancel"
             android:textColor="@color/text_color"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -258,7 +266,7 @@
             android:id="@+id/btnDelete"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="Xóa thẻ"
+            android:text="@string/delete_card"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold"

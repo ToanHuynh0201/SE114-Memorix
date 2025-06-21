@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_color"
     tools:context=".ui.deck.DeckLibraryFragment">
+
     <LinearLayout
         android:id="@+id/layout_header"
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Decks library"
+            android:text="@string/deck_library_title"
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -29,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Explore decks shared by community"
+            android:text="@string/deck_library_subtitle"
             android:textColor="@color/primary_light_color"
             android:textSize="14sp" />
 
@@ -53,7 +54,8 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@android:drawable/ic_menu_search"
-                    app:tint="@color/secondary_text_color" />
+                    app:tint="@color/secondary_text_color"
+                    tools:ignore="ContentDescription" />
 
                 <EditText
                     android:id="@+id/et_search"
@@ -62,7 +64,9 @@
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:hint="Search decks"
+                    android:hint="@string/search_decks_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
                     android:textColorHint="@color/secondary_text_color"
                     android:textSize="14sp" />
 
@@ -96,19 +100,21 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp">
+                        android:paddingEnd="16dp"
+                        tools:ignore="UseCompoundDrawables">
 
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:src="@android:drawable/ic_menu_agenda"
-                            app:tint="@android:color/white" />
+                            app:tint="@android:color/white"
+                            tools:ignore="ContentDescription" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Law"
+                            android:text="@string/category_law"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -131,19 +137,21 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp">
+                        android:paddingEnd="16dp"
+                        tools:ignore="UseCompoundDrawables">
 
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:src="@android:drawable/ic_dialog_map"
-                            app:tint="@android:color/white" />
+                            app:tint="@android:color/white"
+                            tools:ignore="ContentDescription" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Geography"
+                            android:text="@string/category_geography"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -174,13 +182,14 @@
                             android:text="fx"
                             android:textColor="@android:color/white"
                             android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:ignore="HardcodedText" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="Math"
+                            android:text="@string/category_math"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -202,19 +211,21 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp">
+                        android:paddingEnd="16dp"
+                        tools:ignore="UseCompoundDrawables">
 
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:src="@android:drawable/ic_menu_info_details"
-                            app:tint="@android:color/white" />
+                            app:tint="@android:color/white"
+                            tools:ignore="ContentDescription" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Science"
+                            android:text="@string/category_science"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -257,7 +268,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="English (57)"
+                    android:text="@string/section_english"
                     android:textColor="@color/text_color"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -266,7 +277,7 @@
                     android:id="@+id/tvSeeAllEnglish"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="See all"
+                    android:text="@string/see_all"
                     android:textColor="@color/primary_color"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -294,7 +305,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Popular (40)"
+                    android:text="@string/section_popular"
                     android:textColor="@color/text_color"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -302,7 +313,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="See all"
+                    android:text="@string/see_all"
                     android:textColor="@color/primary_color"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -330,7 +341,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Law (39)"
+                    android:text="@string/section_law"
                     android:textColor="@color/text_color"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -338,7 +349,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="See all"
+                    android:text="@string/see_all"
                     android:textColor="@color/primary_color"
                     android:textSize="14sp"
                     android:textStyle="bold" />

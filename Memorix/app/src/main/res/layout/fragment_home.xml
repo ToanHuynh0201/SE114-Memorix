@@ -14,13 +14,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Bộ thẻ của tôi"
+        android:text="@string/my_sets"
         android:textColor="@color/text_color"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/main" />
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_flashcard_sets"
@@ -60,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Bạn chưa có bộ thẻ nào"
+            android:text="@string/empty_state_title"
             android:textColor="@color/text_color"
             android:textSize="16sp" />
 
@@ -70,7 +69,7 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:padding="16dp"
-            android:text="Tạo bộ thẻ đầu tiên để bắt đầu hành trình học tập của bạn!"
+            android:text="@string/empty_state_description"
             android:textColor="@color/text_color"
             android:textSize="14sp" />
 
@@ -80,10 +79,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/secondary_color"
-            android:text="Tạo bộ thẻ đầu tiên"
+            android:text="@string/btn_create_first_set"
             android:textColor="@android:color/white" />
 
     </LinearLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_deck"
         android:layout_width="wrap_content"
@@ -96,4 +96,5 @@
         app:rippleColor="@color/primary_light_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
