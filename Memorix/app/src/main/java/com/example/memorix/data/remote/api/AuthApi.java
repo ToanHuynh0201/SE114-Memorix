@@ -1,5 +1,7 @@
 package com.example.memorix.data.remote.api;
 
+import com.example.memorix.data.remote.dto.GoogleLogin.GoogleLoginRequest;
+import com.example.memorix.data.remote.dto.GoogleLogin.GoogleLoginResponse;
 import com.example.memorix.data.remote.dto.LogOut.LogoutRequest;
 import com.example.memorix.data.remote.dto.Login.LoginRequest;
 import com.example.memorix.data.remote.dto.Login.LoginResponse;
@@ -45,5 +47,8 @@ public interface AuthApi {
 
     @POST("/api/auth/reset-password")
     Call<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest request);
+
+    @POST("/api/auth/google")
+    Call<LoginResponse> loginWithGoogle(@Body GoogleLoginRequest request);
 }
 

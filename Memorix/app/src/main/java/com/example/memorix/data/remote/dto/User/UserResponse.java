@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class UserResponse {
     @SerializedName("user_id")
     private int userId;
+
     private String username;
     private String email;
 
@@ -12,5 +13,6 @@ public class UserResponse {
     public int getUserId()       { return userId; }
     public String getUsername()  { return username; }
     public String getEmail()     { return email; }
+
 
 }
