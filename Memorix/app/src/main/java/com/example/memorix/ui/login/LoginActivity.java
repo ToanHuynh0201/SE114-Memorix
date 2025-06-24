@@ -199,7 +199,34 @@ public class LoginActivity extends AppCompatActivity {
                         finish();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
+                        JSONObject json = new JSONObject(errorBody);
+
+                        String errorMessage = "";
+                        if (json.has("message")) {
+                            errorMessage = json.getString("message");
+                        } else if (json.has("error")) {
+                            errorMessage = json.getString("error");
+                        } else if (json.has("detail")) {
+                            errorMessage = json.getString("detail");
+                        }
+
+                        Log.e("GOOGLE_LOGIN_ERROR", "Lỗi Google Login: " + errorMessage);
+
+                        if (errorMessage.equalsIgnoreCase("Google account has no email")) {
+                            Toast.makeText(LoginActivity.this, "Tài khoản Google không có email. Vui lòng dùng tài khoản khác.", Toast.LENGTH_LONG).show();
+                        } else if (errorMessage.equalsIgnoreCase("Invalid Google token")) {
+                            Toast.makeText(LoginActivity.this, "Token Google không hợp lệ. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Đăng nhập Google thất bại", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
 
             }
@@ -278,7 +305,35 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    Toast.makeText(LoginActivity.this, "Sai email hoặc mật khẩu!", Toast.LENGTH_SHORT).show();
+                    try {
+                        String errorBodyString = response.errorBody().string();
+                        JSONObject json = new JSONObject(errorBodyString);
+                        Log.d("LOGIN_DEBUG", "Error body: " + errorBodyString);
+
+                        // Thử lấy message theo nhiều cách (tùy backend)
+                        String errorMessage = "";
+                        if (json.has("message")) {
+                            errorMessage = json.getString("message");
+                        } else if (json.has("error")) {
+                            errorMessage = json.getString("error");
+                        } else if (json.has("detail")) {
+                            errorMessage = json.getString("detail");
+                        }
+
+                        Log.e("LOGIN_ERROR", "Lỗi từ server: " + errorMessage); // kiểm tra log
+
+                        if (errorMessage.equalsIgnoreCase("Invalid credentials")) {
+                            Toast.makeText(LoginActivity.this, "Vui lòng đăng nhập bằng Google.", Toast.LENGTH_SHORT).show();
+
+                        } else if (errorMessage.equalsIgnoreCase("Email not verified")) {
+                            Toast.makeText(LoginActivity.this, "Email chưa được xác thực. Vui lòng kiểm tra hộp thư để xác thực.", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Sai email hoặc mật khẩu!", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Đăng nhập thất bại!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
