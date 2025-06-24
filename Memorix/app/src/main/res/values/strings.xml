@@ -20,6 +20,8 @@
     <string name="account">Tài khoản</string>
     <string name="phone">Số điện thoại</string>
     <string name="bio">Giới thiệu bản thân</string>
+    <string name="default_web_client_id">181840300124-b3or7c8sdle0858ndtm30fih4f51621k.apps.googleusercontent.com</string>
+
     <!-- RegisterActivity -->
     <string name="create_account">Tạo tài khoản</string>
     <string name="full_name">Họ và tên</string>

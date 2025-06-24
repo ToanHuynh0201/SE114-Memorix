@@ -19,6 +19,7 @@ import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.Register.VerifyEmailRequest;
 import com.example.memorix.data.remote.dto.Register.VerifyEmailResponse;
 import com.example.memorix.data.remote.network.ApiClient;
+import com.example.memorix.ui.MainActivity;
 import com.google.android.material.button.MaterialButton;
 
 import retrofit2.Call;
@@ -103,12 +104,22 @@ public class VerifyEmailActivity extends AppCompatActivity {
             public void onResponse(Call<VerifyEmailResponse> call, Response<VerifyEmailResponse> response) {
                 progressBar.setVisibility(View.GONE);
                 buttonVerify.setEnabled(true);
+                String source = getIntent().getStringExtra("SOURCE");
+                String email = getIntent().getStringExtra("EMAIL");
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(VerifyEmailActivity.this, "Email verified successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(VerifyEmailActivity.this, LoginActivity.class);
-                    intent.putExtra("EMAIL", email);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    if ("google".equals(source)) {
+                        // ✅ Nếu là từ Google Sign-In → vào thẳng MainActivity
+                        Intent intent = new Intent(VerifyEmailActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    } else {
+                        // ✅ Nếu là từ đăng ký thủ công → về lại LoginActivity để đăng nhập
+                        Intent intent = new Intent(VerifyEmailActivity.this, LoginActivity.class);
+                        intent.putExtra("EMAIL", email);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }
                 } else {
                     Toast.makeText(VerifyEmailActivity.this, "Invalid or expired code", Toast.LENGTH_SHORT).show();
                 }

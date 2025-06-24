@@ -113,6 +113,7 @@ public class RegisterActivity extends AppCompatActivity {
                     Intent intent = new Intent(RegisterActivity.this, VerifyEmailActivity.class);
                     intent.putExtra("USER_ID", response.body().getUser_id());
                     intent.putExtra("EMAIL", response.body().getEmail());
+                    intent.putExtra("SOURCE", "manual");
 // 👈 truyền user_id
                     startActivity(intent);
                 } else if (response.code() == 400 && response.errorBody() != null) {
