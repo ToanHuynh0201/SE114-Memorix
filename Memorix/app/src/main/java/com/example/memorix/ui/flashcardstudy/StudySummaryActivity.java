@@ -16,7 +16,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Card;
+import com.example.memorix.model.Card;
 import com.example.memorix.ui.MainActivity;
 
 import java.util.List;
@@ -154,21 +154,21 @@ public class StudySummaryActivity extends AppCompatActivity {
         int fillBlankCount = 0, fillBlankCorrect = 0, fillBlankReviewed = 0;
 
         for (Card card : studiedCards) {
-            switch (card.getType()) {
+            switch (card.getCardType()) {
                 case BASIC:
                     basicCount++;
-                    basicCorrect += card.getCorrectCount();
-                    basicReviewed += card.getReviewCount();
+//                    basicCorrect += card.getCorrectCount();
+//                    basicReviewed += card.getReviewCount();
                     break;
                 case MULTIPLE_CHOICE:
                     multipleChoiceCount++;
-                    multipleChoiceCorrect += card.getCorrectCount();
-                    multipleChoiceReviewed += card.getReviewCount();
+//                    multipleChoiceCorrect += card.getCorrectCount();
+//                    multipleChoiceReviewed += card.getReviewCount();
                     break;
                 case FILL_IN_BLANK:
                     fillBlankCount++;
-                    fillBlankCorrect += card.getCorrectCount();
-                    fillBlankReviewed += card.getReviewCount();
+//                    fillBlankCorrect += card.getCorrectCount();
+//                    fillBlankReviewed += card.getReviewCount();
                     break;
             }
         }

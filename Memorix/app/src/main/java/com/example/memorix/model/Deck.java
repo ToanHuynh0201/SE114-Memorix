@@ -1,18 +1,20 @@
-package com.example.memorix.data;
+package com.example.memorix.model;
 
 public class Deck {
     private long id;
     private String name;
     private String description;
     private int cardCount;
-    private int masteredCount;
+    private String imageUrl;
+    private boolean isPublic;
 
-    public Deck(long id, String name, String description, int cardCount, int masteredCount) {
+    public Deck(long id, String name, String description, int cardCount, String imageUrl, boolean isPublic) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.cardCount = cardCount;
-        this.masteredCount = masteredCount;
+        this.imageUrl = imageUrl;
+        this.isPublic = isPublic;
     }
 
     public long getId() {
@@ -38,20 +40,26 @@ public class Deck {
     public void setDescription(String description) {
         this.description = description;
     }
-
     public int getCardCount() {
         return cardCount;
     }
-
     public void setCardCount(int cardCount) {
         this.cardCount = cardCount;
     }
 
-    public int getMasteredCount() {
-        return masteredCount;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setMasteredCount(int masteredCount) {
-        this.masteredCount = masteredCount;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
     }
 }

@@ -22,7 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Card;
+import com.example.memorix.model.Card;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
@@ -92,10 +92,10 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         // Initialize the flashcard list (replace with actual data from database)
         flashcardList = new ArrayList<>();
 
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
     }
 
     private void initViews() {
@@ -212,17 +212,17 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-            tvCardFront.setText(currentCard.getQuestion());
-            tvCardBack.setText(currentCard.getAnswer());
-
-            // Cập nhật thanh tiến độ và số thẻ
-            updateProgressBar();
-        }
-
-        // Kiểm tra và vô hiệu hóa các nút nếu ở đầu hoặc cuối danh sách
-        checkButtonStatus();
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//            tvCardFront.setText(currentCard.getQuestion());
+//            tvCardBack.setText(currentCard.getAnswer());
+//
+//            // Cập nhật thanh tiến độ và số thẻ
+//            updateProgressBar();
+//        }
+//
+//        // Kiểm tra và vô hiệu hóa các nút nếu ở đầu hoặc cuối danh sách
+//        checkButtonStatus();
     }
 
     @SuppressLint("SetTextI18n")
@@ -345,16 +345,16 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-
-            // Lưu độ khó và trạng thái đúng/sai
-            cardDifficultyMap.put(currentCard.getId(), difficulty);
-            cardCorrectMap.put(currentCard.getId(), isCorrect);
-
-            // Thêm thẻ vào danh sách đã học nếu chưa có
-            if (!studiedCardsList.contains(currentCard)) {
-                studiedCardsList.add(currentCard);
-            }
+//            Card currentCard = flashcardList.get(currentPosition);
+//
+//            // Lưu độ khó và trạng thái đúng/sai
+//            cardDifficultyMap.put(currentCard.getId(), difficulty);
+//            cardCorrectMap.put(currentCard.getId(), isCorrect);
+//
+//            // Thêm thẻ vào danh sách đã học nếu chưa có
+//            if (!studiedCardsList.contains(currentCard)) {
+//                studiedCardsList.add(currentCard);
+//            }
 
             // Cập nhật thông tin thẻ (nếu Card class có các phương thức này)
             // currentCard.incrementReviewCount();
@@ -416,12 +416,12 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             int totalReviewedCards = studiedCardsList.size();
 
             // Đếm số câu trả lời đúng
-            for (Card card : studiedCardsList) {
-                Boolean isCorrect = cardCorrectMap.get(card.getId());
-                if (isCorrect != null && isCorrect) {
-                    totalCorrectAnswers++;
-                }
-            }
+//            for (Card card : studiedCardsList) {
+//                Boolean isCorrect = cardCorrectMap.get(card.getId());
+//                if (isCorrect != null && isCorrect) {
+//                    totalCorrectAnswers++;
+//                }
+//            }
 
 //             Kiểm tra StudyStatisticsHelper có tồn tại không
 //             StudyStatisticsHelper.StudySessionStats stats =

@@ -8,18 +8,97 @@
     android:background="@color/background_color"
     tools:context=".ui.HomeFragment">
 
+    <!-- Search Bar -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iv_search_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="@string/search_icon"
+                app:tint="@color/secondary_text_color" />
+
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_decks_hint"
+                android:textColorHint="@color/secondary_text_color"
+                android:textColor="@color/text_color"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <ImageView
+                android:id="@+id/iv_clear_search"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_clear"
+                android:contentDescription="@string/clear_search"
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                app:tint="@color/secondary_text_color" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
     <TextView
         android:id="@+id/txt_my_sets"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:text="@string/my_sets"
         android:textColor="@color/text_color"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/main" />
+        app:layout_constraintTop_toBottomOf="@+id/card_search" />
+
+    <!-- Search Results Count (Optional) -->
+    <TextView
+        android:id="@+id/txt_search_results"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/search_results_count"
+        android:textColor="@color/secondary_text_color"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_my_sets"
+        tools:text="Tìm thấy 5 kết quả cho 'android'" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_flashcard_sets"
@@ -29,10 +108,11 @@
         android:clipToPadding="false"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:paddingBottom="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_my_sets"
+        app:layout_constraintTop_toBottomOf="@+id/txt_search_results"
         tools:listitem="@layout/item_deck" />
 
     <!-- Empty State -->
@@ -46,7 +126,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_my_sets">
+        app:layout_constraintTop_toBottomOf="@+id/txt_search_results">
 
         <ImageView
             android:layout_width="100dp"
@@ -56,6 +136,7 @@
             android:src="@drawable/ic_empty_state" />
 
         <TextView
+            android:id="@+id/txt_empty_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -64,6 +145,7 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/txt_empty_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -81,6 +163,50 @@
             android:backgroundTint="@color/secondary_color"
             android:text="@string/btn_create_first_set"
             android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+    <!-- No Search Results State -->
+    <LinearLayout
+        android:id="@+id/layout_no_search_results"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_search_results">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:alpha="0.5"
+            android:contentDescription="@string/no_search_results"
+            android:src="@drawable/ic_search_off"
+            app:tint="@color/secondary_text_color" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/no_search_results_title"
+            android:textColor="@color/text_color"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_search_query"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="@string/no_search_results_description"
+            android:textColor="@color/secondary_text_color"
+            android:textSize="14sp"
+            tools:text="Không tìm thấy kết quả nào cho 'android'" />
 
     </LinearLayout>
 

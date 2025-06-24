@@ -1,6 +1,6 @@
 package com.example.memorix.ui.deck.adapter;
 
-import com.example.memorix.data.Deck;
+import com.example.memorix.model.Deck;
 
 public interface DeckActionListener {
     void onEditDeck(int position);

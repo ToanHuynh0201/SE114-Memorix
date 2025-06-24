@@ -22,7 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Card;
+import com.example.memorix.model.Card;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
@@ -99,10 +99,10 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
     private void initFlashcardList() {
         flashcardList = new ArrayList<>();
 
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
     }
 
     private void initMultipleChoiceOptions() {
@@ -248,40 +248,40 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-            tvQuestion.setText(currentCard.getQuestion());
-
-            // Set up multiple choice options
-            setupMultipleChoiceOptions();
-
-            updateProgressBar();
-        }
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//            tvQuestion.setText(currentCard.getQuestion());
+//
+//            // Set up multiple choice options
+//            setupMultipleChoiceOptions();
+//
+//            updateProgressBar();
+//        }
 
         checkButtonStatus();
     }
 
     private void setupMultipleChoiceOptions() {
-        if (currentPosition < allOptions.size()) {
-            List<String> options = new ArrayList<>(allOptions.get(currentPosition));
-            Card currentCard = flashcardList.get(currentPosition);
-            String correctAnswer = currentCard.getAnswer();
-
-            // Find correct answer index before shuffling
-            correctOptionIndex = options.indexOf(correctAnswer);
-
-            // Shuffle options
-            Collections.shuffle(options);
-
-            // Update correct answer index after shuffling
-            correctOptionIndex = options.indexOf(correctAnswer);
-
-            // Set options to buttons
-            btnOption1.setText(options.get(0));
-            btnOption2.setText(options.get(1));
-            btnOption3.setText(options.get(2));
-            btnOption4.setText(options.get(3));
-        }
+//        if (currentPosition < allOptions.size()) {
+//            List<String> options = new ArrayList<>(allOptions.get(currentPosition));
+//            Card currentCard = flashcardList.get(currentPosition);
+//            String correctAnswer = currentCard.getAnswer();
+//
+//            // Find correct answer index before shuffling
+//            correctOptionIndex = options.indexOf(correctAnswer);
+//
+//            // Shuffle options
+//            Collections.shuffle(options);
+//
+//            // Update correct answer index after shuffling
+//            correctOptionIndex = options.indexOf(correctAnswer);
+//
+//            // Set options to buttons
+//            btnOption1.setText(options.get(0));
+//            btnOption2.setText(options.get(1));
+//            btnOption3.setText(options.get(2));
+//            btnOption4.setText(options.get(3));
+//        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -387,31 +387,31 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void showAnswerResult(Button selectedButton) {
-        // Reset all button colors first
-        resetOptionButtonColors();
-
-        // Highlight correct answer in green
-        Button correctButton = getButtonByIndex(correctOptionIndex);
-        if (correctButton != null) {
-            correctButton.setBackgroundTintList(getColorStateList(R.color.secondary_color)); // Green
-        }
-
-        // If selected answer is wrong, highlight it in red
-        if (selectedOptionIndex != correctOptionIndex) {
-            selectedButton.setBackgroundTintList(getColorStateList(android.R.color.holo_red_dark));
-        }
-
-        // Set result text
-        Card currentCard = flashcardList.get(currentPosition);
-        boolean isCorrect = (selectedOptionIndex == correctOptionIndex);
-
-        if (isCorrect) {
-            tvAnswerResult.setText("Chính xác!\n\nĐáp án: " + currentCard.getAnswer());
-            tvAnswerResult.setTextColor(getColor(R.color.secondary_color));
-        } else {
-            tvAnswerResult.setText("Sai rồi!\n\nĐáp án đúng: " + currentCard.getAnswer());
-            tvAnswerResult.setTextColor(getColor(android.R.color.holo_red_dark));
-        }
+//        // Reset all button colors first
+//        resetOptionButtonColors();
+//
+//        // Highlight correct answer in green
+//        Button correctButton = getButtonByIndex(correctOptionIndex);
+//        if (correctButton != null) {
+//            correctButton.setBackgroundTintList(getColorStateList(R.color.secondary_color)); // Green
+//        }
+//
+//        // If selected answer is wrong, highlight it in red
+//        if (selectedOptionIndex != correctOptionIndex) {
+//            selectedButton.setBackgroundTintList(getColorStateList(android.R.color.holo_red_dark));
+//        }
+//
+//        // Set result text
+//        Card currentCard = flashcardList.get(currentPosition);
+//        boolean isCorrect = (selectedOptionIndex == correctOptionIndex);
+//
+//        if (isCorrect) {
+//            tvAnswerResult.setText("Chính xác!\n\nĐáp án: " + currentCard.getAnswer());
+//            tvAnswerResult.setTextColor(getColor(R.color.secondary_color));
+//        } else {
+//            tvAnswerResult.setText("Sai rồi!\n\nĐáp án đúng: " + currentCard.getAnswer());
+//            tvAnswerResult.setTextColor(getColor(android.R.color.holo_red_dark));
+//        }
     }
 
     private Button getButtonByIndex(int index) {
@@ -432,16 +432,16 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
     }
 
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-
-            cardDifficultyMap.put(currentCard.getId(), difficulty);
-            cardCorrectMap.put(currentCard.getId(), isCorrect);
-
-            if (!studiedCardsList.contains(currentCard)) {
-                studiedCardsList.add(currentCard);
-            }
-        }
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//
+//            cardDifficultyMap.put(currentCard.getId(), difficulty);
+//            cardCorrectMap.put(currentCard.getId(), isCorrect);
+//
+//            if (!studiedCardsList.contains(currentCard)) {
+//                studiedCardsList.add(currentCard);
+//            }
+//        }
     }
 
     private void moveToNextCard() {
@@ -469,33 +469,33 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
     }
 
     private void finishStudySession() {
-        try {
-            long studyEndTime = System.currentTimeMillis();
-            int totalCorrectAnswers = 0;
-            int totalReviewedCards = studiedCardsList.size();
-
-            for (Card card : studiedCardsList) {
-                Boolean isCorrect = cardCorrectMap.get(card.getId());
-                if (isCorrect != null && isCorrect) {
-                    totalCorrectAnswers++;
-                }
-            }
-
-            Intent intent = new Intent(this, StudySummaryActivity.class);
-            intent.putExtra("deck_name", deckName);
-            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
-            intent.putExtra("study_start_time", studyStartTime);
-            intent.putExtra("study_end_time", studyEndTime);
-            intent.putExtra("total_correct", totalCorrectAnswers);
-            intent.putExtra("total_reviewed", totalReviewedCards);
-
-            startActivity(intent);
-            finish();
-
-        } catch (Exception e) {
-            Log.e("error", Objects.requireNonNull(e.getMessage()));
-            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
-                    Toast.LENGTH_LONG).show();
-        }
+//        try {
+//            long studyEndTime = System.currentTimeMillis();
+//            int totalCorrectAnswers = 0;
+//            int totalReviewedCards = studiedCardsList.size();
+//
+//            for (Card card : studiedCardsList) {
+//                Boolean isCorrect = cardCorrectMap.get(card.getId());
+//                if (isCorrect != null && isCorrect) {
+//                    totalCorrectAnswers++;
+//                }
+//            }
+//
+//            Intent intent = new Intent(this, StudySummaryActivity.class);
+//            intent.putExtra("deck_name", deckName);
+//            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
+//            intent.putExtra("study_start_time", studyStartTime);
+//            intent.putExtra("study_end_time", studyEndTime);
+//            intent.putExtra("total_correct", totalCorrectAnswers);
+//            intent.putExtra("total_reviewed", totalReviewedCards);
+//
+//            startActivity(intent);
+//            finish();
+//
+//        } catch (Exception e) {
+//            Log.e("error", Objects.requireNonNull(e.getMessage()));
+//            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
+//                    Toast.LENGTH_LONG).show();
+//        }
     }
 }

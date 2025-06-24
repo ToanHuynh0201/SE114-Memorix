@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Deck;
+import com.example.memorix.model.Deck;
 
 public class DeckViewHolder extends RecyclerView.ViewHolder{
     private TextView tvDeckName;
@@ -37,7 +37,6 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         tvDeckName = itemView.findViewById(R.id.tv_deck_name);
         tvDeckDescription = itemView.findViewById(R.id.tv_deck_description);
         tvCardCount = itemView.findViewById(R.id.tv_card_count);
-        tvMasteredCount = itemView.findViewById(R.id.tv_mastered_count);
         progressBar = itemView.findViewById(R.id.progress_bar);
         btnOverflowMenu = itemView.findViewById(R.id.btn_overflow_menu);
 
@@ -120,13 +119,12 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
         tvCardCount.setText(deck.getCardCount() + " cards");
-        tvMasteredCount.setText(deck.getMasteredCount() + " mastered");
 
         // Cập nhật tiến độ
-        int progress = 0;
-        if (deck.getCardCount() > 0) {
-            progress = (int) (((float) deck.getMasteredCount() / deck.getCardCount()) * 100);
-        }
-        progressBar.setProgress(progress);
+//        int progress = 0;
+//        if (deck.getCardCount() > 0) {
+//            progress = (int) (((float) deck.getMasteredCount() / deck.getCardCount()) * 100);
+//        }
+//        progressBar.setProgress(progress);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.memorix.helper;
-import com.example.memorix.data.Card;
-import com.example.memorix.data.CardType;
+import com.example.memorix.model.Card;
+import com.example.memorix.model.CardType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,20 +64,20 @@ public class StudyStatisticsHelper {
         stats.studyDuration = studyEndTime - studyStartTime;
 
         // Tính toán thống kê cho từng loại thẻ
-        for (Card card : studiedCards) {
-            CardType type = card.getType();
-            CardTypeStats typeStats = stats.cardTypeStats.get(type);
-
-            if (typeStats != null) {
-                typeStats.totalCards++;
-                typeStats.totalCorrect += card.getCorrectCount();
-                typeStats.totalReviewed += card.getReviewCount();
-
-                // Cập nhật tổng thể
-                stats.totalCorrect += card.getCorrectCount();
-                stats.totalReviewed += card.getReviewCount();
-            }
-        }
+//        for (Card card : studiedCards) {
+//            CardType type = card.getType();
+//            CardTypeStats typeStats = stats.cardTypeStats.get(type);
+//
+//            if (typeStats != null) {
+//                typeStats.totalCards++;
+//                typeStats.totalCorrect += card.getCorrectCount();
+//                typeStats.totalReviewed += card.getReviewCount();
+//
+//                // Cập nhật tổng thể
+//                stats.totalCorrect += card.getCorrectCount();
+//                stats.totalReviewed += card.getReviewCount();
+//            }
+//        }
 
         // Tính toán tỷ lệ chính xác
         stats.overallAccuracy = stats.totalReviewed > 0 ?

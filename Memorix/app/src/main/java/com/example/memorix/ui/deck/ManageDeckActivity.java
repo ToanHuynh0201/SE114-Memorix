@@ -13,18 +13,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Deck;
+import com.example.memorix.model.Deck;
 import com.example.memorix.ui.deck.adapter.DeckActionListener;
 import com.example.memorix.ui.deck.adapter.DeckAdapter;
-import com.example.memorix.ui.deck.bottomsheet.AddOptionsBottomSheet;
-import com.example.memorix.ui.deck.bottomsheet.CreateDeckBottomSheet;
-import com.example.memorix.ui.deck.bottomsheet.CreateFolderBottomSheet;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ManageDeckActivity extends AppCompatActivity implements DeckActionListener{
-    private RecyclerView recyclerView;
     private DeckAdapter deckAdapter;
     private List<Deck> deckList;
     @Override
@@ -38,7 +34,7 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
             return insets;
         });
 
-        recyclerView = findViewById(R.id.recycler_view_decks);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view_decks);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Tạo dữ liệu mẫu
@@ -64,11 +60,6 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
 
     @Override
     public void onResetProgress(int position) {
-        Deck deck = deckList.get(position);
-        // Reset số thẻ đã thành thạo về 0
-        deck.setMasteredCount(0);
-        deckAdapter.notifyItemChanged(position);
-        Toast.makeText(this, "Đã đặt lại tiến độ bộ thẻ: " + deck.getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -93,9 +84,9 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
     private List<Deck> createSampleData() {
         List<Deck> decks = new ArrayList<>();
 
-        Deck deck1 = new Deck(1, "Tiếng Việt", "Vietnamese language flashcards", 25, 15);
-        Deck deck2 = new Deck(2, "Tiếng Anh", "English vocabulary flashcards", 30, 10);
-        Deck deck3 = new Deck(3, "Toán học", "Math formula flashcards", 20, 5);
+        Deck deck1 = new Deck(1, "Tiếng Việt", "Vietnamese language flashcards", 25, null, false);
+        Deck deck2 = new Deck(2, "Tiếng Anh", "English vocabulary flashcards", 30, null, false);
+        Deck deck3 = new Deck(3, "Toán học", "Math formula flashcards", 20, null, false);
 
         decks.add(deck1);
         decks.add(deck2);

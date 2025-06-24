@@ -82,35 +82,6 @@
                 tools:text="25 cards" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/layout_mastered_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_deck_description"
-            tools:ignore="UseCompoundDrawables">
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:contentDescription="@string/mastered_count"
-                android:src="@drawable/ic_check_circle"
-                app:tint="@color/accent_color" />
-
-            <TextView
-                android:id="@+id/tv_mastered_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="@color/secondary_text_color"
-                tools:text="15 mastered" />
-        </LinearLayout>
-
         <ProgressBar
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"

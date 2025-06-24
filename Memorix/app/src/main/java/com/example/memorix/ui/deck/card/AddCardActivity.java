@@ -1,5 +1,6 @@
 package com.example.memorix.ui.deck.card;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -8,21 +9,22 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.memorix.R;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.memorix.data.Card;
-import com.example.memorix.data.CardType;
+import com.example.memorix.model.Card;
+import com.example.memorix.model.CardType;
+import com.example.memorix.viewmodel.AddCardViewModel;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
@@ -54,6 +56,8 @@ public class AddCardActivity extends AppCompatActivity {
     // Data
     private String deckId;
     private CardType currentCardType = CardType.BASIC;
+    private AddCardViewModel viewModel;
+    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,34 +68,49 @@ public class AddCardActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        setupToolbar();
 
-        // Get deck ID from intent
-//        deckId = getIntent().getStringExtra("deck_id");
-//        if (deckId == null) {
-//            Toast.makeText(this, "Lỗi: Không tìm thấy deck", Toast.LENGTH_SHORT).show();
-//            finish();
-//            return;
-//        }
+        viewModel = new ViewModelProvider(this).get(AddCardViewModel.class);
+        sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
 
+        // Get deck ID from intent (uncomment và sửa)
+        deckId = String.valueOf(getIntent().getLongExtra("deck_id", -1));
+        if (deckId.equals("-1")) {
+            Toast.makeText(this, "Lỗi: Không tìm thấy deck", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        setupObservers();
         initViews();
         setupSpinner();
         setupListeners();
         showContentForCardType(CardType.BASIC);
     }
+    private void setupObservers() {
+        viewModel.getCreateCardSuccess().observe(this, success -> {
+            if (success != null) {
+                if (success) {
+                    Toast.makeText(this, "Đã lưu flashcard thành công!", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                }
+            }
+        });
 
-    private void setupToolbar() {
-        // If you have a toolbar in your layout, uncomment and modify this:
-        /*
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Thêm Flashcard");
-        }
-        */
+        viewModel.getLoadingState().observe(this, isLoading -> {
+            if (isLoading != null) {
+                btnSave.setEnabled(!isLoading);
+                // Có thể thêm progress bar ở đây
+            }
+        });
+
+        viewModel.getErrorMessage().observe(this, errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                viewModel.clearErrorMessage();
+            }
+        });
     }
-
     private void initViews() {
         spinnerCardType = findViewById(R.id.spinner_card_type);
         etQuestion = findViewById(R.id.et_question);
@@ -297,12 +316,7 @@ public class AddCardActivity extends AppCompatActivity {
             }
 
             if (card != null) {
-                // Save card to database
                 saveCardToDatabase(card);
-
-                Toast.makeText(this, "Đã lưu flashcard thành công!", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
-                finish();
             }
         } catch (IllegalArgumentException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -317,9 +331,12 @@ public class AddCardActivity extends AppCompatActivity {
             throw new IllegalArgumentException("Vui lòng nhập câu trả lời");
         }
 
-        return new Card(cardId, deckId, question, answer);
+        // Convert deckId to int
+        int deckIdInt = Integer.parseInt(deckId);
+        return Card.createBasicCard(deckIdInt, question, answer);
     }
 
+    // Cập nhật phương thức createMultipleChoiceCard trong AddCardActivity.java
     private Card createMultipleChoiceCard(String cardId, String question) {
         String optionA = etOptionA.getText().toString().trim();
         String optionB = etOptionB.getText().toString().trim();
@@ -346,9 +363,12 @@ public class AddCardActivity extends AppCompatActivity {
             throw new IllegalArgumentException("Vui lòng chọn đáp án đúng");
         }
 
-        return new Card(cardId, deckId, question, options, correctAnswer);
+        // Convert deckId to int
+        int deckIdInt = Integer.parseInt(deckId);
+        return Card.createMultipleChoiceCard(deckIdInt, question, options, correctAnswer);
     }
 
+    // Cập nhật phương thức createFillInBlankCard trong AddCardActivity.java
     private Card createFillInBlankCard(String cardId, String question) {
         String correctAnswer = etCorrectAnswer.getText().toString().trim();
 
@@ -362,7 +382,9 @@ public class AddCardActivity extends AppCompatActivity {
             throw new IllegalArgumentException("Câu hỏi điền từ phải có ít nhất một dấu gạch dưới (_)");
         }
 
-        return new Card(cardId, deckId, question, correctAnswer, CardType.FILL_IN_BLANK);
+        // Convert deckId to int
+        int deckIdInt = Integer.parseInt(deckId);
+        return Card.createFillInBlankCard(deckIdInt, question, correctAnswer);
     }
 
     private String getSelectedCorrectAnswer() {
@@ -380,9 +402,13 @@ public class AddCardActivity extends AppCompatActivity {
     }
 
     private void saveCardToDatabase(Card card) {
-        System.out.println("Saving card: " + card.toString());
-        System.out.println("Card type: " + card.getType().getDisplayName());
-        System.out.println("Card content: " + card.getDisplayContent());
+        String token = sharedPreferences.getString("access_token", null);
+        if (token == null) {
+            Toast.makeText(this, "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        viewModel.createFlashcard(card, token);
     }
 
     @Override

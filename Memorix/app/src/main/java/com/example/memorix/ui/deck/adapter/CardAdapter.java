@@ -11,14 +11,14 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.memorix.data.Card;
+import com.example.memorix.model.Card;
 import com.example.memorix.R;
 import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
 
-    private List<Card> cards;
-    private OnCardActionListener listener;
+    private final List<Card> cards;
+    private final OnCardActionListener listener;
 
     public interface OnCardActionListener {
         void onCardAction(Card card, String action);
@@ -50,8 +50,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
 
     class CardViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tvCardType, tvCardContent;
-        private ImageButton btnEditCard, btnDeleteCard;
+        private final TextView tvCardType, tvCardContent;
+        private final ImageButton btnEditCard, btnDeleteCard;
 
         public CardViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -66,7 +66,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             String typeText = "";
             int typeColor = R.color.accent_color;
 
-            switch (card.getType()) {
+            switch (card.getCardType()) {
                 case BASIC:
                     typeText = "2 Mặt";
                     typeColor = R.color.primary_color;
@@ -111,19 +111,18 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         }
 
         private String getCardPreviewContent(Card card) {
-            switch (card.getType()) {
+            switch (card.getCardType()) {
                 case BASIC:
-                    return "Câu hỏi: " + card.getQuestion();
+                    return "Câu hỏi: " + card.getDisplayContent();
 
                 case MULTIPLE_CHOICE:
-                    return "Câu hỏi: " + card.getQuestion() +
-                            "\nA. " + card.getOptions().get(0);
+                    return "Câu hỏi: " + card.getDisplayContent() +
+                            "\nA. " + card.getDisplayContent();
 
                 case FILL_IN_BLANK:
-                    return "Điền từ: " + card.getQuestion().replace("___", "[___]");
-
+                    return "Điền từ: " + card.getDisplayContent();
                 default:
-                    return card.getQuestion();
+                    return card.getDisplayContent();
             }
         }
     }

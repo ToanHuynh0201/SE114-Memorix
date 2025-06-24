@@ -23,12 +23,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Deck;
+import com.example.memorix.model.Deck;
 import com.example.memorix.ui.deck.adapter.DeckActionListener;
 import com.example.memorix.ui.deck.adapter.DeckAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DeckLibraryFragment extends Fragment implements DeckActionListener {
     private EditText etSearch;
@@ -123,20 +124,20 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
     private void loadSampleData() {
         // Load sample English decks
         englishDecks.clear();
-        englishDecks.add(new Deck(1, "English Regular Expressions", "Learn common English expressions and idioms", 598, 358));
-        englishDecks.add(new Deck(2, "Common English Phrases", "Essential phrases for daily conversation", 2196, 1318));
+        englishDecks.add(new Deck(1, "English Regular Expressions", "Learn common English expressions and idioms", 598, null, false));
+        englishDecks.add(new Deck(2, "Common English Phrases", "Essential phrases for daily conversation", 2196, null, false));
         englishAdapter.notifyDataSetChanged();
 
         // Load sample Popular decks
         popularDecks.clear();
-        popularDecks.add(new Deck(3, "English Regular Expressions", "Learn common English expressions and idioms", 598, 358));
-        popularDecks.add(new Deck(4, "MCAT Preparation", "Medical College Admission Test preparation", 2597, 1558));
+        popularDecks.add(new Deck(3, "English Regular Expressions", "Learn common English expressions and idioms", 598, null, false));
+        popularDecks.add(new Deck(4, "MCAT Preparation", "Medical College Admission Test preparation", 2597, null, false));
         popularAdapter.notifyDataSetChanged();
 
         // Load sample Law decks
         lawDecks.clear();
-        lawDecks.add(new Deck(5, "Criminal Law", "Fundamental concepts of criminal law", 450, 270));
-        lawDecks.add(new Deck(6, "Family Law", "Family law principles and cases", 320, 192));
+        lawDecks.add(new Deck(5, "Criminal Law", "Fundamental concepts of criminal law", 450, null, false));
+        lawDecks.add(new Deck(6, "Family Law", "Family law principles and cases", 320, null, false));
         lawAdapter.notifyDataSetChanged();
     }
 
@@ -170,7 +171,7 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
 
     @SuppressLint("SetTextI18n")
     private void showDeckInfoDialog(Deck deck) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
         // Inflate custom layout
         LayoutInflater inflater = getLayoutInflater();
@@ -179,7 +180,7 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
 
         // Create dialog
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         // Get views
         TextView tvDeckName = dialogView.findViewById(R.id.tv_deck_name);

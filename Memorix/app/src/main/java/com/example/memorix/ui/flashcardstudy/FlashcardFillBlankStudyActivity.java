@@ -25,8 +25,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Card;
-import com.example.memorix.data.CardType;
+import com.example.memorix.model.Card;
+import com.example.memorix.model.CardType;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -102,16 +102,16 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
         flashcardList = new ArrayList<>();
 
         // Sử dụng format: question|answer|explanation (explanation có thể null)
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-                "She _____ to school every day.", "goes", CardType.FILL_IN_BLANK));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-                "They _____ playing football now.", "are", CardType.FILL_IN_BLANK));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-                "I _____ finished my homework yesterday.", "have", CardType.FILL_IN_BLANK));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-                "He _____ not like vegetables.", "does", CardType.FILL_IN_BLANK));
-        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-                "We _____ watching TV when she called.", "were", CardType.FILL_IN_BLANK));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
+//                "She _____ to school every day.", "goes", CardType.FILL_IN_BLANK));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
+//                "They _____ playing football now.", "are", CardType.FILL_IN_BLANK));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
+//                "I _____ finished my homework yesterday.", "have", CardType.FILL_IN_BLANK));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
+//                "He _____ not like vegetables.", "does", CardType.FILL_IN_BLANK));
+//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
+//                "We _____ watching TV when she called.", "were", CardType.FILL_IN_BLANK));
     }
 
     private void initViews() {
@@ -240,16 +240,16 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-            tvCardFront.setText(currentCard.getQuestion());
-
-            // Hiển thị câu trả lời hoàn chỉnh trên mặt sau
-            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
-            tvCardBack.setText(completeAnswer);
-
-            updateProgressBar();
-        }
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//            tvCardFront.setText(currentCard.getQuestion());
+//
+//            // Hiển thị câu trả lời hoàn chỉnh trên mặt sau
+//            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
+//            tvCardBack.setText(completeAnswer);
+//
+//            updateProgressBar();
+//        }
 
         checkButtonStatus();
     }
@@ -322,63 +322,63 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayAnswerResult() {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
-            String userAnswerLower = userAnswer.toLowerCase().trim();
-
-            boolean isCorrect = correctAnswer.equals(userAnswerLower);
-
-            // Hiển thị trạng thái đúng/sai
-            if (isCorrect) {
-                tvResultStatus.setText(getString(R.string.correct));
-                tvResultStatus.setTextColor(getResources().getColor(R.color.secondary_color, null));
-            } else {
-                tvResultStatus.setText(getString(R.string.incorrect));
-                tvResultStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
-            }
-
-            // Hiển thị câu trả lời của người dùng
-            tvUserAnswer.setText(getString(R.string.your_answer_is) + " " + userAnswer);
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
+//            String userAnswerLower = userAnswer.toLowerCase().trim();
 //
-//            // Hiển thị giải thích nếu có
-//            String explanation = currentCard.getExplanation();
-//            if (!TextUtils.isEmpty(explanation)) {
-//                tvExplanation.setText("Giải thích: " + explanation);
-//                tvExplanation.setVisibility(View.VISIBLE);
+//            boolean isCorrect = correctAnswer.equals(userAnswerLower);
+//
+//            // Hiển thị trạng thái đúng/sai
+//            if (isCorrect) {
+//                tvResultStatus.setText(getString(R.string.correct));
+//                tvResultStatus.setTextColor(getResources().getColor(R.color.secondary_color, null));
 //            } else {
-//                tvExplanation.setVisibility(View.GONE);
+//                tvResultStatus.setText(getString(R.string.incorrect));
+//                tvResultStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
 //            }
-            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
-            SpannableString spannableString = new SpannableString(completeAnswer);
-
-            // Tìm vị trí của đáp án đúng trong câu hoàn chỉnh
-            int startIndex = completeAnswer.indexOf(currentCard.getCorrectAnswer());
-            int endIndex = startIndex + currentCard.getCorrectAnswer().length();
-
-            if (startIndex != -1) {
-                // Chọn màu dựa trên kết quả đúng/sai
-                int color = isCorrect ?
-                        getResources().getColor(R.color.secondary_color, null) :
-                        getResources().getColor(android.R.color.holo_red_dark, null);
-
-                // Áp dụng màu cho phần đáp án
-                spannableString.setSpan(
-                        new android.text.style.ForegroundColorSpan(color),
-                        startIndex,
-                        endIndex,
-                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                );
-
-                // Có thể thêm bold để làm nổi bật hơn
-                spannableString.setSpan(
-                        new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-                        startIndex,
-                        endIndex,
-                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                );
-            }
-        }
+//
+//            // Hiển thị câu trả lời của người dùng
+//            tvUserAnswer.setText(getString(R.string.your_answer_is) + " " + userAnswer);
+////
+////            // Hiển thị giải thích nếu có
+////            String explanation = currentCard.getExplanation();
+////            if (!TextUtils.isEmpty(explanation)) {
+////                tvExplanation.setText("Giải thích: " + explanation);
+////                tvExplanation.setVisibility(View.VISIBLE);
+////            } else {
+////                tvExplanation.setVisibility(View.GONE);
+////            }
+//            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
+//            SpannableString spannableString = new SpannableString(completeAnswer);
+//
+//            // Tìm vị trí của đáp án đúng trong câu hoàn chỉnh
+//            int startIndex = completeAnswer.indexOf(currentCard.getCorrectAnswer());
+//            int endIndex = startIndex + currentCard.getCorrectAnswer().length();
+//
+//            if (startIndex != -1) {
+//                // Chọn màu dựa trên kết quả đúng/sai
+//                int color = isCorrect ?
+//                        getResources().getColor(R.color.secondary_color, null) :
+//                        getResources().getColor(android.R.color.holo_red_dark, null);
+//
+//                // Áp dụng màu cho phần đáp án
+//                spannableString.setSpan(
+//                        new android.text.style.ForegroundColorSpan(color),
+//                        startIndex,
+//                        endIndex,
+//                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+//                );
+//
+//                // Có thể thêm bold để làm nổi bật hơn
+//                spannableString.setSpan(
+//                        new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+//                        startIndex,
+//                        endIndex,
+//                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+//                );
+//            }
+//        }
     }
 
     private void setupClickListeners() {
@@ -442,26 +442,26 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     }
 
     private boolean checkIfAnswerCorrect() {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
-            String userAnswerLower = userAnswer.toLowerCase().trim();
-            return correctAnswer.equals(userAnswerLower);
-        }
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
+//            String userAnswerLower = userAnswer.toLowerCase().trim();
+//            return correctAnswer.equals(userAnswerLower);
+//        }
         return false;
     }
 
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
-        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-            Card currentCard = flashcardList.get(currentPosition);
-
-            cardDifficultyMap.put(currentCard.getId(), difficulty);
-            cardCorrectMap.put(currentCard.getId(), isCorrect);
-
-            if (!studiedCardsList.contains(currentCard)) {
-                studiedCardsList.add(currentCard);
-            }
-        }
+//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+//            Card currentCard = flashcardList.get(currentPosition);
+//
+//            cardDifficultyMap.put(currentCard.getId(), difficulty);
+//            cardCorrectMap.put(currentCard.getId(), isCorrect);
+//
+//            if (!studiedCardsList.contains(currentCard)) {
+//                studiedCardsList.add(currentCard);
+//            }
+//        }
     }
 
     private void moveToNextCard() {
@@ -497,33 +497,33 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     }
 
     private void finishStudySession() {
-        try {
-            long studyEndTime = System.currentTimeMillis();
-            int totalCorrectAnswers = 0;
-            int totalReviewedCards = studiedCardsList.size();
-
-            for (Card card : studiedCardsList) {
-                Boolean isCorrect = cardCorrectMap.get(card.getId());
-                if (isCorrect != null && isCorrect) {
-                    totalCorrectAnswers++;
-                }
-            }
-
-            Intent intent = new Intent(this, StudySummaryActivity.class);
-            intent.putExtra("deck_name", deckName);
-            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
-            intent.putExtra("study_start_time", studyStartTime);
-            intent.putExtra("study_end_time", studyEndTime);
-            intent.putExtra("total_correct", totalCorrectAnswers);
-            intent.putExtra("total_reviewed", totalReviewedCards);
-
-            startActivity(intent);
-            finish();
-
-        } catch (Exception e) {
-            Log.e("error", Objects.requireNonNull(e.getMessage()));
-            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
-                    Toast.LENGTH_LONG).show();
-        }
+//        try {
+//            long studyEndTime = System.currentTimeMillis();
+//            int totalCorrectAnswers = 0;
+//            int totalReviewedCards = studiedCardsList.size();
+//
+//            for (Card card : studiedCardsList) {
+//                Boolean isCorrect = cardCorrectMap.get(card.getId());
+//                if (isCorrect != null && isCorrect) {
+//                    totalCorrectAnswers++;
+//                }
+//            }
+//
+//            Intent intent = new Intent(this, StudySummaryActivity.class);
+//            intent.putExtra("deck_name", deckName);
+//            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
+//            intent.putExtra("study_start_time", studyStartTime);
+//            intent.putExtra("study_end_time", studyEndTime);
+//            intent.putExtra("total_correct", totalCorrectAnswers);
+//            intent.putExtra("total_reviewed", totalReviewedCards);
+//
+//            startActivity(intent);
+//            finish();
+//
+//        } catch (Exception e) {
+//            Log.e("error", Objects.requireNonNull(e.getMessage()));
+//            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
+//                    Toast.LENGTH_LONG).show();
+//        }
     }
 }

@@ -63,12 +63,15 @@
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
             android:exported="false" />
-        <activity android:name=".ui.login.VerifyEmailActivity"/>
-        <activity android:name=".ui.login.ResetPasswordActivity"/>
-
+        <activity
+            android:name=".ui.login.VerifyEmailActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".ui.login.ResetPasswordActivity"
+            android:exported="false"/>
         <activity
             android:name=".ui.MainActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="false"/>

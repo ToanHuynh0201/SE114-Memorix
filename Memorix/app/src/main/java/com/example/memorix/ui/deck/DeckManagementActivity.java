@@ -3,6 +3,7 @@ package com.example.memorix.ui.deck;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,36 +23,43 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Card;
-import com.example.memorix.data.CardType;
+import com.example.memorix.model.Card;
+import com.example.memorix.model.CardType;
+import com.example.memorix.model.Deck;
 import com.example.memorix.ui.deck.adapter.CardAdapter;
 import com.example.memorix.ui.deck.card.AddCardActivity;
 import com.example.memorix.ui.deck.card.EditCardActivity;
 import com.example.memorix.ui.flashcardstudy.FlashcardBasicStudyActivity;
 import com.example.memorix.ui.flashcardstudy.FlashcardFillBlankStudyActivity;
 import com.example.memorix.ui.flashcardstudy.FlashcardMultipleChoiceStudyActivity;
+import com.example.memorix.viewmodel.DeckManagementViewModel;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import android.graphics.Typeface;
-import java.util.List;
+
 import java.util.Objects;
 
-public class DeckManagementActivity extends AppCompatActivity {
+public class DeckManagementActivity extends AppCompatActivity implements CardAdapter.OnCardActionListener{
     private TextView tvDeckName, tvDeckDescription, tvTotalCards;
     private Button btnAddCard, btnStudyDeck;
     private Spinner spinnerCardType;
     private RecyclerView recyclerViewCards;
     private CardAdapter cardAdapter;
-
     private List<Card> allCards;
     private List<Card> filteredCards;
+    private DeckManagementViewModel deckManagementViewModel;
+    private long deckId;
+    private String cachedAuthToken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_deck_management);
@@ -60,11 +68,127 @@ public class DeckManagementActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Lấy deck ID từ Intent
+        deckId = getIntent().getLongExtra("deck_id", -1);
+        if (deckId == -1) {
+            Toast.makeText(this, "Không tìm thấy thông tin deck", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Cache token một lần duy nhất khi khởi tạo
+        cachedAuthToken = getAuthToken();
+        if (cachedAuthToken == null) {
+            Toast.makeText(this, "Phiên đăng nhập đã hết hạn", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Initialize ViewModel
+        deckManagementViewModel = new ViewModelProvider(this).get(DeckManagementViewModel.class);
+
         initViews();
         setupRecyclerView();
         setupSpinner();
         setupListeners();
-        loadSampleData();
+        setupObservers();
+
+        // Load deck data and flashcards from API
+        deckManagementViewModel.loadDeckById(deckId, cachedAuthToken);
+        deckManagementViewModel.loadFlashcardsByDeck(deckId, cachedAuthToken);
+    }
+
+    private String getAuthToken() {
+        if (cachedAuthToken != null) {
+            return cachedAuthToken;
+        }
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        cachedAuthToken = prefs.getString("access_token", null);
+        return cachedAuthToken;
+    }
+    private void setupObservers() {
+        // Observe deck detail data
+        deckManagementViewModel.getDeckDetail().observe(this, deck -> {
+            if (deck != null) {
+                displayDeckInfo(deck);
+            }
+        });
+
+        // Observe loading state
+        deckManagementViewModel.getLoadingState().observe(this, isLoading -> {
+            // Hiển thị/ẩn loading indicator nếu có
+            // Ví dụ: progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        // Observe error messages
+        deckManagementViewModel.getErrorMessage().observe(this, errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // Observe deck detail data from API
+        deckManagementViewModel.getDeckDetail().observe(this, deck -> {
+            if (deck != null) {
+                displayDeckInfo(deck);
+            }
+        });
+
+        // Observe error messages
+        deckManagementViewModel.getErrorMessage().observe(this, errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                // Clear error message sau khi hiển thị
+                deckManagementViewModel.clearErrorMessage();
+            }
+        });
+
+        // Observe deck detail data
+        deckManagementViewModel.getDeckDetail().observe(this, deck -> {
+            if (deck != null) {
+                displayDeckInfo(deck);
+            }
+        });
+
+        // Observe flashcards data from API
+        deckManagementViewModel.getFlashcards().observe(this, cards -> {
+            if (cards != null) {
+                allCards = new ArrayList<>(cards);
+                updateCardCount();
+                filterCards(spinnerCardType.getSelectedItemPosition());
+            }
+        });
+
+        // Observe loading state
+        deckManagementViewModel.getLoadingState().observe(this, isLoading -> {
+            // Hiển thị/ẩn loading indicator nếu có
+            // Ví dụ: progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        // Observe error messages
+        deckManagementViewModel.getErrorMessage().observe(this, errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                // Clear error message sau khi hiển thị
+                deckManagementViewModel.clearErrorMessage();
+            }
+        });
+    }
+    @SuppressLint("SetTextI18n")
+    private void displayDeckInfo(Deck deck) {
+        tvDeckName.setText(deck.getName());
+        tvDeckDescription.setText(deck.getDescription());
+
+        // Update card count - will be updated when flashcards are loaded
+        updateCardCount();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateCardCount() {
+        if (allCards != null) {
+            tvTotalCards.setText(String.valueOf(allCards.size()));
+        }
     }
 
     private void initViews() {
@@ -76,14 +200,12 @@ public class DeckManagementActivity extends AppCompatActivity {
         spinnerCardType = findViewById(R.id.spinnerCardType);
         recyclerViewCards = findViewById(R.id.recyclerViewCards);
     }
-
     private void setupRecyclerView() {
         filteredCards = new ArrayList<>();
-        cardAdapter = new CardAdapter(filteredCards, this::onCardAction);
+        cardAdapter = new CardAdapter(filteredCards, this);
         recyclerViewCards.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewCards.setAdapter(cardAdapter);
     }
-
     private void setupSpinner() {
         String[] cardTypes = {"Tất cả", "2 Mặt", "Trắc nghiệm", "Điền từ"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -101,7 +223,6 @@ public class DeckManagementActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
-
     private void setupListeners() {
         btnAddCard.setOnClickListener(v -> {
             // Demo: Tạo thẻ mới và thêm vào danh sách
@@ -162,93 +283,36 @@ public class DeckManagementActivity extends AppCompatActivity {
         // Hiển thị dialog
         dialog.show();
     }
-
     private void startFlashcardBasicStudy() {
         Intent intent = new Intent(this, FlashcardBasicStudyActivity.class);
-        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        // Có thể truyền thêm dữ liệu khác nếu cần
+        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
         startActivity(intent);
     }
-
     private void startMultipleChoiceStudy() {
         Intent intent = new Intent(this, FlashcardMultipleChoiceStudyActivity.class);
-        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        // Có thể truyền thêm dữ liệu khác nếu cần
+        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
         startActivity(intent);
     }
-
     private void startFillBlankStudy() {
         Intent intent = new Intent(this, FlashcardFillBlankStudyActivity.class);
-        // Truyền dữ liệu cần thiết qua intent
+        intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        // Có thể truyền thêm dữ liệu khác nếu cần
+        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
         startActivity(intent);
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void loadSampleData() {
-        // Tạo dữ liệu mẫu cho deck
-        tvDeckName.setText("Tiếng Anh Cơ Bản");
-        tvDeckDescription.setText("Học từ vựng tiếng Anh cơ bản cho người mới bắt đầu");
-
-        // Tạo danh sách thẻ mẫu
-        allCards = new ArrayList<>();
-
-        // Thẻ 2 mặt
-        Card card1 = new Card("1", "deck1", "Hello", "Xin chào");
-        card1.setReviewCount(5);
-        card1.setCorrectCount(4);
-        allCards.add(card1);
-
-        Card card2 = new Card("2", "deck1", "Good morning", "Chào buổi sáng");
-        card2.setReviewCount(3);
-        card2.setCorrectCount(3);
-        allCards.add(card2);
-
-        // Thẻ trắc nghiệm
-        List<String> options1 = new ArrayList<>();
-        options1.add("Tôi là");
-        options1.add("Bạn là");
-        options1.add("Anh ấy là");
-        options1.add("Cô ấy là");
-        Card card3 = new Card("3", "deck1", "I am", options1, "Tôi là");
-        card3.setReviewCount(2);
-        card3.setCorrectCount(1);
-        allCards.add(card3);
-
-        List<String> options2 = new ArrayList<>();
-        options2.add("Đi");
-        options2.add("Đến");
-        options2.add("Về");
-        options2.add("Tới");
-        Card card4 = new Card("4", "deck1", "Go", options2, "Đi");
-        card4.setReviewCount(4);
-        card4.setCorrectCount(4);
-        allCards.add(card4);
-
-        // Thẻ điền từ
-        Card card5 = new Card("5", "deck1", "I ___ a student", "am", CardType.FILL_IN_BLANK);
-        card5.setReviewCount(6);
-        card5.setCorrectCount(5);
-        allCards.add(card5);
-
-        Card card6 = new Card("6", "deck1", "She ___ to school", "goes", CardType.FILL_IN_BLANK);
-        card6.setReviewCount(1);
-        card6.setCorrectCount(0);
-        allCards.add(card6);
-
-        // Cập nhật UI
-        tvTotalCards.setText(String.valueOf(allCards.size()));
-        filterCards(0); // Hiển thị tất cả thẻ
     }
 
     private void addSampleCard() {
         Intent intent = new Intent(this, AddCardActivity.class);
+        intent.putExtra("deck_id", deckId);
+//        intent.putExtra("deck_id", deckId);
+        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
         startActivity(intent);
-    }
 
+    }
     @SuppressLint("NotifyDataSetChanged")
     private void filterCards(int filterType) {
         filteredCards.clear();
@@ -259,21 +323,21 @@ public class DeckManagementActivity extends AppCompatActivity {
                 break;
             case 1: // 2 Mặt
                 for (Card card : allCards) {
-                    if (card.getType() == CardType.BASIC) {
+                    if (card.getCardType() == CardType.BASIC) {
                         filteredCards.add(card);
                     }
                 }
                 break;
             case 2: // Trắc nghiệm
                 for (Card card : allCards) {
-                    if (card.getType() == CardType.MULTIPLE_CHOICE) {
+                    if (card.getCardType() == CardType.MULTIPLE_CHOICE) {
                         filteredCards.add(card);
                     }
                 }
                 break;
             case 3: // Điền từ
                 for (Card card : allCards) {
-                    if (card.getType() == CardType.FILL_IN_BLANK) {
+                    if (card.getCardType() == CardType.FILL_IN_BLANK) {
                         filteredCards.add(card);
                     }
                 }
@@ -282,8 +346,8 @@ public class DeckManagementActivity extends AppCompatActivity {
 
         cardAdapter.notifyDataSetChanged();
     }
-
-    private void onCardAction(Card card, String action) {
+    @Override
+    public void onCardAction(Card card, String action) {
         switch (action) {
             case "edit":
                 // Demo: Hiển thị thông tin thẻ
@@ -301,35 +365,14 @@ public class DeckManagementActivity extends AppCompatActivity {
                 break;
         }
     }
-
     private void showCardInfo(Card card) {
-//        @SuppressLint("DefaultLocale") String info = "Loại: " + card.getType().getDisplayName() + "\n" +
-//                "Câu hỏi: " + card.getQuestion() + "\n" +
-//                "Số lần ôn: " + card.getReviewCount() + "\n" +
-//                "Tỷ lệ đúng: " + String.format("%.1f", card.getAccuracyRate()) + "%";
-//
-//        new AlertDialog.Builder(this)
-//                .setTitle("Thông tin thẻ")
-//                .setMessage(info)
-//                .setPositiveButton("OK", null)
-//                .show();
         Intent intent = new Intent(this, EditCardActivity.class);
-        intent.putExtra("card", card);
+        intent.putExtra("card_id", card.getFlashcardId());
+        intent.putExtra("deck_id", deckId);
         startActivity(intent);
     }
-
     @SuppressLint("SetTextI18n")
     private void showCardDetail(Card card) {
-//        new AlertDialog.Builder(this)
-//                .setTitle("Chi tiết thẻ")
-//                .setMessage(card.getDisplayContent())
-//                .setPositiveButton("Chỉnh sửa", (dialog, which) -> {
-//                    Intent intent = new Intent(this, EditCardActivity.class);
-//                    intent.putExtra("card", card);
-//                    startActivity(intent);
-//                })
-//                .setNegativeButton("Đóng", null)
-//                .show();
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_card_detail, null);
 
         // Find views
@@ -339,128 +382,134 @@ public class DeckManagementActivity extends AppCompatActivity {
         TextView tvAnswer = dialogView.findViewById(R.id.tvAnswer);
         LinearLayout layoutOptions = dialogView.findViewById(R.id.layoutOptions);
         LinearLayout layoutOptionsList = dialogView.findViewById(R.id.layoutOptionsList);
-        TextView tvReviewCount = dialogView.findViewById(R.id.tvReviewCount);
-        TextView tvCorrectCount = dialogView.findViewById(R.id.tvCorrectCount);
-        TextView tvAccuracy = dialogView.findViewById(R.id.tvAccuracy);
         AppCompatButton btnClose = dialogView.findViewById(R.id.btnClose);
         AppCompatButton btnEdit = dialogView.findViewById(R.id.btnEdit);
 
         // Set card type and its color
         String cardTypeText;
         int cardTypeColor;
-        switch (card.getType()) {
+        switch (card.getCardType()) {
             case BASIC:
                 cardTypeText = "2 Mặt";
-                cardTypeColor = getResources().getColor(R.color.primary_color);
+                cardTypeColor = ContextCompat.getColor(this, R.color.primary_color);
                 break;
             case MULTIPLE_CHOICE:
                 cardTypeText = "Trắc nghiệm";
-                cardTypeColor = getResources().getColor(R.color.secondary_color);
+                cardTypeColor = ContextCompat.getColor(this, R.color.secondary_color);
                 break;
             case FILL_IN_BLANK:
                 cardTypeText = "Điền từ";
-                cardTypeColor = getResources().getColor(R.color.accent_color);
+                cardTypeColor = ContextCompat.getColor(this, R.color.accent_color);
                 break;
             default:
                 cardTypeText = "Không xác định";
-                cardTypeColor = getResources().getColor(R.color.secondary_text_color);
+                cardTypeColor = ContextCompat.getColor(this, R.color.secondary_text_color);
                 break;
         }
 
         tvCardType.setText(cardTypeText);
         tvCardType.getBackground().setTint(cardTypeColor);
 
-        // Set question
-        tvQuestion.setText(card.getQuestion());
+        // Handle different card types based on JsonObject content
+        JsonObject content = card.getContent();
+        if (content != null) {
+            switch (card.getCardType()) {
+                case BASIC:
+                    // For basic cards: {"front": "question", "back": "answer"}
+                    String front = content.has("front") ? content.get("front").getAsString() : "";
+                    String back = content.has("back") ? content.get("back").getAsString() : "";
 
-        // Handle different card types
-        if (card.getType() == CardType.MULTIPLE_CHOICE) {
-            // For multiple choice cards
-            tvAnswerLabel.setText("Đáp án đúng");
-            tvAnswer.setText(card.getCorrectAnswer());
+                    tvQuestion.setText(front);
+                    tvAnswerLabel.setText("Mặt sau");
+                    tvAnswer.setText(back);
+                    layoutOptions.setVisibility(View.GONE);
+                    break;
 
-            // Show options
-            layoutOptions.setVisibility(View.VISIBLE);
-            layoutOptionsList.removeAllViews();
+                case MULTIPLE_CHOICE:
+                    // For multiple choice cards: {"question": "...", "options": [...], "answer": "..."}
+                    String question = content.has("question") ? content.get("question").getAsString() : "";
+                    String correctAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
 
-            List<String> options = card.getOptions();
-            if (options != null) {
-                for (int i = 0; i < options.size(); i++) {
-                    String option = options.get(i);
+                    tvQuestion.setText(question);
+                    tvAnswerLabel.setText("Đáp án đúng");
+                    tvAnswer.setText(correctAnswer);
 
-                    // Create option view
-                    LinearLayout optionLayout = getLinearLayout();
+                    // Show options
+                    layoutOptions.setVisibility(View.VISIBLE);
+                    layoutOptionsList.removeAllViews();
 
-                    // Option letter (A, B, C, D)
-                    TextView tvOptionLetter = new TextView(this);
-                    tvOptionLetter.setText(String.valueOf((char)('A' + i)));
-                    tvOptionLetter.setTextColor(getResources().getColor(R.color.text_color));
-                    tvOptionLetter.setTextSize(14);
-                    tvOptionLetter.setTypeface(tvOptionLetter.getTypeface(), Typeface.BOLD);
-                    tvOptionLetter.setPadding(0, 0, 16, 0);
+                    if (content.has("options")) {
+                        JsonArray optionsArray = content.getAsJsonArray("options");
+                        for (int i = 0; i < optionsArray.size(); i++) {
+                            String option = optionsArray.get(i).getAsString();
 
-                    // Option text
-                    TextView tvOptionText = new TextView(this);
-                    tvOptionText.setText(option);
-                    tvOptionText.setTextColor(getResources().getColor(R.color.text_color));
-                    tvOptionText.setTextSize(14);
-                    tvOptionText.setLayoutParams(new LinearLayout.LayoutParams(
-                            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                            // Create option view
+                            LinearLayout optionLayout = getLinearLayout();
 
-                    // Highlight correct answer
-                    if (option.equals(card.getCorrectAnswer())) {
-                        optionLayout.getBackground().setTint(getResources().getColor(R.color.primary_light_color));
-                        tvOptionLetter.setTextColor(getResources().getColor(R.color.primary_dark_color));
-                        tvOptionText.setTextColor(getResources().getColor(R.color.primary_dark_color));
-                        tvOptionText.setTypeface(tvOptionText.getTypeface(), Typeface.BOLD);
+                            // Option letter (A, B, C, D)
+                            TextView tvOptionLetter = new TextView(this);
+                            tvOptionLetter.setText(String.valueOf((char)('A' + i)));
+                            tvOptionLetter.setTextColor(ContextCompat.getColor(this, R.color.text_color));
+                            tvOptionLetter.setTextSize(14);
+                            tvOptionLetter.setTypeface(tvOptionLetter.getTypeface(), android.graphics.Typeface.BOLD);
+                            tvOptionLetter.setPadding(0, 0, 16, 0);
 
-                        // Add checkmark
-                        TextView tvCheckmark = new TextView(this);
-                        tvCheckmark.setText("✓");
-                        tvCheckmark.setTextColor(getResources().getColor(R.color.secondary_color));
-                        tvCheckmark.setTextSize(16);
-                        tvCheckmark.setTypeface(tvCheckmark.getTypeface(), Typeface.BOLD);
-                        optionLayout.addView(tvCheckmark);
+                            // Option text
+                            TextView tvOptionText = new TextView(this);
+                            tvOptionText.setText(option);
+                            tvOptionText.setTextColor(ContextCompat.getColor(this, R.color.text_color));
+                            tvOptionText.setTextSize(14);
+                            tvOptionText.setLayoutParams(new LinearLayout.LayoutParams(
+                                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+                            // Highlight correct answer
+                            if (option.equals(correctAnswer)) {
+                                optionLayout.getBackground().setTint(ContextCompat.getColor(this, R.color.primary_light_color));
+                                tvOptionLetter.setTextColor(ContextCompat.getColor(this, R.color.primary_dark_color));
+                                tvOptionText.setTextColor(ContextCompat.getColor(this, R.color.primary_dark_color));
+                                tvOptionText.setTypeface(tvOptionText.getTypeface(), android.graphics.Typeface.BOLD);
+
+                                // Add checkmark
+                                TextView tvCheckmark = new TextView(this);
+                                tvCheckmark.setText("✓");
+                                tvCheckmark.setTextColor(ContextCompat.getColor(this, R.color.secondary_color));
+                                tvCheckmark.setTextSize(16);
+                                tvCheckmark.setTypeface(tvCheckmark.getTypeface(), android.graphics.Typeface.BOLD);
+                                optionLayout.addView(tvCheckmark);
+                            }
+
+                            optionLayout.addView(tvOptionLetter);
+                            optionLayout.addView(tvOptionText);
+                            layoutOptionsList.addView(optionLayout);
+                        }
                     }
+                    break;
 
-                    optionLayout.addView(tvOptionLetter);
-                    optionLayout.addView(tvOptionText);
-                    layoutOptionsList.addView(optionLayout);
-                }
+                case FILL_IN_BLANK:
+                    // For fill in blank cards: {"text": "question", "answer": "correct_answer"}
+                    String text = content.has("text") ? content.get("text").getAsString() : "";
+                    String fillAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
+
+                    tvQuestion.setText(text);
+                    tvAnswerLabel.setText("Từ cần điền");
+                    tvAnswer.setText(fillAnswer);
+                    layoutOptions.setVisibility(View.GONE);
+                    break;
+
+                default:
+                    tvQuestion.setText("Không có nội dung");
+                    tvAnswerLabel.setText("Không có đáp án");
+                    tvAnswer.setText("");
+                    layoutOptions.setVisibility(View.GONE);
+                    break;
             }
-        } else if (card.getType() == CardType.FILL_IN_BLANK) {
-            // For fill in blank cards
-            tvAnswerLabel.setText("Từ cần điền");
-            tvAnswer.setText(card.getCorrectAnswer());
-            layoutOptions.setVisibility(View.GONE);
         } else {
-            // For basic cards
-            tvAnswerLabel.setText("Mặt sau");
-            tvAnswer.setText(card.getAnswer());
+            // Handle case when content is null
+            tvQuestion.setText("Không có nội dung");
+            tvAnswerLabel.setText("Không có đáp án");
+            tvAnswer.setText("");
             layoutOptions.setVisibility(View.GONE);
         }
-
-        // Set statistics
-        tvReviewCount.setText(String.valueOf(card.getReviewCount()));
-        tvCorrectCount.setText(String.valueOf(card.getCorrectCount()));
-
-        // Calculate and set accuracy
-        int accuracy = 0;
-        if (card.getReviewCount() > 0) {
-            accuracy = (int) Math.round((double) card.getCorrectCount() / card.getReviewCount() * 100);
-        }
-        tvAccuracy.setText(accuracy + "%");
-
-        // Set accuracy color based on percentage
-        int accuracyColor;
-        if (accuracy >= 80) {
-            accuracyColor = getResources().getColor(R.color.secondary_color);
-        } else if (accuracy >= 60) {
-            accuracyColor = getResources().getColor(R.color.accent_color);
-        } else {
-            accuracyColor = getResources().getColor(R.color.secondary_text_color);
-        }
-        tvAccuracy.setTextColor(accuracyColor);
 
         // Create dialog
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -473,7 +522,8 @@ public class DeckManagementActivity extends AppCompatActivity {
         btnEdit.setOnClickListener(v -> {
             dialog.dismiss();
             Intent intent = new Intent(this, EditCardActivity.class);
-            intent.putExtra("card", card);
+            intent.putExtra("card_id", card.getFlashcardId());
+            intent.putExtra("deck_id", deckId);
             startActivity(intent);
         });
 
@@ -486,7 +536,6 @@ public class DeckManagementActivity extends AppCompatActivity {
             dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
         }
     }
-
     @NonNull
     private LinearLayout getLinearLayout() {
         LinearLayout optionLayout = new LinearLayout(this);
@@ -506,22 +555,8 @@ public class DeckManagementActivity extends AppCompatActivity {
         optionLayout.setLayoutParams(layoutParams);
         return optionLayout;
     }
-
     @SuppressLint("SetTextI18n")
     private void showDeleteConfirmDialog(Card card) {
-//        new AlertDialog.Builder(this)
-//                .setTitle("Xóa thẻ")
-//                .setMessage("Bạn có chắc chắn muốn xóa thẻ này?\n\n" + card.getQuestion())
-//                .setPositiveButton("Xóa", (dialog, which) -> {
-//                    // Xóa thẻ khỏi danh sách
-//                    allCards.remove(card);
-//                    tvTotalCards.setText(String.valueOf(allCards.size()));
-//                    filterCards(spinnerCardType.getSelectedItemPosition());
-//                    Toast.makeText(this, "Đã xóa thẻ!", Toast.LENGTH_SHORT).show();
-//                })
-//                .setNegativeButton("Hủy", null)
-//                .show();
-
         // Inflate custom dialog layout
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_card, null);
 
@@ -529,16 +564,13 @@ public class DeckManagementActivity extends AppCompatActivity {
         TextView tvCardTypeBadge = dialogView.findViewById(R.id.tvCardTypeBadge);
         TextView tvCardQuestion = dialogView.findViewById(R.id.tvCardQuestion);
         TextView tvCardAnswer = dialogView.findViewById(R.id.tvCardAnswer);
-        TextView tvReviewCountValue = dialogView.findViewById(R.id.tvReviewCountValue);
-        TextView tvCorrectCountValue = dialogView.findViewById(R.id.tvCorrectCountValue);
-        TextView tvAccuracyValue = dialogView.findViewById(R.id.tvAccuracyValue);
         AppCompatButton btnCancel = dialogView.findViewById(R.id.btnCancel);
         AppCompatButton btnDelete = dialogView.findViewById(R.id.btnDelete);
 
         // Set card type and its color
         String cardTypeText;
         int cardTypeColor;
-        switch (card.getType()) {
+        switch (card.getCardType()) {
             case BASIC:
                 cardTypeText = "2 Mặt";
                 cardTypeColor = ContextCompat.getColor(this, R.color.primary_color);
@@ -560,39 +592,47 @@ public class DeckManagementActivity extends AppCompatActivity {
         tvCardTypeBadge.setText(cardTypeText);
         tvCardTypeBadge.getBackground().setTint(cardTypeColor);
 
-        // Set card content
-        tvCardQuestion.setText(card.getQuestion());
+        // Set card content based on JsonObject content
+        JsonObject content = card.getContent();
+        if (content != null) {
+            switch (card.getCardType()) {
+                case BASIC:
+                    // For basic cards: {"front": "question", "back": "answer"}
+                    String front = content.has("front") ? content.get("front").getAsString() : "";
+                    String back = content.has("back") ? content.get("back").getAsString() : "";
 
-        // Set answer based on card type
-        if (card.getType() == CardType.MULTIPLE_CHOICE) {
-            tvCardAnswer.setText(card.getCorrectAnswer());
-        } else if (card.getType() == CardType.FILL_IN_BLANK) {
-            tvCardAnswer.setText(card.getCorrectAnswer());
+                    tvCardQuestion.setText(front);
+                    tvCardAnswer.setText(back);
+                    break;
+
+                case MULTIPLE_CHOICE:
+                    // For multiple choice cards: {"question": "...", "options": [...], "answer": "..."}
+                    String question = content.has("question") ? content.get("question").getAsString() : "";
+                    String correctAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
+
+                    tvCardQuestion.setText(question);
+                    tvCardAnswer.setText(correctAnswer);
+                    break;
+
+                case FILL_IN_BLANK:
+                    // For fill in blank cards: {"text": "question", "answer": "correct_answer"}
+                    String text = content.has("text") ? content.get("text").getAsString() : "";
+                    String fillAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
+
+                    tvCardQuestion.setText(text);
+                    tvCardAnswer.setText(fillAnswer);
+                    break;
+
+                default:
+                    tvCardQuestion.setText("Không có nội dung");
+                    tvCardAnswer.setText("");
+                    break;
+            }
         } else {
-            tvCardAnswer.setText(card.getAnswer());
+            // Handle case when content is null
+            tvCardQuestion.setText("Không có nội dung");
+            tvCardAnswer.setText("");
         }
-
-        // Set statistics
-        tvReviewCountValue.setText(String.valueOf(card.getReviewCount()));
-        tvCorrectCountValue.setText(String.valueOf(card.getCorrectCount()));
-
-        // Calculate and set accuracy with color
-        int accuracy = 0;
-        if (card.getReviewCount() > 0) {
-            accuracy = (int) Math.round((double) card.getCorrectCount() / card.getReviewCount() * 100);
-        }
-        tvAccuracyValue.setText(accuracy + "%");
-
-        // Set accuracy color based on percentage
-        int accuracyColor;
-        if (accuracy >= 80) {
-            accuracyColor = ContextCompat.getColor(this, R.color.secondary_color);
-        } else if (accuracy >= 60) {
-            accuracyColor = ContextCompat.getColor(this, R.color.accent_color);
-        } else {
-            accuracyColor = ContextCompat.getColor(this, R.color.secondary_text_color);
-        }
-        tvAccuracyValue.setTextColor(accuracyColor);
 
         // Create dialog
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -604,16 +644,51 @@ public class DeckManagementActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         btnDelete.setOnClickListener(v -> {
-            // Delete card from list
-            allCards.remove(card);
-            tvTotalCards.setText(String.valueOf(allCards.size()));
-            filterCards(spinnerCardType.getSelectedItemPosition());
+            // Show loading state (optional)
+            btnDelete.setEnabled(false);
+            btnDelete.setText("Đang xóa...");
 
-            // Show success message
-            Toast.makeText(this, "Đã xóa thẻ: " + card.getQuestion(), Toast.LENGTH_SHORT).show();
+            // Call ViewModel to delete flashcard via API
+            deckManagementViewModel.deleteFlashcard(card.getFlashcardId(), cachedAuthToken);
 
-            // Dismiss dialog
-            dialog.dismiss();
+            // Observe delete result
+            deckManagementViewModel.getDeleteResult().observe(this, isSuccess -> {
+                if (isSuccess != null) {
+                    if (isSuccess) {
+                        // Success: Remove card from local list and update UI
+                        allCards.remove(card);
+                        updateCardCount();
+                        filterCards(spinnerCardType.getSelectedItemPosition());
+
+                        // Show success message
+                        String questionText = "";
+                        if (content != null) {
+                            switch (card.getCardType()) {
+                                case BASIC:
+                                    questionText = content.has("front") ? content.get("front").getAsString() : "";
+                                    break;
+                                case MULTIPLE_CHOICE:
+                                    questionText = content.has("question") ? content.get("question").getAsString() : "";
+                                    break;
+                                case FILL_IN_BLANK:
+                                    questionText = content.has("text") ? content.get("text").getAsString() : "";
+                                    break;
+                            }
+                        }
+
+                        Toast.makeText(this, "Đã xóa thẻ: " + questionText, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    } else {
+                        // Error: Re-enable button and show error
+                        btnDelete.setEnabled(true);
+                        btnDelete.setText("Xóa");
+                        Toast.makeText(this, "Không thể xóa thẻ. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    // Clear delete result to avoid triggering observer again
+                    deckManagementViewModel.clearDeleteResult();
+                }
+            });
         });
 
         // Show dialog
@@ -627,6 +702,20 @@ public class DeckManagementActivity extends AppCompatActivity {
             // Set dialog width (optional)
             int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
             dialog.getWindow().setLayout(width, LinearLayout.LayoutParams.WRAP_CONTENT);
+        }
+    }
+    private void refreshDeckData() {
+        if (cachedAuthToken != null) {
+            deckManagementViewModel.loadDeckById(deckId, cachedAuthToken);
+            deckManagementViewModel.loadFlashcardsByDeck(deckId, cachedAuthToken);
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh deck data khi quay lại Activity
+        if (cachedAuthToken != null) {
+            refreshDeckData();
         }
     }
 }

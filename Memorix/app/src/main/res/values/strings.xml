@@ -259,4 +259,16 @@
     <!-- Card Content -->
     <string name="card_content_placeholder">Nội dung thẻ...</string>
     <string name="delete">Xóa</string>
+
+    <!-- Search related strings -->
+    <string name="search_icon">Biểu tượng tìm kiếm</string>
+    <string name="clear_search">Xóa tìm kiếm</string>
+    <string name="search_results_count">Kết quả tìm kiếm</string>
+
+    <!-- No search results -->
+    <string name="no_search_results">Không có kết quả</string>
+    <string name="no_search_results_title">Không tìm thấy kết quả</string>
+    <string name="no_search_results_description">Hãy thử tìm kiếm với từ khóa khác hoặc tạo bộ thẻ mới</string>
+
+    <!-- Existing strings that might be missing -->
 </resources>

@@ -1,9 +1,9 @@
-package com.example.memorix.data;
+package com.example.memorix.model;
 
 public enum CardType {
-    BASIC("BASIC", "2 Mặt"),
-    MULTIPLE_CHOICE("MULTIPLE_CHOICE", "Trắc nghiệm"),
-    FILL_IN_BLANK("FILL_IN_BLANK", "Điền từ");
+    BASIC("two_sided", "2 Mặt"),
+    MULTIPLE_CHOICE("multiple_choice", "Trắc nghiệm"),
+    FILL_IN_BLANK("fill_in_blank", "Điền từ");
 
     private final String code;
     private final String displayName;
@@ -27,7 +27,7 @@ public enum CardType {
                 return type;
             }
         }
-        return BASIC; // Default
+        return BASIC; // default
     }
 
     public static CardType fromDisplayName(String displayName) {

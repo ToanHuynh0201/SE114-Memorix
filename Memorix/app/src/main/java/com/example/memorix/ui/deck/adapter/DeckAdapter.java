@@ -8,13 +8,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
-import com.example.memorix.data.Deck;
+import com.example.memorix.model.Deck;
 
 import java.util.List;
 
 public class DeckAdapter extends RecyclerView.Adapter<DeckViewHolder>{
-    private List<Deck> deckList;
-    private DeckActionListener listener;
+    private final List<Deck> deckList;
+    private final DeckActionListener listener;
 
     public DeckAdapter(List<Deck> deckList, DeckActionListener listener) {
         this.deckList = deckList;

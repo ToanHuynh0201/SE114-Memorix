@@ -1,5 +1,6 @@
 package com.example.memorix.data.remote.Repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -22,16 +23,16 @@ public class UserRepository {
     public LiveData<UserResponse> getMe() {
         MutableLiveData<UserResponse> userLiveData = new MutableLiveData<>();
 
-        userApi.getCurrentUser().enqueue(new Callback<UserResponse>() {
+        userApi.getCurrentUser().enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+            public void onResponse(@NonNull Call<UserResponse> call, @NonNull Response<UserResponse> response) {
                 if (response.isSuccessful()) {
                     userLiveData.postValue(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<UserResponse> call, @NonNull Throwable t) {
                 userLiveData.postValue(null);
             }
         });
@@ -42,14 +43,14 @@ public class UserRepository {
     public LiveData<UserResponse> updateMe(UpdateUserRequest request) {
         MutableLiveData<UserResponse> result = new MutableLiveData<>();
 
-        userApi.updateUser(request).enqueue(new Callback<UserResponse>() {
+        userApi.updateUser(request).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+            public void onResponse(@NonNull Call<UserResponse> call, @NonNull Response<UserResponse> response) {
                 result.postValue(response.body());
             }
 
             @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<UserResponse> call, @NonNull Throwable t) {
                 result.postValue(null);
             }
         });
