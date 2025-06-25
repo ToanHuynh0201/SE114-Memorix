@@ -1,5 +1,8 @@
 package com.example.memorix.view.deck.adapter;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,16 +28,33 @@ public class DeckAdapter extends RecyclerView.Adapter<DeckViewHolder>{
     public DeckViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_deck, parent, false);
-        return new DeckViewHolder(view, listener);
+        return new DeckViewHolder(view, listener); // Truyền listener trực tiếp
     }
 
     @Override
     public void onBindViewHolder(@NonNull DeckViewHolder holder, int position) {
+        if (position < 0 || position >= deckList.size()) {
+            Log.w(TAG, "Invalid position: " + position + ", list size: " + deckList.size());
+            return;
+        }
+
         Deck deck = deckList.get(position);
+        Log.d(TAG, "Binding position " + position +
+                ", deck: " + deck.getName() +
+                ", imageUrl: " + deck.getImageUrl());
+
         holder.bind(deck, position);
+
+        // Set click listener
         holder.itemView.setOnClickListener(v -> {
-            if(listener != null){
-                listener.onDeckClick(deck, position);
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition != RecyclerView.NO_POSITION &&
+                    currentPosition < deckList.size() &&
+                    listener != null) {
+
+                Deck clickedDeck = deckList.get(currentPosition);
+                Log.d(TAG, "Deck clicked at position: " + currentPosition + ", deck: " + clickedDeck.getName());
+                listener.onDeckClick(clickedDeck, currentPosition);
             }
         });
     }

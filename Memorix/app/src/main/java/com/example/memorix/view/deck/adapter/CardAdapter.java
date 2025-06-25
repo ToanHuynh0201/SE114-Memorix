@@ -1,6 +1,7 @@
 package com.example.memorix.view.deck.adapter;
 
 import android.content.res.ColorStateList;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.model.Card;
 import com.example.memorix.R;
+import com.google.gson.JsonObject;
+
 import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
+    private static final String TAG = "CardAdapter";
 
     private final List<Card> cards;
     private final OnCardActionListener listener;
@@ -27,6 +31,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     public CardAdapter(List<Card> cards, OnCardActionListener listener) {
         this.cards = cards;
         this.listener = listener;
+
+        // Enable stable IDs để tránh position conflicts
+        setHasStableIds(true);
     }
 
     @NonNull
@@ -39,19 +46,59 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
+        if (position < 0 || position >= cards.size()) {
+            Log.w(TAG, "Invalid position: " + position + ", list size: " + cards.size());
+            return;
+        }
+
         Card card = cards.get(position);
+        Log.d(TAG, "Binding card at position " + position +
+                ", ID: " + card.getFlashcardId() +
+                ", Type: " + card.getCardType());
+
         holder.bind(card);
     }
 
     @Override
     public int getItemCount() {
-        return cards.size();
+        return cards != null ? cards.size() : 0;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // Use card ID as stable ID để tránh position conflicts
+        if (position >= 0 && position < cards.size()) {
+            return cards.get(position).getFlashcardId();
+        }
+        return RecyclerView.NO_ID;
+    }
+
+    /**
+     * Lấy card theo position một cách an toàn
+     */
+    public Card getCardAt(int position) {
+        if (position >= 0 && position < cards.size()) {
+            return cards.get(position);
+        }
+        return null;
+    }
+
+    /**
+     * Tìm position của card theo ID
+     */
+    public int findPositionByCardId(long cardId) {
+        for (int i = 0; i < cards.size(); i++) {
+            if (cards.get(i).getFlashcardId() == cardId) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     class CardViewHolder extends RecyclerView.ViewHolder {
-
         private final TextView tvCardType, tvCardContent;
         private final ImageButton btnEditCard, btnDeleteCard;
+        private Card currentCard; // Store card reference instead of relying on position
 
         public CardViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -62,6 +109,9 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         }
 
         public void bind(Card card) {
+            // Store card reference
+            this.currentCard = card;
+
             // Hiển thị loại thẻ
             String typeText = "";
             int typeColor = R.color.accent_color;
@@ -89,40 +139,73 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             String content = getCardPreviewContent(card);
             tvCardContent.setText(content);
 
-            // Setup listeners
+            // Setup listeners với safe position checking
             btnEditCard.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onCardAction(card, "edit");
+                if (listener != null && currentCard != null) {
+                    Log.d(TAG, "Edit clicked for card ID: " + currentCard.getFlashcardId());
+                    listener.onCardAction(currentCard, "edit");
                 }
             });
 
             btnDeleteCard.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onCardAction(card, "delete");
+                if (listener != null && currentCard != null) {
+                    Log.d(TAG, "Delete clicked for card ID: " + currentCard.getFlashcardId());
+                    listener.onCardAction(currentCard, "delete");
                 }
             });
 
             // Click vào item để xem chi tiết
             itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onCardAction(card, "view");
+                if (listener != null && currentCard != null) {
+                    Log.d(TAG, "View clicked for card ID: " + currentCard.getFlashcardId());
+                    listener.onCardAction(currentCard, "view");
                 }
             });
         }
 
         private String getCardPreviewContent(Card card) {
+            // Get content from JsonObject for better accuracy
+            JsonObject content = card.getContent();
+            if (content == null) {
+                return card.getDisplayContent(); // Fallback to display content
+            }
+
             switch (card.getCardType()) {
                 case BASIC:
-                    return "Câu hỏi: " + card.getDisplayContent();
+                    // For basic cards: {"front": "question", "back": "answer"}
+                    String front = content.has("front") ? content.get("front").getAsString() : "";
+                    String back = content.has("back") ? content.get("back").getAsString() : "";
+
+                    // Truncate if too long
+                    if (front.length() > 50) {
+                        front = front.substring(0, 47) + "...";
+                    }
+                    return "Mặt trước: " + front;
 
                 case MULTIPLE_CHOICE:
-                    return "Câu hỏi: " + card.getDisplayContent() +
-                            "\nA. " + card.getDisplayContent();
+                    // For multiple choice cards: {"question": "...", "options": [...], "answer": "..."}
+                    String question = content.has("question") ? content.get("question").getAsString() : "";
+
+                    if (question.length() > 50) {
+                        question = question.substring(0, 47) + "...";
+                    }
+                    return "Câu hỏi: " + question;
 
                 case FILL_IN_BLANK:
-                    return "Điền từ: " + card.getDisplayContent();
+                    // For fill in blank cards: {"text": "question", "answer": "correct_answer"}
+                    String text = content.has("text") ? content.get("text").getAsString() : "";
+
+                    if (text.length() > 50) {
+                        text = text.substring(0, 47) + "...";
+                    }
+                    return "Điền từ: " + text;
+
                 default:
-                    return card.getDisplayContent();
+                    String displayContent = card.getDisplayContent();
+                    if (displayContent != null && displayContent.length() > 50) {
+                        displayContent = displayContent.substring(0, 47) + "...";
+                    }
+                    return displayContent != null ? displayContent : "Không có nội dung";
             }
         }
     }

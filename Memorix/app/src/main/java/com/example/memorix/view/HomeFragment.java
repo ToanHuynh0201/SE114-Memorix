@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 
@@ -329,6 +330,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     @SuppressLint("NotifyDataSetChanged")
     private void updateDeckList(List<Deck> newDecks) {
         if (newDecks == null) return;
+        debugDeckData(newDecks);
 
         if (deckList.isEmpty()) {
             // First load - just set the data
@@ -351,6 +353,20 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         }
 
         checkEmptyState();
+    }
+
+    private void debugDeckData(List<Deck> decks) {
+        Log.d("HomeFragment", "=== DEBUG DECK DATA ===");
+        for (int i = 0; i < decks.size(); i++) {
+            Deck deck = decks.get(i);
+            Log.d("HomeFragment", "Deck " + i + ":");
+            Log.d("HomeFragment", "  Name: " + deck.getName());
+            Log.d("HomeFragment", "  Description: " + deck.getDescription());
+            Log.d("HomeFragment", "  ImageUrl: " + deck.getImageUrl());
+            Log.d("HomeFragment", "  CardCount: " + deck.getCardCount());
+            Log.d("HomeFragment", "  IsPublic: " + deck.isPublic());
+        }
+        Log.d("HomeFragment", "=== END DEBUG ===");
     }
 
     // Optimized error handling
@@ -458,23 +474,27 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     }
 
     @Override
-    public void onEditDeck(int position) {
-        if (position < 0 || position >= deckList.size()) {
-            return;
+    public void onEditDeck(long deckId) {
+        Deck deckToEdit = findDeckById(deckId);
+        if (deckToEdit != null) {
+            Log.d("HomeFragment", "Editing deck with ID: " + deckId + ", Name: " + deckToEdit.getName());
+            showEditDeckDialog(deckToEdit);
+        } else {
+            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
         }
-
-        Deck currentDeck = deckList.get(position);
-        showEditDeckDialog(currentDeck);
     }
 
     @Override
-    public void onShareDeck(int position) {
-        if (position < 0 || position >= deckList.size()) {
-            return;
+    public void onShareDeck(long deckId) {
+        Deck deckToShare = findDeckById(deckId);
+        if (deckToShare != null) {
+            Log.d("HomeFragment", "Sharing deck with ID: " + deckId + ", Name: " + deckToShare.getName());
+            showShareDeckDialog(deckToShare);
+        } else {
+            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
         }
-
-        Deck deckToShare = deckList.get(position);
-        showShareDeckDialog(deckToShare);
     }
 
     private void showShareDeckDialog(Deck deck) {
@@ -607,24 +627,28 @@ public class HomeFragment extends Fragment implements DeckActionListener,
 
 
     @Override
-    public void onResetProgress(int position) {
-        // Implementation for resetting progress
+    public void onResetProgress(long deckId) {
+        // Implementation for resetting progress by ID
+        Log.d("HomeFragment", "Reset progress for deck ID: " + deckId);
     }
 
     @Override
-    public void onDeleteDeck(int position) {
-        if (position < 0 || position >= deckList.size()) {
+    public void onDeleteDeck(long deckId) {
+        Deck deckToDelete = findDeckById(deckId);
+        if (deckToDelete == null) {
+            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Deck deckToDelete = deckList.get(position);
+        Log.d("HomeFragment", "Deleting deck with ID: " + deckId + ", Name: " + deckToDelete.getName());
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Xác nhận xóa")
                 .setMessage("Bạn có chắc chắn muốn xóa bộ thẻ \"" + deckToDelete.getName() + "\"?\n\nHành động này không thể hoàn tác.")
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
-                        homeViewModel.deleteDeck(deckToDelete.getId(), cachedAuthToken);
+                        homeViewModel.deleteDeck(deckId, cachedAuthToken);
                         Toast.makeText(getContext(), "Đang xóa bộ thẻ...", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
@@ -633,6 +657,17 @@ public class HomeFragment extends Fragment implements DeckActionListener,
                 .setNegativeButton("Hủy", null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    private Deck findDeckById(long deckId) {
+        if (deckList != null) {
+            for (Deck deck : deckList) {
+                if (deck.getId() == deckId) {
+                    return deck;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -657,16 +692,24 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     }
 
     @Override
-    public void onDeckCreated(String deckName) {
+    public void onDeckCreated(String deckName, int colorId) {
         if (deckName == null || deckName.trim().isEmpty()) {
             Toast.makeText(getContext(), "Tên bộ thẻ không được để trống", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (colorId < 1 || colorId > 6) {
+            Toast.makeText(getContext(), "Màu được chọn không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
             String description = "";
+            String imageUrl = String.valueOf(colorId); // Sử dụng colorId làm imageUrl
             boolean isPublic = false;
-            homeViewModel.createDeck(deckName.trim(), description, isPublic, cachedAuthToken);
+
+            // Call API với imageUrl là colorId
+            homeViewModel.createDeck(deckName.trim(), description, imageUrl, isPublic, cachedAuthToken);
         } else {
             Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
         }
@@ -703,7 +746,8 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             }
 
             if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
-                // Using new update method with parameters
+                // Sử dụng deck ID thay vì tìm position
+                Log.d("HomeFragment", "Updating deck with ID: " + deck.getId());
                 homeViewModel.updateDeck(deck.getId(), newName, newDescription, false, cachedAuthToken);
                 dialog.dismiss();
             } else {

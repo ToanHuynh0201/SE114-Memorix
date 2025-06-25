@@ -46,38 +46,33 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
     }
 
     // Interface implementation để xử lý các hành động từ menu
-    @Override
-    public void onEditDeck(int position) {
-        Deck deck = deckList.get(position);
-        Toast.makeText(this, "Chỉnh sửa bộ thẻ: " + deck.getName(), Toast.LENGTH_SHORT).show();
-    }
 
-    @Override
-    public void onShareDeck(int position) {
-        Deck deck = deckList.get(position);
-        Toast.makeText(this, "Chia sẻ bộ thẻ: " + deck.getName(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onResetProgress(int position) {
-    }
-
-    @Override
-    public void onDeleteDeck(int position) {
-        // Xóa bộ thẻ khỏi danh sách
-        Deck removedDeck = deckList.remove(position);
-        deckAdapter.notifyItemRemoved(position);
-        Toast.makeText(this, "Đã xóa bộ thẻ: " + removedDeck.getName(), Toast.LENGTH_SHORT).show();
-
-        // Cập nhật trạng thái trống
-//        updateEmptyState();
-    }
 
     @Override
     public void onDeckClick(Deck deck, int position) {
         Intent intent = new Intent(this, DeckManagementActivity.class);
         intent.putExtra("deck_id", deck.getId());
         startActivity(intent);
+    }
+
+    @Override
+    public void onEditDeck(long deckId) {
+
+    }
+
+    @Override
+    public void onShareDeck(long deckId) {
+
+    }
+
+    @Override
+    public void onResetProgress(long deckId) {
+
+    }
+
+    @Override
+    public void onDeleteDeck(long deckId) {
+
     }
 
     // Tạo dữ liệu mẫu

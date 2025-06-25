@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -43,10 +44,11 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Objects;
 
 public class DeckManagementActivity extends AppCompatActivity implements CardAdapter.OnCardActionListener{
+    private static final String TAG = "DeckManagementActivity";
+
     private TextView tvDeckName, tvDeckDescription, tvTotalCards;
     private Button btnAddCard, btnStudyDeck;
     private Spinner spinnerCardType;
@@ -57,9 +59,13 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
     private DeckManagementViewModel deckManagementViewModel;
     private long deckId;
     private String cachedAuthToken;
+
+    // Track current delete operation to prevent conflicts
+    private boolean isDeletingCard = false;
+    private AlertDialog currentDeleteDialog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_deck_management);
@@ -92,7 +98,7 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         setupRecyclerView();
         setupSpinner();
         setupListeners();
-        setupObservers();
+        setupObservers(); // SET UP OBSERVERS ONCE
 
         // Load deck data and flashcards from API
         deckManagementViewModel.loadDeckById(deckId, cachedAuthToken);
@@ -107,43 +113,8 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         cachedAuthToken = prefs.getString("access_token", null);
         return cachedAuthToken;
     }
+
     private void setupObservers() {
-        // Observe deck detail data
-        deckManagementViewModel.getDeckDetail().observe(this, deck -> {
-            if (deck != null) {
-                displayDeckInfo(deck);
-            }
-        });
-
-        // Observe loading state
-        deckManagementViewModel.getLoadingState().observe(this, isLoading -> {
-            // Hiển thị/ẩn loading indicator nếu có
-            // Ví dụ: progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        });
-
-        // Observe error messages
-        deckManagementViewModel.getErrorMessage().observe(this, errorMsg -> {
-            if (errorMsg != null && !errorMsg.isEmpty()) {
-                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        // Observe deck detail data from API
-        deckManagementViewModel.getDeckDetail().observe(this, deck -> {
-            if (deck != null) {
-                displayDeckInfo(deck);
-            }
-        });
-
-        // Observe error messages
-        deckManagementViewModel.getErrorMessage().observe(this, errorMsg -> {
-            if (errorMsg != null && !errorMsg.isEmpty()) {
-                Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
-                // Clear error message sau khi hiển thị
-                deckManagementViewModel.clearErrorMessage();
-            }
-        });
-
         // Observe deck detail data
         deckManagementViewModel.getDeckDetail().observe(this, deck -> {
             if (deck != null) {
@@ -160,10 +131,19 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             }
         });
 
+        // SINGLE DELETE RESULT OBSERVER - SET UP ONCE
+        deckManagementViewModel.getDeleteResult().observe(this, isSuccess -> {
+            if (isSuccess != null && isDeletingCard) {
+                handleDeleteResult(isSuccess);
+                // Clear delete result immediately after handling
+                deckManagementViewModel.clearDeleteResult();
+            }
+        });
+
         // Observe loading state
         deckManagementViewModel.getLoadingState().observe(this, isLoading -> {
+            Log.d(TAG, "Loading state: " + isLoading);
             // Hiển thị/ẩn loading indicator nếu có
-            // Ví dụ: progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
         // Observe error messages
@@ -175,12 +155,33 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             }
         });
     }
+
+    private void handleDeleteResult(boolean isSuccess) {
+        Log.d(TAG, "Handling delete result: " + isSuccess);
+
+        if (isSuccess) {
+            Toast.makeText(this, "Đã xóa thẻ thành công", Toast.LENGTH_SHORT).show();
+
+            // Refresh data from server để đảm bảo sync
+            refreshDeckData();
+        } else {
+            Toast.makeText(this, "Không thể xóa thẻ. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+        }
+
+        // Reset delete state
+        isDeletingCard = false;
+
+        // Close dialog and reset UI
+        if (currentDeleteDialog != null && currentDeleteDialog.isShowing()) {
+            currentDeleteDialog.dismiss();
+            currentDeleteDialog = null;
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private void displayDeckInfo(Deck deck) {
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
-
-        // Update card count - will be updated when flashcards are loaded
         updateCardCount();
     }
 
@@ -200,12 +201,14 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         spinnerCardType = findViewById(R.id.spinnerCardType);
         recyclerViewCards = findViewById(R.id.recyclerViewCards);
     }
+
     private void setupRecyclerView() {
         filteredCards = new ArrayList<>();
         cardAdapter = new CardAdapter(filteredCards, this);
         recyclerViewCards.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewCards.setAdapter(cardAdapter);
     }
+
     private void setupSpinner() {
         String[] cardTypes = {"Tất cả", "2 Mặt", "Trắc nghiệm", "Điền từ"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -223,46 +226,32 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
-    private void setupListeners() {
-        btnAddCard.setOnClickListener(v -> {
-            // Demo: Tạo thẻ mới và thêm vào danh sách
-            addSampleCard();
-        });
 
-        btnStudyDeck.setOnClickListener(v -> {
-            // Demo: Hiển thị toast
-            showStudyOptionsDialog();
-        });
+    private void setupListeners() {
+        btnAddCard.setOnClickListener(v -> addSampleCard());
+        btnStudyDeck.setOnClickListener(v -> showStudyOptionsDialog());
     }
+
     private void showStudyOptionsDialog() {
-        // Kiểm tra xem có thẻ nào để học không
         if (allCards.isEmpty()) {
             Toast.makeText(this, "Chưa có thẻ nào để học!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tạo dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        // Inflate custom layout
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_study_options, null);
         builder.setView(dialogView);
 
-        // Tạo dialog
         AlertDialog dialog = builder.create();
-
-        // Set dialog properties
         dialog.setCancelable(true);
         Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
-        // Lấy references đến các view
         LinearLayout layoutTwoSided = dialogView.findViewById(R.id.layoutTwoSided);
         LinearLayout layoutMultipleChoice = dialogView.findViewById(R.id.layoutMultipleChoice);
         LinearLayout layoutFillBlank = dialogView.findViewById(R.id.layoutFillBlank);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
 
-        // Set click listeners
         layoutTwoSided.setOnClickListener(v -> {
             dialog.dismiss();
             startFlashcardBasicStudy();
@@ -279,42 +268,44 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        // Hiển thị dialog
         dialog.show();
     }
+
     private void startFlashcardBasicStudy() {
         Intent intent = new Intent(this, FlashcardBasicStudyActivity.class);
         intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
+        intent.putExtra("auth_token", cachedAuthToken);
         startActivity(intent);
     }
+
     private void startMultipleChoiceStudy() {
         Intent intent = new Intent(this, FlashcardMultipleChoiceStudyActivity.class);
         intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
+        intent.putExtra("auth_token", cachedAuthToken);
         startActivity(intent);
     }
+
     private void startFillBlankStudy() {
         Intent intent = new Intent(this, FlashcardFillBlankStudyActivity.class);
         intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
-        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
+        intent.putExtra("auth_token", cachedAuthToken);
         startActivity(intent);
     }
 
     private void addSampleCard() {
         Intent intent = new Intent(this, AddCardActivity.class);
         intent.putExtra("deck_id", deckId);
-//        intent.putExtra("deck_id", deckId);
-        intent.putExtra("auth_token", cachedAuthToken); // Truyền cached token
+        intent.putExtra("auth_token", cachedAuthToken);
         startActivity(intent);
-
     }
+
     @SuppressLint("NotifyDataSetChanged")
     private void filterCards(int filterType) {
+        if (allCards == null) return;
+
         filteredCards.clear();
 
         switch (filterType) {
@@ -346,36 +337,46 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
 
         cardAdapter.notifyDataSetChanged();
     }
+
     @Override
     public void onCardAction(Card card, String action) {
+        Log.d(TAG, "Card action: " + action + " for card ID: " + card.getFlashcardId());
+
         switch (action) {
             case "edit":
-                // Demo: Hiển thị thông tin thẻ
                 showCardInfo(card);
                 break;
-
             case "delete":
-                // Demo: Xóa thẻ khỏi danh sách
                 showDeleteConfirmDialog(card);
                 break;
-
             case "view":
-                // Demo: Hiển thị chi tiết thẻ
                 showCardDetail(card);
                 break;
         }
     }
+
+    private Card findCardById(long cardId) {
+        if (allCards != null) {
+            for (Card card : allCards) {
+                if (card.getFlashcardId() == cardId) {
+                    return card;
+                }
+            }
+        }
+        return null;
+    }
+
     private void showCardInfo(Card card) {
         Intent intent = new Intent(this, EditCardActivity.class);
         intent.putExtra("card_id", card.getFlashcardId());
         intent.putExtra("deck_id", deckId);
         startActivity(intent);
     }
+
     @SuppressLint("SetTextI18n")
     private void showCardDetail(Card card) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_card_detail, null);
 
-        // Find views
         TextView tvCardType = dialogView.findViewById(R.id.tvCardType);
         TextView tvQuestion = dialogView.findViewById(R.id.tvQuestion);
         TextView tvAnswerLabel = dialogView.findViewById(R.id.tvAnswerLabel);
@@ -415,10 +416,8 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         if (content != null) {
             switch (card.getCardType()) {
                 case BASIC:
-                    // For basic cards: {"front": "question", "back": "answer"}
                     String front = content.has("front") ? content.get("front").getAsString() : "";
                     String back = content.has("back") ? content.get("back").getAsString() : "";
-
                     tvQuestion.setText(front);
                     tvAnswerLabel.setText("Mặt sau");
                     tvAnswer.setText(back);
@@ -426,15 +425,12 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                     break;
 
                 case MULTIPLE_CHOICE:
-                    // For multiple choice cards: {"question": "...", "options": [...], "answer": "..."}
                     String question = content.has("question") ? content.get("question").getAsString() : "";
                     String correctAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
-
                     tvQuestion.setText(question);
                     tvAnswerLabel.setText("Đáp án đúng");
                     tvAnswer.setText(correctAnswer);
 
-                    // Show options
                     layoutOptions.setVisibility(View.VISIBLE);
                     layoutOptionsList.removeAllViews();
 
@@ -442,11 +438,8 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                         JsonArray optionsArray = content.getAsJsonArray("options");
                         for (int i = 0; i < optionsArray.size(); i++) {
                             String option = optionsArray.get(i).getAsString();
-
-                            // Create option view
                             LinearLayout optionLayout = getLinearLayout();
 
-                            // Option letter (A, B, C, D)
                             TextView tvOptionLetter = new TextView(this);
                             tvOptionLetter.setText(String.valueOf((char)('A' + i)));
                             tvOptionLetter.setTextColor(ContextCompat.getColor(this, R.color.text_color));
@@ -454,7 +447,6 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                             tvOptionLetter.setTypeface(tvOptionLetter.getTypeface(), android.graphics.Typeface.BOLD);
                             tvOptionLetter.setPadding(0, 0, 16, 0);
 
-                            // Option text
                             TextView tvOptionText = new TextView(this);
                             tvOptionText.setText(option);
                             tvOptionText.setTextColor(ContextCompat.getColor(this, R.color.text_color));
@@ -462,14 +454,12 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                             tvOptionText.setLayoutParams(new LinearLayout.LayoutParams(
                                     0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 
-                            // Highlight correct answer
                             if (option.equals(correctAnswer)) {
                                 optionLayout.getBackground().setTint(ContextCompat.getColor(this, R.color.primary_light_color));
                                 tvOptionLetter.setTextColor(ContextCompat.getColor(this, R.color.primary_dark_color));
                                 tvOptionText.setTextColor(ContextCompat.getColor(this, R.color.primary_dark_color));
                                 tvOptionText.setTypeface(tvOptionText.getTypeface(), android.graphics.Typeface.BOLD);
 
-                                // Add checkmark
                                 TextView tvCheckmark = new TextView(this);
                                 tvCheckmark.setText("✓");
                                 tvCheckmark.setTextColor(ContextCompat.getColor(this, R.color.secondary_color));
@@ -486,10 +476,8 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                     break;
 
                 case FILL_IN_BLANK:
-                    // For fill in blank cards: {"text": "question", "answer": "correct_answer"}
                     String text = content.has("text") ? content.get("text").getAsString() : "";
                     String fillAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
-
                     tvQuestion.setText(text);
                     tvAnswerLabel.setText("Từ cần điền");
                     tvAnswer.setText(fillAnswer);
@@ -504,19 +492,16 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                     break;
             }
         } else {
-            // Handle case when content is null
             tvQuestion.setText("Không có nội dung");
             tvAnswerLabel.setText("Không có đáp án");
             tvAnswer.setText("");
             layoutOptions.setVisibility(View.GONE);
         }
 
-        // Create dialog
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
 
-        // Set button listeners
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
         btnEdit.setOnClickListener(v -> {
@@ -527,26 +512,22 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             startActivity(intent);
         });
 
-        // Show dialog
         dialog.show();
 
-        // Optional: Set dialog window properties for better appearance
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
         }
     }
+
     @NonNull
     private LinearLayout getLinearLayout() {
         LinearLayout optionLayout = new LinearLayout(this);
         optionLayout.setOrientation(LinearLayout.HORIZONTAL);
         optionLayout.setPadding(16, 12, 16, 12);
         optionLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
-
-        // Set background
         optionLayout.setBackgroundResource(R.drawable.bg_option_item);
 
-        // Add margin
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -555,12 +536,19 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         optionLayout.setLayoutParams(layoutParams);
         return optionLayout;
     }
+
     @SuppressLint("SetTextI18n")
     private void showDeleteConfirmDialog(Card card) {
-        // Inflate custom dialog layout
+        // Prevent multiple delete operations
+        if (isDeletingCard) {
+            Log.d(TAG, "Delete operation already in progress, ignoring new request");
+            return;
+        }
+
+        Log.d(TAG, "Showing delete dialog for card ID: " + card.getFlashcardId());
+
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_card, null);
 
-        // Find views
         TextView tvCardTypeBadge = dialogView.findViewById(R.id.tvCardTypeBadge);
         TextView tvCardQuestion = dialogView.findViewById(R.id.tvCardQuestion);
         TextView tvCardAnswer = dialogView.findViewById(R.id.tvCardAnswer);
@@ -592,33 +580,27 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         tvCardTypeBadge.setText(cardTypeText);
         tvCardTypeBadge.getBackground().setTint(cardTypeColor);
 
-        // Set card content based on JsonObject content
+        // Set card content
         JsonObject content = card.getContent();
         if (content != null) {
             switch (card.getCardType()) {
                 case BASIC:
-                    // For basic cards: {"front": "question", "back": "answer"}
                     String front = content.has("front") ? content.get("front").getAsString() : "";
                     String back = content.has("back") ? content.get("back").getAsString() : "";
-
                     tvCardQuestion.setText(front);
                     tvCardAnswer.setText(back);
                     break;
 
                 case MULTIPLE_CHOICE:
-                    // For multiple choice cards: {"question": "...", "options": [...], "answer": "..."}
                     String question = content.has("question") ? content.get("question").getAsString() : "";
                     String correctAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
-
                     tvCardQuestion.setText(question);
                     tvCardAnswer.setText(correctAnswer);
                     break;
 
                 case FILL_IN_BLANK:
-                    // For fill in blank cards: {"text": "question", "answer": "correct_answer"}
                     String text = content.has("text") ? content.get("text").getAsString() : "";
                     String fillAnswer = content.has("answer") ? content.get("answer").getAsString() : "";
-
                     tvCardQuestion.setText(text);
                     tvCardAnswer.setText(fillAnswer);
                     break;
@@ -629,93 +611,75 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
                     break;
             }
         } else {
-            // Handle case when content is null
             tvCardQuestion.setText("Không có nội dung");
             tvCardAnswer.setText("");
         }
 
-        // Create dialog
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        currentDeleteDialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .setCancelable(true)
                 .create();
 
-        // Set button listeners
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnCancel.setOnClickListener(v -> {
+            currentDeleteDialog.dismiss();
+            currentDeleteDialog = null;
+        });
 
         btnDelete.setOnClickListener(v -> {
-            // Show loading state (optional)
+            // Prevent multiple delete calls
+            if (isDeletingCard) {
+                Log.d(TAG, "Delete already in progress");
+                return;
+            }
+
+            // Set delete state
+            isDeletingCard = true;
+
+            // Show loading state
             btnDelete.setEnabled(false);
             btnDelete.setText("Đang xóa...");
+            btnCancel.setEnabled(false);
+
+            Log.d(TAG, "Starting delete for card ID: " + card.getFlashcardId());
 
             // Call ViewModel to delete flashcard via API
             deckManagementViewModel.deleteFlashcard(card.getFlashcardId(), cachedAuthToken);
-
-            // Observe delete result
-            deckManagementViewModel.getDeleteResult().observe(this, isSuccess -> {
-                if (isSuccess != null) {
-                    if (isSuccess) {
-                        // Success: Remove card from local list and update UI
-                        allCards.remove(card);
-                        updateCardCount();
-                        filterCards(spinnerCardType.getSelectedItemPosition());
-
-                        // Show success message
-                        String questionText = "";
-                        if (content != null) {
-                            switch (card.getCardType()) {
-                                case BASIC:
-                                    questionText = content.has("front") ? content.get("front").getAsString() : "";
-                                    break;
-                                case MULTIPLE_CHOICE:
-                                    questionText = content.has("question") ? content.get("question").getAsString() : "";
-                                    break;
-                                case FILL_IN_BLANK:
-                                    questionText = content.has("text") ? content.get("text").getAsString() : "";
-                                    break;
-                            }
-                        }
-
-                        Toast.makeText(this, "Đã xóa thẻ: " + questionText, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    } else {
-                        // Error: Re-enable button and show error
-                        btnDelete.setEnabled(true);
-                        btnDelete.setText("Xóa");
-                        Toast.makeText(this, "Không thể xóa thẻ. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                    }
-
-                    // Clear delete result to avoid triggering observer again
-                    deckManagementViewModel.clearDeleteResult();
-                }
-            });
         });
 
-        // Show dialog
-        dialog.show();
+        currentDeleteDialog.show();
 
-        // Optional: Set dialog window properties for better appearance
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
+        if (currentDeleteDialog.getWindow() != null) {
+            currentDeleteDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            currentDeleteDialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
 
-            // Set dialog width (optional)
             int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
-            dialog.getWindow().setLayout(width, LinearLayout.LayoutParams.WRAP_CONTENT);
+            currentDeleteDialog.getWindow().setLayout(width, LinearLayout.LayoutParams.WRAP_CONTENT);
         }
     }
+
     private void refreshDeckData() {
         if (cachedAuthToken != null) {
+            Log.d(TAG, "Refreshing deck data");
             deckManagementViewModel.loadDeckById(deckId, cachedAuthToken);
             deckManagementViewModel.loadFlashcardsByDeck(deckId, cachedAuthToken);
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh deck data khi quay lại Activity
-        if (cachedAuthToken != null) {
+        if (cachedAuthToken != null && !isDeletingCard) {
             refreshDeckData();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up dialog references
+        if (currentDeleteDialog != null && currentDeleteDialog.isShowing()) {
+            currentDeleteDialog.dismiss();
+            currentDeleteDialog = null;
         }
     }
 }

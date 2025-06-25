@@ -79,7 +79,7 @@ public class DeckResponse {
                 this.name,
                 this.description != null ? this.description : "",
                 0,
-                null,
+                this.image_url,
                 false// cardCount - có thể cần update từ API khác
                   // masteredCount - có thể cần update từ API khác
         );
