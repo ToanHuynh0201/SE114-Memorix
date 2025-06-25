@@ -1,7 +1,6 @@
 package com.example.memorix.ui.deck;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -24,26 +23,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
 import com.example.memorix.model.Deck;
-import com.example.memorix.ui.deck.adapter.DeckActionListener;
-import com.example.memorix.ui.deck.adapter.DeckAdapter;
+import com.example.memorix.ui.deck.adapter.DeckLibraryAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DeckLibraryFragment extends Fragment implements DeckActionListener {
+public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.DeckLibraryListener {
     private EditText etSearch;
-    private RecyclerView rvEnglishDecks;
-    private RecyclerView rvPopularDecks;
-    private RecyclerView rvLawDecks;
-    private DeckAdapter englishAdapter;
-    private DeckAdapter popularAdapter;
-    private DeckAdapter lawAdapter;
-    private TextView tvSeeAllEnglish;
+    private RecyclerView rvAllDecks;
+    private DeckLibraryAdapter deckAdapter;
 
-    private List<Deck> englishDecks;
-    private List<Deck> popularDecks;
-    private List<Deck> lawDecks;
+    private List<Deck> allDecks;
+    private List<Deck> originalDecks;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,42 +47,22 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
         super.onViewCreated(view, savedInstanceState);
 
         initViews(view);
-        setupRecyclerViews();
+        setupRecyclerView();
         setupSearchFunctionality();
         loadSampleData();
     }
 
     private void initViews(View view) {
         etSearch = view.findViewById(R.id.et_search);
-        rvEnglishDecks = view.findViewById(R.id.rv_english_decks);
-        rvPopularDecks = view.findViewById(R.id.rv_popular_decks);
-        rvLawDecks = view.findViewById(R.id.rv_law_decks);
-        tvSeeAllEnglish = view.findViewById(R.id.tvSeeAllEnglish);
-
-        tvSeeAllEnglish.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), ManageDeckActivity.class);
-            startActivity(intent);
-        });
+        rvAllDecks = view.findViewById(R.id.rv_all_decks);
     }
 
-    private void setupRecyclerViews() {
-        // Setup English decks RecyclerView
-        englishDecks = new ArrayList<>();
-        englishAdapter = new DeckAdapter(englishDecks, this);
-        rvEnglishDecks.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvEnglishDecks.setAdapter(englishAdapter);
-
-        // Setup Popular decks RecyclerView
-        popularDecks = new ArrayList<>();
-        popularAdapter = new DeckAdapter(popularDecks, this);
-        rvPopularDecks.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvPopularDecks.setAdapter(popularAdapter);
-
-        // Setup Law decks RecyclerView
-        lawDecks = new ArrayList<>();
-        lawAdapter = new DeckAdapter(lawDecks, this);
-        rvLawDecks.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvLawDecks.setAdapter(lawAdapter);
+    private void setupRecyclerView() {
+        allDecks = new ArrayList<>();
+        originalDecks = new ArrayList<>();
+        deckAdapter = new DeckLibraryAdapter(allDecks, this);
+        rvAllDecks.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvAllDecks.setAdapter(deckAdapter);
     }
 
     private void setupSearchFunctionality() {
@@ -108,69 +80,85 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void filterDecks(String query) {
-        // Implement search functionality here
-        // This is a basic example - you can enhance it based on your needs
         if (query.isEmpty()) {
-            loadSampleData();
+            allDecks.clear();
+            allDecks.addAll(originalDecks);
         } else {
-            // Filter decks based on query
-            // For now, just show a toast
-            Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
+            List<Deck> filteredList = new ArrayList<>();
+            String lowerCaseQuery = query.toLowerCase();
+
+            for (Deck deck : originalDecks) {
+                if (deck.getName().toLowerCase().contains(lowerCaseQuery) ||
+                        (deck.getDescription() != null && deck.getDescription().toLowerCase().contains(lowerCaseQuery))) {
+                    filteredList.add(deck);
+                }
+            }
+
+            allDecks.clear();
+            allDecks.addAll(filteredList);
         }
+        deckAdapter.notifyDataSetChanged();
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadSampleData() {
-        // Load sample English decks
-        englishDecks.clear();
-        englishDecks.add(new Deck(1, "English Regular Expressions", "Learn common English expressions and idioms", 598, null, false));
-        englishDecks.add(new Deck(2, "Common English Phrases", "Essential phrases for daily conversation", 2196, null, false));
-        englishAdapter.notifyDataSetChanged();
+        // Clear existing data
+        allDecks.clear();
+        originalDecks.clear();
 
-        // Load sample Popular decks
-        popularDecks.clear();
-        popularDecks.add(new Deck(3, "English Regular Expressions", "Learn common English expressions and idioms", 598, null, false));
-        popularDecks.add(new Deck(4, "MCAT Preparation", "Medical College Admission Test preparation", 2597, null, false));
-        popularAdapter.notifyDataSetChanged();
+        // Mix of different categories for variety
+        List<Deck> sampleDecks = new ArrayList<>();
 
-        // Load sample Law decks
-        lawDecks.clear();
-        lawDecks.add(new Deck(5, "Criminal Law", "Fundamental concepts of criminal law", 450, null, false));
-        lawDecks.add(new Deck(6, "Family Law", "Family law principles and cases", 320, null, false));
-        lawAdapter.notifyDataSetChanged();
+        // Popular/Trending decks
+        sampleDecks.add(new Deck(1, "🚀 IELTS Writing Task 2 Master", "Chinh phục IELTS Writing với 200+ bài mẫu band 8.0+ được examiner khuyên dùng", 1250, "Comprehensive IELTS writing guide with examiner-approved templates", false));
+        sampleDecks.add(new Deck(2, "💼 Business English Pro", "Tiếng Anh kinh doanh từ cơ bản đến nâng cao cho môi trường công việc chuyên nghiệp", 890, "Professional English for business communication and meetings", false));
+        sampleDecks.add(new Deck(3, "🎯 TOEIC 990 Listening Master", "Phương pháp bí mật đạt điểm tối đa TOEIC Listening với 500+ bài tập thực chiến", 756, "Secret techniques used by 990 TOEIC achievers", false));
+
+        // English learning decks
+        sampleDecks.add(new Deck(4, "📚 English Idioms & Phrases", "1000+ thành ngữ và cụm từ tiếng Anh thông dụng nhất với ví dụ thực tế", 598, "Master everyday English expressions used by native speakers", false));
+        sampleDecks.add(new Deck(5, "🎬 Movie English Quotes", "Học tiếng Anh qua 500+ câu thoại từ các bộ phim Hollywood nổi tiếng", 423, "Learn English through famous movie dialogues and quotes", false));
+        sampleDecks.add(new Deck(6, "🌟 Advanced Vocabulary Builder", "Nâng tầm vốn từ vựng lên level chuyên gia với 800+ từ vựng nâng cao", 789, "Elevate your vocabulary to expert level with advanced words", false));
+
+        // Academic subjects
+        sampleDecks.add(new Deck(7, "⚖️ Luật Hình sự Việt Nam 2024", "Bộ luật hình sự mới nhất với các điều khoản và án lệ cập nhật", 450, "Latest Vietnamese criminal law with updated articles and precedents", false));
+        sampleDecks.add(new Deck(8, "🧮 Toán Cao cấp A1", "Giải tích 1 từ cơ bản đến nâng cao với 300+ công thức và bài tập", 520, "Calculus fundamentals with formulas and practice problems", false));
+        sampleDecks.add(new Deck(9, "🔬 Hóa Đại cương", "Hóa học đại cương với các phản ứng và công thức quan trọng", 380, "General chemistry with important reactions and formulas", false));
+
+        // Technology & Programming
+        sampleDecks.add(new Deck(10, "💻 Java Programming Basics", "Học lập trình Java từ zero đến hero với 200+ ví dụ code thực tế", 675, "Complete Java programming guide with practical examples", false));
+        sampleDecks.add(new Deck(11, "🌐 HTML & CSS Essentials", "Thiết kế web responsive với HTML5 và CSS3 hiện đại", 445, "Modern web design with HTML5 and CSS3 techniques", false));
+        sampleDecks.add(new Deck(12, "📱 Android Development", "Phát triển ứng dụng Android với Kotlin và các best practices", 590, "Android app development using Kotlin and modern practices", false));
+
+        // Medical & Health
+        sampleDecks.add(new Deck(13, "🏥 Thuật ngữ Y khoa", "500+ thuật ngữ y khoa tiếng Anh-Việt cần thiết cho sinh viên y", 320, "Essential English-Vietnamese medical terminology for students", false));
+        sampleDecks.add(new Deck(14, "💊 Dược lý học cơ bản", "Các nhóm thuốc và cơ chế tác dụng trong điều trị", 280, "Basic pharmacology with drug groups and mechanisms", false));
+
+        // Language learning
+        sampleDecks.add(new Deck(15, "🇯🇵 Hiragana & Katakana", "Bảng chữ cái tiếng Nhật cơ bản với cách viết và phát âm chuẩn", 210, "Japanese alphabet with proper writing and pronunciation", false));
+        sampleDecks.add(new Deck(16, "🇰🇷 Korean Basic Vocabulary", "1000 từ vựng tiếng Hàn cơ bản cho người mới bắt đầu", 350, "Essential Korean vocabulary for beginners with pronunciation", false));
+
+        // Add all sample decks to both lists
+        allDecks.addAll(sampleDecks);
+        originalDecks.addAll(sampleDecks);
+
+        deckAdapter.notifyDataSetChanged();
     }
 
-
-
-    // Implement DeckActionListener methods
-    @Override
-    public void onEditDeck(int position) {
-        Toast.makeText(getContext(), "Edit deck at position: " + position, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onShareDeck(int position) {
-        Toast.makeText(getContext(), "Share deck at position: " + position, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onResetProgress(int position) {
-        Toast.makeText(getContext(), "Reset progress for deck at position: " + position, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onDeleteDeck(int position) {
-        Toast.makeText(getContext(), "Delete deck at position: " + position, Toast.LENGTH_SHORT).show();
-    }
-
+    // Implement DeckLibraryListener methods
     @Override
     public void onDeckClick(Deck deck, int position) {
-        showDeckInfoDialog(deck);
+        showDeckPreviewDialog(deck);
+    }
+
+    @Override
+    public void onCloneDeck(Deck deck, int position) {
+        showCloneConfirmationDialog(deck);
     }
 
     @SuppressLint("SetTextI18n")
-    private void showDeckInfoDialog(Deck deck) {
+    private void showDeckPreviewDialog(Deck deck) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
         // Inflate custom layout
@@ -187,31 +175,65 @@ public class DeckLibraryFragment extends Fragment implements DeckActionListener 
         TextView tvCardCount = dialogView.findViewById(R.id.tv_card_count);
         TextView tvDeckDescription = dialogView.findViewById(R.id.tv_deck_description);
         AppCompatButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
-        AppCompatButton btnStartLearning = dialogView.findViewById(R.id.btn_start_learning);
+        AppCompatButton btnClone = dialogView.findViewById(R.id.btn_start_learning);
 
         // Set data
         tvDeckName.setText(deck.getName());
         tvCardCount.setText(deck.getCardCount() + " thẻ");
 
-        // Set description, nếu không có mô tả thì hiển thị text mặc định
+        // Set description
         String description = deck.getDescription();
         if (description == null || description.trim().isEmpty()) {
-            tvDeckDescription.setText("Không có mô tả cho bộ flashcard này.");
+            tvDeckDescription.setText("Một bộ flashcard thú vị đang chờ bạn khám phá! 🚀");
         } else {
             tvDeckDescription.setText(description);
         }
 
+        // Update button text for cloning
+        btnClone.setText("Clone Deck");
+
         // Set click listeners
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        btnStartLearning.setOnClickListener(v -> {
+        btnClone.setOnClickListener(v -> {
             dialog.dismiss();
-            // Chuyển đến activity học
-            Intent intent = new Intent(getContext(), DeckManagementActivity.class);
-            intent.putExtra("deck_id", deck.getId());
-            startActivity(intent);
+            cloneDeck(deck);
         });
 
         dialog.show();
+    }
+
+    private void showCloneConfirmationDialog(Deck deck) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("🚀 Clone Deck");
+        builder.setMessage("Bạn có muốn clone deck \"" + deck.getName() + "\" vào thư viện cá nhân không?\n\nDeck sẽ được thêm vào bộ sưu tập của bạn và bạn có thể tùy chỉnh nội dung.");
+
+        builder.setPositiveButton("✨ Clone ngay", (dialog, which) -> {
+            cloneDeck(deck);
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Customize button colors
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.secondary_color));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.secondary_text_color));
+    }
+
+    private void cloneDeck(Deck deck) {
+        Toast.makeText(getContext(),
+                "🎉 Đã clone \"" + deck.getName() + "\" thành công!\nKiểm tra trong thư viện cá nhân của bạn.",
+                Toast.LENGTH_LONG).show();
+
+        // Here you would implement the actual cloning logic:
+        // 1. Copy deck data to user's personal library
+        // 2. Create new deck instance with user as owner
+        // 3. Copy all cards from original deck
+        // 4. Update database
+        // 5. Navigate to the new deck or refresh UI
     }
 }

@@ -29,6 +29,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -466,8 +469,142 @@ public class HomeFragment extends Fragment implements DeckActionListener,
 
     @Override
     public void onShareDeck(int position) {
-        // Implementation for sharing deck
+        if (position < 0 || position >= deckList.size()) {
+            return;
+        }
+
+        Deck deckToShare = deckList.get(position);
+        showShareDeckDialog(deckToShare);
     }
+
+    private void showShareDeckDialog(Deck deck) {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_share_deck, null);
+
+        // Initialize views
+        TextView txtDeckName = dialogView.findViewById(R.id.txt_deck_name);
+        TextView txtDeckDescription = dialogView.findViewById(R.id.txt_deck_description);
+        TextInputEditText etReceiverEmail = dialogView.findViewById(R.id.et_receiver_email);
+        RadioGroup radioGroupPermission = dialogView.findViewById(R.id.radio_group_permission);
+        RadioButton radioView = dialogView.findViewById(R.id.radio_view);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        Button btnShare = dialogView.findViewById(R.id.btn_share);
+        ProgressBar progressSharing = dialogView.findViewById(R.id.progress_sharing);
+
+        // Set deck info
+        txtDeckName.setText(deck.getName());
+        txtDeckDescription.setText(deck.getDescription());
+
+        // Create dialog
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        // Set up listeners
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnShare.setOnClickListener(v -> {
+            String receiverEmail = Objects.requireNonNull(etReceiverEmail.getText()).toString().trim();
+
+            // Validate email
+            if (receiverEmail.isEmpty()) {
+                etReceiverEmail.setError("Vui lòng nhập email người nhận");
+                etReceiverEmail.requestFocus();
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(receiverEmail).matches()) {
+                etReceiverEmail.setError("Email không hợp lệ");
+                etReceiverEmail.requestFocus();
+                return;
+            }
+
+            // Get permission level
+            String permissionLevel = "view"; // Default
+            int selectedRadioId = radioGroupPermission.getCheckedRadioButtonId();
+            if (selectedRadioId == R.id.radio_view) {
+                permissionLevel = "view";
+            }
+
+            // Show loading
+            progressSharing.setVisibility(View.VISIBLE);
+            btnShare.setEnabled(false);
+            btnCancel.setEnabled(false);
+
+            // Call share API
+            if (cachedAuthToken != null) {
+                shareDeck(deck.getId(), receiverEmail, permissionLevel, dialog, progressSharing, btnShare, btnCancel);
+            } else {
+                hideLoading(progressSharing, btnShare, btnCancel);
+                Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void shareDeck(long deckId, String receiverEmail, String permissionLevel,
+                           AlertDialog dialog, ProgressBar progressSharing,
+                           Button btnShare, Button btnCancel) {
+
+        // Reset previous states
+        homeViewModel.resetShareStates();
+
+        // Call share API
+        homeViewModel.shareDeck(deckId, receiverEmail, permissionLevel, cachedAuthToken);
+
+        // Observe loading state
+        homeViewModel.getShareLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    showLoading(progressSharing, btnShare, btnCancel);
+                } else {
+                    hideLoading(progressSharing, btnShare, btnCancel);
+                }
+            }
+        });
+
+        // Observe share result
+        homeViewModel.getShareSuccess().observe(getViewLifecycleOwner(), success -> {
+            if (success != null) {
+                if (success) {
+                    Toast.makeText(getContext(), "Đã gửi lời mời chia sẻ thành công!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    // Remove observers after successful share
+                    removeShareObservers();
+                }
+                // Note: Error case is handled by shareError observer
+            }
+        });
+
+        // Observe share error
+        homeViewModel.getShareError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                removeShareObservers();
+            }
+        });
+    }
+
+    private void hideLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
+        progressSharing.setVisibility(View.GONE);
+        btnShare.setEnabled(true);
+        btnCancel.setEnabled(true);
+    }
+
+    private void showLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
+        progressSharing.setVisibility(View.VISIBLE);
+        btnShare.setEnabled(false);
+        btnCancel.setEnabled(false);
+    }
+
+    private void removeShareObservers() {
+        // Remove observers to prevent memory leaks and multiple triggers
+        homeViewModel.getShareLoading().removeObservers(getViewLifecycleOwner());
+        homeViewModel.getShareSuccess().removeObservers(getViewLifecycleOwner());
+        homeViewModel.getShareError().removeObservers(getViewLifecycleOwner());
+    }
+
 
     @Override
     public void onResetProgress(int position) {

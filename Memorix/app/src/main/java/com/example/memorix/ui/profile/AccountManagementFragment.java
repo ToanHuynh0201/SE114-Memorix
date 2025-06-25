@@ -219,7 +219,6 @@ public class AccountManagementFragment extends Fragment {
     }
 
     private void logout() {
-
         if (getContext() == null || getActivity() == null) return;
 
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);

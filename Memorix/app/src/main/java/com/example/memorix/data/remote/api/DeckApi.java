@@ -19,27 +19,27 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface DeckApi {
-    @GET("api/decks")
+    @GET("/api/decks")
     Call<List<DeckResponse>> getDecks(@Header("Authorization") String token);
 
-    @GET("api/decks")
+    @GET("/api/decks")
     Call<List<DeckResponse>> getDecksWithSearch(@Header("Authorization") String token, @Query("q") String searchQuery);
 
-    @GET("api/decks/{deckId}")
+    @GET("/api/decks/{deckId}")
     Call<Deck> getDeckById(@Header("Authorization") String token, @Path("deckId") long deckId);
 
-    @DELETE("api/decks/{id}")
+    @DELETE("/api/decks/{id}")
     Call<DeckDeleteResponse> deleteDeck(
             @Header("Authorization") String token,
             @Path("id") long deckId
     );
 
-    @PUT("api/decks/{id}")
+    @PUT("/api/decks/{id}")
     Call<DeckResponse> updateDeck(
             @Header("Authorization") String token,
             @Path("id") long deckId,
             @Body DeckUpdateRequest request
     );
-    @POST("api/decks")
+    @POST("/api/decks")
     Call<DeckCreateResponse> createDeck(@Header("Authorization") String token, @Body DeckCreateRequest request);
 }
