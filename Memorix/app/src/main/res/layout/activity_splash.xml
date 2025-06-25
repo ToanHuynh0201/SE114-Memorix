@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color"
-    tools:context=".ui.SplashActivity">
+    tools:context=".view.SplashActivity">
     <!-- Floating Flashcards -->
     <androidx.cardview.widget.CardView
         android:id="@+id/flashcard1"

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.memorix.ui.HomeFragment"
+        android:name="com.example.memorix.view.HomeFragment"
         android:label="Manage Deck"
         tools:layout="@layout/fragment_home">
 
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/nav_library"
-        android:name="com.example.memorix.ui.deck.DeckLibraryFragment"
+        android:name="com.example.memorix.view.deck.DeckLibraryFragment"
         android:label="Deck Library"
         tools:layout="@layout/fragment_deck_library">
 
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/nav_invites"
-        android:name="com.example.memorix.ui.share.InviteManagementFragment"
+        android:name="com.example.memorix.view.share.InviteManagementFragment"
         android:label="Chia sẻ"
         tools:layout="@layout/fragment_invite_management">
 
@@ -51,7 +51,7 @@
 
     <fragment
         android:id="@+id/nav_profile"
-        android:name="com.example.memorix.ui.profile.AccountManagementFragment"
+        android:name="com.example.memorix.view.profile.AccountManagementFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_account_management">
 

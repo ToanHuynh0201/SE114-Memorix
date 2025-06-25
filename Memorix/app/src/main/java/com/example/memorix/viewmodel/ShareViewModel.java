@@ -5,11 +5,12 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.memorix.data.remote.Repository.ShareRepository;
 import com.example.memorix.data.remote.dto.Share.IncomingShare;
+import com.example.memorix.data.remote.dto.Share.AcceptShareResponse;
 
 import java.util.List;
 
 public class ShareViewModel extends ViewModel {
-    private ShareRepository shareRepository;
+    private final ShareRepository shareRepository;
 
     public ShareViewModel() {
         shareRepository = new ShareRepository();
@@ -37,7 +38,6 @@ public class ShareViewModel extends ViewModel {
      * @param token Auth token
      */
     public void shareDeck(long deckId, String receiverEmail, String permissionLevel, String token) {
-        android.util.Log.d("ShareViewModel", "Sharing deck - ID: " + deckId + ", Email: " + receiverEmail);
         shareRepository.shareDeck(deckId, receiverEmail, permissionLevel, token);
     }
 
@@ -60,7 +60,6 @@ public class ShareViewModel extends ViewModel {
      * @param token Auth token
      */
     public void loadIncomingShares(String token) {
-        android.util.Log.d("ShareViewModel", "Loading incoming shares");
         shareRepository.getIncomingShares(token);
     }
 
@@ -69,9 +68,58 @@ public class ShareViewModel extends ViewModel {
      * @param token Auth token
      */
     public void refreshIncomingShares(String token) {
-        android.util.Log.d("ShareViewModel", "Refreshing incoming shares");
         shareRepository.resetIncomingSharesStates();
         shareRepository.getIncomingShares(token);
+    }
+
+    // ==================== ACCEPT SHARE OPERATIONS ====================
+    // Getters for accept operations LiveData
+    public LiveData<Boolean> getAcceptSuccess() {
+        return shareRepository.getAcceptSuccess();
+    }
+
+    public LiveData<String> getAcceptError() {
+        return shareRepository.getAcceptError();
+    }
+
+    public LiveData<Boolean> getAcceptLoading() {
+        return shareRepository.getAcceptLoading();
+    }
+
+    public LiveData<AcceptShareResponse.ClonedDeck> getClonedDeck() {
+        return shareRepository.getClonedDeck();
+    }
+
+    /**
+     * Chấp nhận lời mời share deck
+     * @param shareId ID của share
+     * @param token Auth token
+     */
+    public void acceptShare(long shareId, String token) {
+        shareRepository.acceptShare(shareId, token);
+    }
+
+    // ==================== DECLINE SHARE OPERATIONS ====================
+    // Getters for decline operations LiveData
+    public LiveData<Boolean> getDeclineSuccess() {
+        return shareRepository.getDeclineSuccess();
+    }
+
+    public LiveData<String> getDeclineError() {
+        return shareRepository.getDeclineError();
+    }
+
+    public LiveData<Boolean> getDeclineLoading() {
+        return shareRepository.getDeclineLoading();
+    }
+
+    /**
+     * Từ chối lời mời share deck
+     * @param shareId ID của share
+     * @param token Auth token
+     */
+    public void declineShare(long shareId, String token) {
+        shareRepository.declineShare(shareId, token);
     }
 
     // ==================== STATE MANAGEMENT ====================
@@ -79,7 +127,6 @@ public class ShareViewModel extends ViewModel {
      * Reset share states - useful when starting a new share operation
      */
     public void resetShareStates() {
-        android.util.Log.d("ShareViewModel", "Resetting share states");
         shareRepository.resetShareStates();
     }
 
@@ -87,22 +134,33 @@ public class ShareViewModel extends ViewModel {
      * Reset incoming shares states
      */
     public void resetIncomingSharesStates() {
-        android.util.Log.d("ShareViewModel", "Resetting incoming shares states");
         shareRepository.resetIncomingSharesStates();
+    }
+
+    /**
+     * Reset accept states
+     */
+    public void resetAcceptStates() {
+        shareRepository.resetAcceptStates();
+    }
+
+    /**
+     * Reset decline states
+     */
+    public void resetDeclineStates() {
+        shareRepository.resetDeclineStates();
     }
 
     /**
      * Clear all states - for complete cleanup
      */
     public void clearAllStates() {
-        android.util.Log.d("ShareViewModel", "Clearing all states");
         shareRepository.clearStates();
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        android.util.Log.d("ShareViewModel", "ViewModel cleared");
         shareRepository.clearStates();
     }
 }

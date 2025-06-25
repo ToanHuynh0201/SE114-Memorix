@@ -8,6 +8,9 @@ public class Deck {
     private String imageUrl;
     private boolean isPublic;
 
+
+    public Deck() {}
+
     public Deck(long id, String name, String description, int cardCount, String imageUrl, boolean isPublic) {
         this.id = id;
         this.name = name;

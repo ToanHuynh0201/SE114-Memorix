@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_color"
     android:orientation="vertical"
-    tools:context=".ui.share.InviteManagementFragment">
+    tools:context=".view.share.InviteManagementFragment">
 
     <!-- Header -->
     <LinearLayout

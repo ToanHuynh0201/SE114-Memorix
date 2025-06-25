@@ -9,6 +9,8 @@ import com.example.memorix.data.remote.dto.Share.IncomingShare;
 import com.example.memorix.data.remote.dto.Share.IncomingSharesResponse;
 import com.example.memorix.data.remote.dto.Share.ShareRequest;
 import com.example.memorix.data.remote.dto.Share.ShareResponse;
+import com.example.memorix.data.remote.dto.Share.AcceptShareResponse;
+import com.example.memorix.data.remote.dto.Share.DeclineShareResponse;
 import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.helper.ShareValidationHelper;
 import com.google.gson.Gson;
@@ -20,7 +22,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ShareRepository {
-    private ShareApi shareApiService;
+    private final ShareApi shareApiService;
 
     // LiveData for share operations
     private final MutableLiveData<Boolean> shareSuccess = new MutableLiveData<>();
@@ -31,6 +33,16 @@ public class ShareRepository {
     private final MutableLiveData<List<IncomingShare>> incomingShares = new MutableLiveData<>();
     private final MutableLiveData<String> incomingSharesError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> incomingSharesLoading = new MutableLiveData<>();
+
+    // LiveData for accept/decline operations
+    private final MutableLiveData<Boolean> acceptSuccess = new MutableLiveData<>();
+    private final MutableLiveData<String> acceptError = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> acceptLoading = new MutableLiveData<>();
+    private final MutableLiveData<AcceptShareResponse.ClonedDeck> clonedDeck = new MutableLiveData<>();
+
+    private final MutableLiveData<Boolean> declineSuccess = new MutableLiveData<>();
+    private final MutableLiveData<String> declineError = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> declineLoading = new MutableLiveData<>();
 
     public ShareRepository() {
         shareApiService = ApiClient.getClient().create(ShareApi.class);
@@ -60,6 +72,220 @@ public class ShareRepository {
 
     public LiveData<Boolean> getIncomingSharesLoading() {
         return incomingSharesLoading;
+    }
+
+    // Getters for accept operation LiveData
+    public LiveData<Boolean> getAcceptSuccess() {
+        return acceptSuccess;
+    }
+
+    public LiveData<String> getAcceptError() {
+        return acceptError;
+    }
+
+    public LiveData<Boolean> getAcceptLoading() {
+        return acceptLoading;
+    }
+
+    public LiveData<AcceptShareResponse.ClonedDeck> getClonedDeck() {
+        return clonedDeck;
+    }
+
+    // Getters for decline operation LiveData
+    public LiveData<Boolean> getDeclineSuccess() {
+        return declineSuccess;
+    }
+
+    public LiveData<String> getDeclineError() {
+        return declineError;
+    }
+
+    public LiveData<Boolean> getDeclineLoading() {
+        return declineLoading;
+    }
+
+    /**
+     * Chấp nhận lời mời share deck
+     * @param shareId ID của share
+     * @param token Auth token
+     */
+    public void acceptShare(long shareId, String token) {
+        // Reset previous states
+        acceptSuccess.setValue(null);
+        acceptError.setValue(null);
+        acceptLoading.setValue(true);
+        clonedDeck.setValue(null);
+
+        // Validate token
+        if (token == null || token.trim().isEmpty()) {
+            acceptLoading.setValue(false);
+            acceptError.setValue("Token không hợp lệ");
+            return;
+        }
+
+        // Validate shareId
+        if (shareId <= 0) {
+            acceptLoading.setValue(false);
+            acceptError.setValue("ID share không hợp lệ");
+            return;
+        }
+
+        // Format token with "Bearer " prefix if not already present
+        String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
+
+        // Log request for debugging
+        android.util.Log.d("ShareRepository", "Accepting share with ID: " + shareId);
+
+        // Make API call
+        Call<AcceptShareResponse> call = shareApiService.acceptShare(authToken, shareId);
+
+        call.enqueue(new Callback<AcceptShareResponse>() {
+            @Override
+            public void onResponse(Call<AcceptShareResponse> call, Response<AcceptShareResponse> response) {
+                acceptLoading.setValue(false);
+
+                // Log response for debugging
+                android.util.Log.d("ShareRepository", "Accept share response code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    AcceptShareResponse acceptResponse = response.body();
+                    android.util.Log.d("ShareRepository", "Accept response: " + acceptResponse.toString());
+
+                    if (acceptResponse.isSuccess()) {
+                        acceptSuccess.setValue(true);
+                        acceptError.setValue(null);
+                        clonedDeck.setValue(acceptResponse.getData());
+                        android.util.Log.d("ShareRepository", "Successfully accepted share");
+                    } else {
+                        acceptSuccess.setValue(false);
+                        acceptError.setValue("Không thể chấp nhận lời mời. Vui lòng thử lại.");
+                    }
+                } else {
+                    // Handle HTTP error codes
+                    acceptSuccess.setValue(false);
+
+                    String errorBody = "";
+                    String detailedErrorMessage = null;
+
+                    if (response.errorBody() != null) {
+                        try {
+                            errorBody = response.errorBody().string();
+                            android.util.Log.e("ShareRepository", "Accept error body: " + errorBody);
+                            detailedErrorMessage = parseErrorResponse(errorBody);
+                        } catch (Exception e) {
+                            android.util.Log.e("ShareRepository", "Could not read error body", e);
+                        }
+                    }
+
+                    String errorMessage = handleAcceptDeclineError(response.code(), errorBody, detailedErrorMessage, "chấp nhận");
+                    acceptError.setValue(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AcceptShareResponse> call, Throwable t) {
+                acceptLoading.setValue(false);
+                acceptSuccess.setValue(false);
+
+                // Log failure for debugging
+                android.util.Log.e("ShareRepository", "Network failure for accept share", t);
+
+                // Handle network errors
+                String errorMessage = handleNetworkError(t);
+                acceptError.setValue(errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Từ chối lời mời share deck
+     * @param shareId ID của share
+     * @param token Auth token
+     */
+    public void declineShare(long shareId, String token) {
+        // Reset previous states
+        declineSuccess.setValue(null);
+        declineError.setValue(null);
+        declineLoading.setValue(true);
+
+        // Validate token
+        if (token == null || token.trim().isEmpty()) {
+            declineLoading.setValue(false);
+            declineError.setValue("Token không hợp lệ");
+            return;
+        }
+
+        // Validate shareId
+        if (shareId <= 0) {
+            declineLoading.setValue(false);
+            declineError.setValue("ID share không hợp lệ");
+            return;
+        }
+
+        // Format token with "Bearer " prefix if not already present
+        String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
+
+        // Log request for debugging
+        android.util.Log.d("ShareRepository", "Declining share with ID: " + shareId);
+
+        // Make API call
+        Call<DeclineShareResponse> call = shareApiService.declineShare(authToken, shareId);
+
+        call.enqueue(new Callback<DeclineShareResponse>() {
+            @Override
+            public void onResponse(Call<DeclineShareResponse> call, Response<DeclineShareResponse> response) {
+                declineLoading.setValue(false);
+
+                // Log response for debugging
+                android.util.Log.d("ShareRepository", "Decline share response code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    DeclineShareResponse declineResponse = response.body();
+                    android.util.Log.d("ShareRepository", "Decline response: " + declineResponse.toString());
+
+                    if (declineResponse.isSuccess()) {
+                        declineSuccess.setValue(true);
+                        declineError.setValue(null);
+                        android.util.Log.d("ShareRepository", "Successfully declined share");
+                    } else {
+                        declineSuccess.setValue(false);
+                        declineError.setValue("Không thể từ chối lời mời. Vui lòng thử lại.");
+                    }
+                } else {
+                    // Handle HTTP error codes
+                    declineSuccess.setValue(false);
+
+                    String errorBody = "";
+                    String detailedErrorMessage = null;
+
+                    if (response.errorBody() != null) {
+                        try {
+                            errorBody = response.errorBody().string();
+                            android.util.Log.e("ShareRepository", "Decline error body: " + errorBody);
+                            detailedErrorMessage = parseErrorResponse(errorBody);
+                        } catch (Exception e) {
+                            android.util.Log.e("ShareRepository", "Could not read error body", e);
+                        }
+                    }
+
+                    String errorMessage = handleAcceptDeclineError(response.code(), errorBody, detailedErrorMessage, "từ chối");
+                    declineError.setValue(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeclineShareResponse> call, Throwable t) {
+                declineLoading.setValue(false);
+                declineSuccess.setValue(false);
+
+                // Log failure for debugging
+                android.util.Log.e("ShareRepository", "Network failure for decline share", t);
+
+                // Handle network errors
+                String errorMessage = handleNetworkError(t);
+                declineError.setValue(errorMessage);
+            }
+        });
     }
 
     /**
@@ -152,13 +378,8 @@ public class ShareRepository {
                 android.util.Log.e("ShareRepository", "Network failure for incoming shares", t);
 
                 // Handle network errors
-                if (t.getMessage() != null && t.getMessage().contains("timeout")) {
-                    incomingSharesError.setValue("Kết nối timeout. Vui lòng kiểm tra mạng và thử lại.");
-                } else if (t.getMessage() != null && t.getMessage().contains("Unable to resolve host")) {
-                    incomingSharesError.setValue("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
-                } else {
-                    incomingSharesError.setValue("Lỗi mạng: " + (t.getMessage() != null ? t.getMessage() : "Không xác định"));
-                }
+                String errorMessage = handleNetworkError(t);
+                incomingSharesError.setValue(errorMessage);
             }
         });
     }
@@ -261,15 +482,73 @@ public class ShareRepository {
                 android.util.Log.e("ShareRepository", "Network failure", t);
 
                 // Handle network errors
-                if (t.getMessage() != null && t.getMessage().contains("timeout")) {
-                    shareError.setValue("Kết nối timeout. Vui lòng kiểm tra mạng và thử lại.");
-                } else if (t.getMessage() != null && t.getMessage().contains("Unable to resolve host")) {
-                    shareError.setValue("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
-                } else {
-                    shareError.setValue("Lỗi mạng: " + (t.getMessage() != null ? t.getMessage() : "Không xác định"));
-                }
+                String errorMessage = handleNetworkError(t);
+                shareError.setValue(errorMessage);
             }
         });
+    }
+
+    /**
+     * Handle network errors
+     */
+    private String handleNetworkError(Throwable t) {
+        if (t.getMessage() != null && t.getMessage().contains("timeout")) {
+            return "Kết nối timeout. Vui lòng kiểm tra mạng và thử lại.";
+        } else if (t.getMessage() != null && t.getMessage().contains("Unable to resolve host")) {
+            return "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.";
+        } else {
+            return "Lỗi mạng: " + (t.getMessage() != null ? t.getMessage() : "Không xác định");
+        }
+    }
+
+    /**
+     * Handle HTTP error codes for accept/decline operations
+     */
+    private String handleAcceptDeclineError(int code, String errorBody, String detailedError, String action) {
+        android.util.Log.e("ShareRepository", "HTTP Error " + code + " for " + action + ", Body: " + errorBody);
+
+        String baseMessage;
+        switch (code) {
+            case 400:
+                baseMessage = "Yêu cầu không hợp lệ. Có thể lời mời đã được xử lý trước đó";
+                break;
+            case 401:
+                baseMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại";
+                break;
+            case 403:
+                baseMessage = "Bạn không có quyền " + action + " lời mời này";
+                break;
+            case 404:
+                baseMessage = "Lời mời không tồn tại hoặc đã bị xóa";
+                break;
+            case 409:
+                baseMessage = "Lời mời đã được xử lý trước đó";
+                break;
+            case 429:
+                baseMessage = "Bạn đã thực hiện quá nhiều yêu cầu. Vui lòng thử lại sau";
+                break;
+            case 500:
+                if (detailedError != null) {
+                    baseMessage = "Lỗi server: " + detailedError;
+                } else {
+                    baseMessage = "Server đang gặp sự cố. Vui lòng thử lại sau";
+                }
+                break;
+            case 502:
+            case 503:
+            case 504:
+                baseMessage = "Server tạm thời không khả dụng. Vui lòng thử lại sau";
+                break;
+            default:
+                if (detailedError != null) {
+                    baseMessage = "Lỗi: " + detailedError + " (mã lỗi: " + code + ")";
+                } else {
+                    baseMessage = "Không thể " + action + " lời mời (mã lỗi: " + code + "). Vui lòng thử lại";
+                }
+                break;
+        }
+
+        return baseMessage;
     }
 
     /**
@@ -427,6 +706,25 @@ public class ShareRepository {
     }
 
     /**
+     * Reset accept states
+     */
+    public void resetAcceptStates() {
+        acceptSuccess.setValue(null);
+        acceptError.setValue(null);
+        acceptLoading.setValue(false);
+        clonedDeck.setValue(null);
+    }
+
+    /**
+     * Reset decline states
+     */
+    public void resetDeclineStates() {
+        declineSuccess.setValue(null);
+        declineError.setValue(null);
+        declineLoading.setValue(false);
+    }
+
+    /**
      * Clear all states - useful for cleanup
      */
     public void clearStates() {
@@ -436,5 +734,12 @@ public class ShareRepository {
         incomingShares.setValue(null);
         incomingSharesError.setValue(null);
         incomingSharesLoading.setValue(null);
+        acceptSuccess.setValue(null);
+        acceptError.setValue(null);
+        acceptLoading.setValue(null);
+        clonedDeck.setValue(null);
+        declineSuccess.setValue(null);
+        declineError.setValue(null);
+        declineLoading.setValue(null);
     }
 }

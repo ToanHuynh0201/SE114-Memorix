@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.example.memorix.ui.login.LoginActivity;
+import com.example.memorix.view.login.LoginActivity;
 
 public class LogoutHelper {
 
