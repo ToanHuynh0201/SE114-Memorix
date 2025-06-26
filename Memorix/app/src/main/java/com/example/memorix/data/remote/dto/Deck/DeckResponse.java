@@ -9,17 +9,19 @@ public class DeckResponse {
     private String description;
     private String image_url;
     private boolean is_public;
+    private int total_cards;
 
     public DeckResponse() {
     }
 
-    public DeckResponse(int deck_id, int user_id, String name, String description, String image_url, boolean is_public) {
+    public DeckResponse(int deck_id, int user_id, String name, String description, String image_url, boolean is_public, int total_cards) {
         this.deck_id = deck_id;
         this.user_id = user_id;
         this.name = name;
         this.description = description;
         this.image_url = image_url;
         this.is_public = is_public;
+        this.total_cards = total_cards;
     }
 
     // Getters
@@ -72,16 +74,23 @@ public class DeckResponse {
         this.is_public = is_public;
     }
 
+    public int getTotal_cards(){
+        return this.total_cards;
+    }
+
+    public void setTotal_cards(int total_cards){
+        this.total_cards = total_cards;
+    }
+
     // Utility method to convert to Deck object
     public Deck toDeck() {
         return new Deck(
                 this.deck_id,
                 this.name,
                 this.description != null ? this.description : "",
-                0,
+                this.total_cards,  // Đang truyền vào cardCount thay vì totalCards
                 this.image_url,
-                false// cardCount - có thể cần update từ API khác
-                  // masteredCount - có thể cần update từ API khác
+                false
         );
     }
 }

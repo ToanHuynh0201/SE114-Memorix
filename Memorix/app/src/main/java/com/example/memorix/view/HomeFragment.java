@@ -31,7 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
+//import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -363,7 +363,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             Log.d("HomeFragment", "  Name: " + deck.getName());
             Log.d("HomeFragment", "  Description: " + deck.getDescription());
             Log.d("HomeFragment", "  ImageUrl: " + deck.getImageUrl());
-            Log.d("HomeFragment", "  CardCount: " + deck.getCardCount());
+            Log.d("HomeFragment", "  CardCount: " + deck.getTotalCards());
             Log.d("HomeFragment", "  IsPublic: " + deck.isPublic());
         }
         Log.d("HomeFragment", "=== END DEBUG ===");
@@ -505,7 +505,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         TextView txtDeckDescription = dialogView.findViewById(R.id.txt_deck_description);
         TextInputEditText etReceiverEmail = dialogView.findViewById(R.id.et_receiver_email);
         RadioGroup radioGroupPermission = dialogView.findViewById(R.id.radio_group_permission);
-        RadioButton radioView = dialogView.findViewById(R.id.radio_view);
+//        RadioButton radioView = dialogView.findViewById(R.id.radio_view);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnShare = dialogView.findViewById(R.id.btn_share);
         ProgressBar progressSharing = dialogView.findViewById(R.id.progress_sharing);
@@ -791,7 +791,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
 
             return Objects.equals(oldDeck.getName(), newDeck.getName()) &&
                     Objects.equals(oldDeck.getDescription(), newDeck.getDescription()) &&
-                    oldDeck.getCardCount() == newDeck.getCardCount() &&
+                    oldDeck.getTotalCards() == newDeck.getTotalCards() &&
                     oldDeck.isPublic() == newDeck.isPublic() &&
                     Objects.equals(oldDeck.getImageUrl(), newDeck.getImageUrl());
         }

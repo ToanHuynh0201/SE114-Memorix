@@ -211,7 +211,7 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
 
         // Set data
         tvDeckName.setText(deck.getName());
-        tvCardCount.setText(deck.getCardCount() + " thẻ");
+        tvCardCount.setText(deck.getTotalCards() + " thẻ");
 
         // Set description
         String description = deck.getDescription();

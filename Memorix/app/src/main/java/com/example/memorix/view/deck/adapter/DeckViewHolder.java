@@ -14,8 +14,6 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,15 +23,14 @@ import com.example.memorix.model.Deck;
 public class DeckViewHolder extends RecyclerView.ViewHolder{
     private static final String TAG = "DeckViewHolder";
     private Deck currentDeck;
-    private TextView tvDeckName;
-    private TextView tvDeckDescription;
-    private TextView tvCardCount;
-    private TextView tvMasteredCount;
-    private ProgressBar progressBar;
-    private ImageButton btnOverflowMenu;
-    private Context context;
+    private final TextView tvDeckName;
+    private final TextView tvDeckDescription;
+    private final TextView tvCardCount;
+    private final ProgressBar progressBar;
+    private final ImageButton btnOverflowMenu;
+    private final Context context;
     private int currentPosition;
-    private DeckActionListener listener;
+    private final DeckActionListener listener;
 
     // 6 bộ màu gradient có sẵn (ID từ 1-6)
     private static final int[][] GRADIENT_COLORS = {
@@ -60,7 +57,7 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
 
     private void showPopupMenu() {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View customMenuView = inflater.inflate(R.layout.menu_deck_options, null);
+        @SuppressLint("InflateParams") View customMenuView = inflater.inflate(R.layout.menu_deck_options, null);
 
         final PopupWindow popupWindow = new PopupWindow(
                 customMenuView,
@@ -297,25 +294,25 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         this.currentDeck = deck; // Lưu deck reference
         this.currentPosition = position; // Lưu position for fallback
 
-        Log.d(TAG, "Binding deck: " + deck.getName() +
-                " (ID: " + deck.getId() + ") at position: " + position +
-                ", imageUrl: " + deck.getImageUrl());
+        // Debug log để kiểm tra dữ liệu
+        Log.d(TAG, "Binding deck: " + deck.getName());
+        Log.d(TAG, "Total cards: " + deck.getTotalCards());
 
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
-        tvCardCount.setText(deck.getCardCount() + " cards");
 
-        // Áp dụng màu dựa trên deck - FIXED: Only pass deck parameter
+        // SỬA: Sử dụng getTotalCards() thay vì getCardCount()
+        int cardCount = deck.getTotalCards();
+        if (cardCount <= 0) {
+            tvCardCount.setText("0 cards");
+            Log.w(TAG, "Deck has 0 cards: " + deck.getName());
+        } else {
+            tvCardCount.setText(cardCount + " cards");
+        }
+
+        // Áp dụng màu dựa trên deck
         applyDeckColors(deck);
-
-        // Set default progress for visual testing
         progressBar.setProgress(25);
     }
 
-    /**
-     * Get current deck
-     */
-    public Deck getCurrentDeck() {
-        return currentDeck;
-    }
 }
