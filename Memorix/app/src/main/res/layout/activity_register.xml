@@ -132,12 +132,40 @@
                 android:textColor="@android:color/white"
                 app:cornerRadius="8dp" />
 
+            <TextView
+                android:id="@+id/text_or_access"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="------ Hoặc đăng kí nhanh ------"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:textColor="#888888"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Nút đăng kí bằng Google -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_google_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#4285F4"
+                android:text="Đăng kí với Google"
+                android:textColor="@android:color/white"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium"
+                android:icon="@drawable/ic_google"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconTint="@null"
+                app:cornerRadius="12dp"
+                android:layout_marginBottom="24dp" />
+
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
