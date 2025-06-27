@@ -4,14 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="6dp"
+    android:background="@android:color/transparent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="12dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/tv_deck_name"
@@ -22,6 +23,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/text_color"
             android:textStyle="bold"
+            android:layout_marginTop="2dp"
             app:layout_constraintEnd_toStartOf="@+id/btn_overflow_menu"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -30,21 +32,22 @@
         <!-- Nút 3 chấm (Overflow menu) -->
         <ImageButton
             android:id="@+id/btn_overflow_menu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/menu"
             android:src="@drawable/ic_more_vert"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_deck_name"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/secondary_color" />
 
         <TextView
             android:id="@+id/tv_deck_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="6dp"
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
@@ -58,7 +61,7 @@
             android:id="@+id/layout_card_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,8 +69,8 @@
             tools:ignore="UseCompoundDrawables">
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:contentDescription="@string/card_count"
                 android:src="@drawable/ic_cards"
                 app:tint="@color/secondary_color" />
@@ -76,7 +79,7 @@
                 android:id="@+id/tv_card_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="6dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/secondary_text_color"
                 tools:text="25 cards" />
@@ -86,9 +89,8 @@
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="8dp"
-            android:progressDrawable="@drawable/custom_progress_bar"
+            android:layout_height="6dp"
+            android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_card_count"

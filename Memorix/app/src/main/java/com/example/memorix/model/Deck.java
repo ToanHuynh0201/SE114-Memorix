@@ -4,15 +4,18 @@ public class Deck {
     private long id;
     private String name;
     private String description;
-    private int cardCount;
+    private int totalCards;
     private String imageUrl;
     private boolean isPublic;
 
-    public Deck(long id, String name, String description, int cardCount, String imageUrl, boolean isPublic) {
+
+    public Deck() {}
+
+    public Deck(long id, String name, String description, int totalCards, String imageUrl, boolean isPublic) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.cardCount = cardCount;
+        this.totalCards = totalCards;
         this.imageUrl = imageUrl;
         this.isPublic = isPublic;
     }
@@ -40,11 +43,11 @@ public class Deck {
     public void setDescription(String description) {
         this.description = description;
     }
-    public int getCardCount() {
-        return cardCount;
+    public int getTotalCards() {
+        return totalCards;
     }
-    public void setCardCount(int cardCount) {
-        this.cardCount = cardCount;
+    public void setTotalCards(int cardCount) {
+        this.totalCards = cardCount;
     }
 
     public String getImageUrl() {

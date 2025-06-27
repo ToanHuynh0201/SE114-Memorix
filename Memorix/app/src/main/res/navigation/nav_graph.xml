@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,36 +6,128 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.memorix.ui.HomeFragment"
+        android:name="com.example.memorix.view.HomeFragment"
         android:label="Manage Deck"
         tools:layout="@layout/fragment_home">
 
-        <!-- Có thể thêm các action để navigation sang fragment khác -->
         <action
             android:id="@+id/action_home_to_library"
             app:destination="@id/nav_library" />
+
+        <action
+            android:id="@+id/action_home_to_statistics"
+            app:destination="@id/nav_statistics" />
+
+        <action
+            android:id="@+id/action_home_to_invites"
+            app:destination="@id/nav_invites" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_library"
-        android:name="com.example.memorix.ui.deck.DeckLibraryFragment"
+        android:name="com.example.memorix.view.deck.DeckLibraryFragment"
         android:label="Deck Library"
         tools:layout="@layout/fragment_deck_library">
 
         <action
             android:id="@+id/action_library_to_home"
             app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_library_to_statistics"
+            app:destination="@id/nav_statistics" />
+
+        <action
+            android:id="@+id/action_library_to_invites"
+            app:destination="@id/nav_invites" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_statistics"
+        android:name="com.example.memorix.view.StatisticsFragment"
+        android:label="Thống kê"
+        tools:layout="@layout/fragment_statistics">
+
+        <action
+            android:id="@+id/action_statistics_to_home"
+            app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_statistics_to_library"
+            app:destination="@id/nav_library" />
+
+        <action
+            android:id="@+id/action_statistics_to_invites"
+            app:destination="@id/nav_invites" />
+
+        <action
+            android:id="@+id/action_statistics_to_profile"
+            app:destination="@id/nav_profile" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_invites"
+        android:name="com.example.memorix.view.share.InviteManagementFragment"
+        android:label="Chia sẻ"
+        tools:layout="@layout/fragment_invite_management">
+
+        <action
+            android:id="@+id/action_invites_to_home"
+            app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_invites_to_library"
+            app:destination="@id/nav_library" />
+
+        <action
+            android:id="@+id/action_invites_to_statistics"
+            app:destination="@id/nav_statistics" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_profile"
-        android:name="com.example.memorix.ui.profile.AccountManagementFragment"
+        android:name="com.example.memorix.view.profile.AccountManagementFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_account_management">
 
         <action
             android:id="@+id/action_profile_to_home"
             app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_profile_to_statistics"
+            app:destination="@id/nav_statistics" />
     </fragment>
+
+    <!-- Global Actions for BottomNavigation -->
+    <action
+        android:id="@+id/action_global_nav_home"
+        app:destination="@id/nav_home"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_library"
+        app:destination="@id/nav_library"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_statistics"
+        app:destination="@id/nav_statistics"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_invites"
+        app:destination="@id/nav_invites"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_profile"
+        app:destination="@id/nav_profile"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 
 </navigation>

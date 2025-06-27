@@ -271,6 +271,18 @@
     <string name="no_search_results">Không có kết quả</string>
     <string name="no_search_results_title">Không tìm thấy kết quả</string>
     <string name="no_search_results_description">Hãy thử tìm kiếm với từ khóa khác hoặc tạo bộ thẻ mới</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!-- Existing strings that might be missing -->
+
+    <string name="select_deck_color">Chọn màu cho bộ thẻ</string>
+    <string name="selected_color">Đã chọn: %1$s</string>
+    <string name="color_pink_green">Hồng - Xanh lá</string>
+    <string name="color_light_green">Xanh lá nhạt</string>
+    <string name="color_yellow_orange">Vàng - Cam</string>
+    <string name="color_purple">Tím</string>
+    <string name="color_pink_yellow">Hồng - Vàng</string>
+    <string name="color_dark_green">Xanh lá đậm</string>
+    <string name="go_to_library">Thư viện</string>
 </resources>

@@ -71,4 +71,13 @@
         <item name="android:background">@drawable/otp_box_background</item>
     </style>
 
+    <style name="ColorOptionAnimation">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+
 </resources>

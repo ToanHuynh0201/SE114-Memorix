@@ -12,6 +12,11 @@
         android:title="Bộ thẻ"
         tools:ignore="HardcodedText" />
     <item
+        android:id="@+id/nav_statistics"
+        android:icon="@drawable/ic_statistics"
+        android:title="Thống kê"
+        tools:ignore="HardcodedText" />
+    <item
         android:id="@+id/nav_invites"
         android:icon="@drawable/ic_share"
         android:title="Chia sẻ"

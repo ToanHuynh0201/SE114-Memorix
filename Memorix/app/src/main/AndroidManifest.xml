@@ -3,9 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-
-
     <application
         android:name=".MemorixApplication"
         android:allowBackup="true"
@@ -19,62 +16,62 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ui.deck.ManageDeckActivity"
+            android:name=".view.deck.ManageDeckActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.flashcardstudy.StudySummaryActivity"
+            android:name=".view.flashcardstudy.StudySummaryActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.deck.card.AddCardActivity"
+            android:name=".view.deck.card.AddCardActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.deck.card.EditCardActivity"
+            android:name=".view.deck.card.EditCardActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.deck.DeckManagementActivity"
+            android:name=".view.deck.DeckManagementActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.flashcardstudy.FlashcardFillBlankStudyActivity"
+            android:name=".view.flashcardstudy.FlashcardFillBlankStudyActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.flashcardstudy.FlashcardMultipleChoiceStudyActivity"
+            android:name=".view.flashcardstudy.FlashcardMultipleChoiceStudyActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.flashcardstudy.FlashcardBasicStudyActivity"
+            android:name=".view.flashcardstudy.FlashcardBasicStudyActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.EditProfileActivity"
+            android:name=".view.profile.EditProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.login.ChangePasswordActivity"
+            android:name=".view.login.ChangePasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.SplashActivity"
-            android:exported="true" >
+            android:name=".view.SplashActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.login.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.login.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.login.VerifyEmailActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".view.login.ResetPasswordActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".view.MainActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.login.LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.login.RegisterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.login.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.login.VerifyEmailActivity"
-            android:exported="false"/>
-        <activity
-            android:name=".ui.login.ResetPasswordActivity"
-            android:exported="false"/>
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.login.LoginActivity"
-            android:exported="false"/>
     </application>
 
 </manifest>

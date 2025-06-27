@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 
 import com.example.memorix.data.remote.network.ApiClient;
-import com.example.memorix.ui.login.LoginActivity;
+import com.example.memorix.view.login.LoginActivity;
 import com.example.memorix.data.remote.api.AuthApi;
 import com.example.memorix.data.remote.dto.Login.LoginResponse;
 import com.example.memorix.data.remote.dto.Token.RefreshTokenRequest;

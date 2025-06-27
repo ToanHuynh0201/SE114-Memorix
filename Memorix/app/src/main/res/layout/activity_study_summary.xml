@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:background="@color/background_color"
     android:layout_height="match_parent"
-    tools:context=".ui.flashcardstudy.StudySummaryActivity">
+    tools:context=".view.flashcardstudy.StudySummaryActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

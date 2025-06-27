@@ -1,5 +1,9 @@
 package com.example.memorix.data.remote.Repository;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -13,6 +17,7 @@ import com.example.memorix.data.remote.dto.Deck.DeckCreateResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckResponse;
 import com.example.memorix.data.remote.network.ApiClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,24 +227,133 @@ public class DeckRepository {
                 break;
         }
     }
+    /**
+     * Convert color ID (1-6) to valid image URL
+     */
+    private String convertColorIdToImageUrl(String colorId) {
+        if (colorId == null || colorId.trim().isEmpty()) {
+            return "https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Color1"; // Default color 1
+        }
 
-    // Updated createDeck method to match the new API
-    public void createDeck(String name, String description, String imageUrl, boolean isPublic, String token) {
+        try {
+            int id = Integer.parseInt(colorId);
+            switch (id) {
+                case 1:
+                    return "https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Color1";
+                case 2:
+                    return "https://via.placeholder.com/300x200/A8E6CF/FFFFFF?text=Color2";
+                case 3:
+                    return "https://via.placeholder.com/300x200/FFD93D/FFFFFF?text=Color3";
+                case 4:
+                    return "https://via.placeholder.com/300x200/6C5CE7/FFFFFF?text=Color4";
+                case 5:
+                    return "https://via.placeholder.com/300x200/FD79A8/FFFFFF?text=Color5";
+                case 6:
+                    return "https://via.placeholder.com/300x200/00B894/FFFFFF?text=Color6";
+                default:
+                    return "https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Color1";
+            }
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Invalid color ID format: " + colorId + ", using default");
+            return "https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Color1";
+        }
+    }
+
+    /**
+     * Extract color ID from image URL
+     */
+    private String extractColorIdFromImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return "1"; // Default color ID
+        }
+
+        // Check if it's already a color ID (1-6)
+        try {
+            int id = Integer.parseInt(imageUrl);
+            if (id >= 1 && id <= 6) {
+                return imageUrl; // It's already a color ID
+            }
+        } catch (NumberFormatException e) {
+            // It's a URL, try to extract color ID from it
+        }
+
+        // Extract color ID from placeholder URL
+        if (imageUrl.contains("Color1")) return "1";
+        if (imageUrl.contains("Color2")) return "2";
+        if (imageUrl.contains("Color3")) return "3";
+        if (imageUrl.contains("Color4")) return "4";
+        if (imageUrl.contains("Color5")) return "5";
+        if (imageUrl.contains("Color6")) return "6";
+
+        return "1"; // Default fallback
+    }
+
+    // Updated createDeck method to handle color ID conversion
+    public void createDeck(String name, String description, String colorId, boolean isPublic, String token) {
+        Log.d(TAG, "Creating deck with params:");
+        Log.d(TAG, "Name: " + name);
+        Log.d(TAG, "Description: " + description);
+        Log.d(TAG, "ColorId: " + colorId);
+        Log.d(TAG, "IsPublic: " + isPublic);
+
         loadingState.setValue(true);
 
+        // Validate input parameters
+        if (name == null || name.trim().isEmpty()) {
+            Log.e(TAG, "Deck name is null or empty");
+            loadingState.setValue(false);
+            errorMessage.setValue("Tên bộ thẻ không được để trống");
+            return;
+        }
+
+        if (token == null || token.trim().isEmpty()) {
+            Log.e(TAG, "Token is null or empty");
+            loadingState.setValue(false);
+            errorMessage.setValue("Phiên đăng nhập đã hết hạn");
+            return;
+        }
+
+        // Convert color ID to valid image URL
+        String imageUrl = convertColorIdToImageUrl(colorId);
+        Log.d(TAG, "Converted colorId " + colorId + " to imageUrl: " + imageUrl);
+
         // Create request using the new DTO structure
-        DeckCreateRequest request = new DeckCreateRequest(name, description, imageUrl, isPublic);
+        DeckCreateRequest request = new DeckCreateRequest(
+                name.trim(),
+                description != null ? description.trim() : "",
+                imageUrl,  // Use converted URL instead of ID
+                isPublic
+        );
+
+        Log.d(TAG, "Request object: " + request.toString());
 
         Call<DeckCreateResponse> call = apiService.createDeck("Bearer " + token, request);
         call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<DeckCreateResponse> call, @NonNull Response<DeckCreateResponse> response) {
                 loadingState.setValue(false);
+
+                Log.d(TAG, "Response code: " + response.code());
+                Log.d(TAG, "Response message: " + response.message());
+
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "Deck created successfully: " + response.body().toString());
                     createDeckSuccessLiveData.setValue(response.body());
                     // Refresh danh sách decks sau khi tạo thành công
                     fetchDecks(token);
                 } else {
+                    Log.e(TAG, "Create deck failed with code: " + response.code());
+
+                    // Log error body if available
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBody = response.errorBody().string();
+                            Log.e(TAG, "Error body: " + errorBody);
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to read error body", e);
+                        }
+                    }
+
                     handleCreateDeckError(response.code());
                 }
             }
@@ -247,37 +361,45 @@ public class DeckRepository {
             @Override
             public void onFailure(@NonNull Call<DeckCreateResponse> call, @NonNull Throwable t) {
                 loadingState.setValue(false);
+                Log.e(TAG, "Network error during deck creation", t);
                 errorMessage.setValue("Network error: " + t.getMessage());
             }
         });
     }
 
-    // Overloaded method for backward compatibility (without imageUrl)
+    // Overloaded method for backward compatibility (without colorId)
     public void createDeck(String name, String description, boolean isPublic, String token) {
-        createDeck(name, description, null, isPublic, token);
+        Log.d(TAG, "Creating deck without colorId - using default color");
+        createDeck(name, description, "1", isPublic, token); // Default to color ID 1
     }
 
     private void handleCreateDeckError(int responseCode) {
+        String errorMsg;
         switch (responseCode) {
             case 400:
-                errorMessage.setValue("Thông tin bộ thẻ không hợp lệ");
+                errorMsg = "Thông tin bộ thẻ không hợp lệ";
                 break;
             case 401:
-                errorMessage.setValue("Phiên đăng nhập đã hết hạn");
+                errorMsg = "Phiên đăng nhập đã hết hạn";
                 break;
             case 403:
-                errorMessage.setValue("Không có quyền thực hiện hành động này");
+                errorMsg = "Không có quyền thực hiện hành động này";
                 break;
             case 409:
-                errorMessage.setValue("Bộ thẻ với tên này đã tồn tại");
+                errorMsg = "Bộ thẻ với tên này đã tồn tại";
                 break;
             case 422:
-                errorMessage.setValue("Dữ liệu không hợp lệ");
+                errorMsg = "Dữ liệu không hợp lệ";
+                break;
+            case 500:
+                errorMsg = "Lỗi máy chủ nội bộ";
                 break;
             default:
-                errorMessage.setValue("Failed to create deck");
+                errorMsg = "Không thể tạo bộ thẻ (Mã lỗi: " + responseCode + ")";
                 break;
         }
+        Log.e(TAG, "Create deck error: " + errorMsg);
+        errorMessage.setValue(errorMsg);
     }
 
     public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String token) {

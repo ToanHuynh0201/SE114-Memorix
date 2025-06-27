@@ -1,6 +1,8 @@
 package com.example.memorix.data.remote.api;
+import com.example.memorix.data.remote.dto.Deck.CloneResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckDeleteResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckUpdateRequest;
+import com.example.memorix.data.remote.dto.Deck.PublicDecksResponse;
 import com.example.memorix.model.Deck;
 import com.example.memorix.data.remote.dto.Deck.DeckCreateRequest;
 import com.example.memorix.data.remote.dto.Deck.DeckCreateResponse;
@@ -42,4 +44,13 @@ public interface DeckApi {
     );
     @POST("api/decks")
     Call<DeckCreateResponse> createDeck(@Header("Authorization") String token, @Body DeckCreateRequest request);
+
+    @GET("api/shares/public-decks")
+    Call<PublicDecksResponse> getPublicDecks();
+
+    @POST("api/shares/clone/{deckId}")
+    Call<CloneResponse> cloneDeck(
+            @Header("Authorization") String token,
+            @Path("deckId") long deckId
+    );
 }

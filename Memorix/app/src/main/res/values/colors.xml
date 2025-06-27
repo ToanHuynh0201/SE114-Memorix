@@ -30,4 +30,34 @@
     <color name="input_background">#3D3D3D</color>
     <color name="hint_color">#8A8A8A</color>
     <color name="bottom_sheet_background">#2D2D2D</color>
+
+    <color name="gradient_1_start">#FF6B6B</color>
+    <color name="gradient_1_end">#4ECDC4</color>
+
+    <color name="gradient_2_start">#A8E6CF</color>
+    <color name="gradient_2_end">#88D8C0</color>
+
+    <color name="gradient_3_start">#FFD93D</color>
+    <color name="gradient_3_end">#FF8C42</color>
+
+    <color name="gradient_4_start">#6C5CE7</color>
+    <color name="gradient_4_end">#A29BFE</color>
+
+    <color name="gradient_5_start">#FD79A8</color>
+    <color name="gradient_5_end">#FDCB6E</color>
+
+    <color name="gradient_6_start">#00B894</color>
+    <color name="gradient_6_end">#55EFC4</color>
+
+    <color name="gradient_7_start">#E17055</color>
+    <color name="gradient_7_end">#FFEAA7</color>
+
+    <color name="gradient_8_start">#0984E3</color>
+    <color name="gradient_8_end">#74B9FF</color>
+
+    <color name="gradient_9_start">#E84393</color>
+    <color name="gradient_9_end">#F8BBD0</color>
+
+    <color name="gradient_10_start">#00CEC9</color>
+    <color name="gradient_10_end">#81ECEC</color>
 </resources>

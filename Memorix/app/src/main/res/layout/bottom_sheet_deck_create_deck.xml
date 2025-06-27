@@ -51,7 +51,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         app:boxBackgroundColor="@android:color/white"
         app:boxBackgroundMode="filled"
         app:boxCornerRadiusBottomEnd="12dp"
@@ -73,6 +73,123 @@
             android:textSize="16sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Color Selection Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chọn màu cho bộ thẻ"
+        android:textColor="@color/text_color"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Color Options Grid -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp"
+        android:gravity="center">
+
+        <!-- Row 1: Colors 1-3 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Color 1: Hồng -> Xanh lá -->
+            <View
+                android:id="@+id/color_option_1"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_1"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+            <!-- Color 2: Xanh lá nhạt -> Xanh đậm -->
+            <View
+                android:id="@+id/color_option_2"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_2"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+            <!-- Color 3: Vàng -> Cam -->
+            <View
+                android:id="@+id/color_option_3"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_3"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+        </LinearLayout>
+
+        <!-- Row 2: Colors 4-6 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Color 4: Tím đậm -> Tím nhạt -->
+            <View
+                android:id="@+id/color_option_4"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_4"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+            <!-- Color 5: Hồng -> Vàng -->
+            <View
+                android:id="@+id/color_option_5"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_5"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+            <!-- Color 6: Xanh lá đậm -> Xanh lá nhạt -->
+            <View
+                android:id="@+id/color_option_6"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/gradient_color_6"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Selected Color Indicator -->
+    <TextView
+        android:id="@+id/tv_selected_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đã chọn: Màu 1"
+        android:textColor="@color/secondary_text_color"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
 
     <!-- Create Button -->
     <androidx.appcompat.widget.AppCompatButton
