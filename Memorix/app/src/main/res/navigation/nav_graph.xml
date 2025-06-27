@@ -15,6 +15,10 @@
             app:destination="@id/nav_library" />
 
         <action
+            android:id="@+id/action_home_to_statistics"
+            app:destination="@id/nav_statistics" />
+
+        <action
             android:id="@+id/action_home_to_invites"
             app:destination="@id/nav_invites" />
     </fragment>
@@ -30,8 +34,35 @@
             app:destination="@id/nav_home" />
 
         <action
+            android:id="@+id/action_library_to_statistics"
+            app:destination="@id/nav_statistics" />
+
+        <action
             android:id="@+id/action_library_to_invites"
             app:destination="@id/nav_invites" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_statistics"
+        android:name="com.example.memorix.view.StatisticsFragment"
+        android:label="Thống kê"
+        tools:layout="@layout/fragment_statistics">
+
+        <action
+            android:id="@+id/action_statistics_to_home"
+            app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_statistics_to_library"
+            app:destination="@id/nav_library" />
+
+        <action
+            android:id="@+id/action_statistics_to_invites"
+            app:destination="@id/nav_invites" />
+
+        <action
+            android:id="@+id/action_statistics_to_profile"
+            app:destination="@id/nav_profile" />
     </fragment>
 
     <fragment
@@ -47,6 +78,10 @@
         <action
             android:id="@+id/action_invites_to_library"
             app:destination="@id/nav_library" />
+
+        <action
+            android:id="@+id/action_invites_to_statistics"
+            app:destination="@id/nav_statistics" />
     </fragment>
 
     <fragment
@@ -58,6 +93,41 @@
         <action
             android:id="@+id/action_profile_to_home"
             app:destination="@id/nav_home" />
+
+        <action
+            android:id="@+id/action_profile_to_statistics"
+            app:destination="@id/nav_statistics" />
     </fragment>
+
+    <!-- Global Actions for BottomNavigation -->
+    <action
+        android:id="@+id/action_global_nav_home"
+        app:destination="@id/nav_home"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_library"
+        app:destination="@id/nav_library"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_statistics"
+        app:destination="@id/nav_statistics"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_invites"
+        app:destination="@id/nav_invites"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_nav_profile"
+        app:destination="@id/nav_profile"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 
 </navigation>

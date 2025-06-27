@@ -44,7 +44,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/layout_create_folder"
+        android:id="@+id/layout_go_to_library"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -56,13 +56,13 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_folder"
-            android:contentDescription="@string/create_folder" />
+            android:src="@drawable/ic_library"
+            android:contentDescription="@string/go_to_library" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/create_folder"
+            android:text="@string/go_to_library"
             android:textSize="16sp"
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical" />

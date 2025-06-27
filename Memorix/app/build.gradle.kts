@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.biometric)
     implementation(libs.navigation.fragment)
+    implementation(libs.mpandroidchart)
     implementation(libs.retrofit)
     implementation(libs.navigation.ui)
     implementation(libs.swiperefreshlayout)

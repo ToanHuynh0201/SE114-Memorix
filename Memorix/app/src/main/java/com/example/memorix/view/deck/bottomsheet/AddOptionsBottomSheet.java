@@ -12,7 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 public class AddOptionsBottomSheet extends BottomSheetDialogFragment {
     public interface OptionClickListener {
         void onCreateDeckClicked();
-        void onCreateFolderClicked();
+        void onGoToLibrary();
     }
 
     private OptionClickListener listener;
@@ -36,7 +36,7 @@ public class AddOptionsBottomSheet extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
 
         LinearLayout createDeckLayout = view.findViewById(R.id.layout_create_deck);
-        LinearLayout createFolderLayout = view.findViewById(R.id.layout_create_folder);
+        LinearLayout goToLibrary = view.findViewById(R.id.layout_go_to_library);
 
         createDeckLayout.setOnClickListener(v -> {
             if (listener != null) {
@@ -45,9 +45,9 @@ public class AddOptionsBottomSheet extends BottomSheetDialogFragment {
             dismiss();
         });
 
-        createFolderLayout.setOnClickListener(v -> {
+        goToLibrary.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onCreateFolderClicked();
+                listener.onGoToLibrary();
             }
             dismiss();
         });

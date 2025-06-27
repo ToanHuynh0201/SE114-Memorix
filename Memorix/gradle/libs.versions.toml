@@ -14,6 +14,7 @@ converter-gson = "3.0.0"
 okhttp = "4.12.0"
 nav_version = "2.9.0"
 swiperefreshlayout = "1.1.0"
+chart = "v3.1.0"
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -31,6 +32,7 @@ navigation-fragment = { module = "androidx.navigation:navigation-fragment", vers
 navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "nav_version" }
 biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout"}
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "chart" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 

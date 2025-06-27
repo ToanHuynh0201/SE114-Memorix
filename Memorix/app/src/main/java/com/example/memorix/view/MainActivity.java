@@ -29,9 +29,17 @@ public class  MainActivity extends AppCompatActivity {
 
     private void setupNavigation() {
         findViewById(R.id.nav_host_fragment).post(() -> {
-                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-                BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-                NavigationUI.setupWithNavController(bottomNav, navController);
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+            // Cấu hình để BottomNavigation xử lý navigation đúng cách
+            NavigationUI.setupWithNavController(bottomNav, navController);
+
+            // Thêm listener để xử lý việc reselect
+            bottomNav.setOnItemReselectedListener(item -> {
+                // Khi reselect một item, pop back stack về destination đó
+                navController.popBackStack(item.getItemId(), false);
+            });
         });
     }
 

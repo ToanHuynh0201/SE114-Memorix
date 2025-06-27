@@ -43,8 +43,8 @@ import com.example.memorix.view.deck.adapter.DeckActionListener;
 import com.example.memorix.view.deck.adapter.DeckAdapter;
 import com.example.memorix.view.deck.bottomsheet.AddOptionsBottomSheet;
 import com.example.memorix.view.deck.bottomsheet.CreateDeckBottomSheet;
-import com.example.memorix.view.deck.bottomsheet.CreateFolderBottomSheet;
 import com.example.memorix.viewmodel.HomeViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -54,8 +54,7 @@ import java.util.Objects;
 
 public class HomeFragment extends Fragment implements DeckActionListener,
         AddOptionsBottomSheet.OptionClickListener,
-        CreateDeckBottomSheet.CreateDeckListener,
-        CreateFolderBottomSheet.CreateFolderListener{
+        CreateDeckBottomSheet.CreateDeckListener{
 
     // Views
     private RecyclerView recyclerFlashcardSets;
@@ -685,10 +684,14 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     }
 
     @Override
-    public void onCreateFolderClicked() {
-        CreateFolderBottomSheet createFolderBottomSheet = CreateFolderBottomSheet.newInstance();
-        createFolderBottomSheet.setCreateFolderListener(this);
-        createFolderBottomSheet.show(getParentFragmentManager(), "CreateFolderBottomSheet");
+    public void onGoToLibrary() {
+        // Điều hướng đến Library fragment thay vì tạo folder
+        if (getActivity() instanceof MainActivity) {
+         BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
+         if (bottomNav != null) {
+             bottomNav.setSelectedItemId(R.id.nav_library);
+         }
+     }
     }
 
     @Override
@@ -713,11 +716,6 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         } else {
             Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onFolderCreated(String folderName) {
-        // Implementation for creating folder
     }
 
     private void showEditDeckDialog(Deck deck) {
