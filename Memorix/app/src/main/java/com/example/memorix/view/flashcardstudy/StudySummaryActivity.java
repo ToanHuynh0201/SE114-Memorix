@@ -32,21 +32,6 @@ public class StudySummaryActivity extends AppCompatActivity {
     private TextView tvStudyTime;
     private TextView tvAverageTime;
 
-    // Card type layouts
-    private LinearLayout layoutBasicCards;
-    private LinearLayout layoutMultipleChoiceCards;
-    private LinearLayout layoutFillBlankCards;
-
-    // Card type statistics
-    private TextView tvBasicStats;
-    private TextView tvBasicAccuracy;
-    private TextView tvMultipleChoiceStats;
-    private TextView tvMultipleChoiceAccuracy;
-    private TextView tvFillBlankStats;
-    private TextView tvFillBlankAccuracy;
-
-    // Buttons
-    private AppCompatButton btnStudyAgain;
     private AppCompatButton btnBackToDeck;
 
     // Data
@@ -81,18 +66,7 @@ public class StudySummaryActivity extends AppCompatActivity {
         tvStudyTime = findViewById(R.id.tv_study_time);
         tvAverageTime = findViewById(R.id.tv_average_time);
 
-        layoutBasicCards = findViewById(R.id.layout_basic_cards);
-        layoutMultipleChoiceCards = findViewById(R.id.layout_multiple_choice_cards);
-        layoutFillBlankCards = findViewById(R.id.layout_fill_blank_cards);
 
-        tvBasicStats = findViewById(R.id.tv_basic_stats);
-        tvBasicAccuracy = findViewById(R.id.tv_basic_accuracy);
-        tvMultipleChoiceStats = findViewById(R.id.tv_multiple_choice_stats);
-        tvMultipleChoiceAccuracy = findViewById(R.id.tv_multiple_choice_accuracy);
-        tvFillBlankStats = findViewById(R.id.tv_fill_blank_stats);
-        tvFillBlankAccuracy = findViewById(R.id.tv_fill_blank_accuracy);
-
-        btnStudyAgain = findViewById(R.id.btn_study_again);
         btnBackToDeck = findViewById(R.id.btn_back_to_deck);
     }
 
@@ -122,8 +96,6 @@ public class StudySummaryActivity extends AppCompatActivity {
         // Calculate and display study time
         displayStudyTime();
 
-        // Display card type breakdown
-        displayCardTypeBreakdown();
     }
 
     @SuppressLint("SetTextI18n")
@@ -143,73 +115,7 @@ public class StudySummaryActivity extends AppCompatActivity {
         }
     }
 
-    private void displayCardTypeBreakdown() {
-        if (studiedCards == null || studiedCards.isEmpty()) {
-            return;
-        }
-
-        // Count cards by type
-        int basicCount = 0, basicCorrect = 0, basicReviewed = 0;
-        int multipleChoiceCount = 0, multipleChoiceCorrect = 0, multipleChoiceReviewed = 0;
-        int fillBlankCount = 0, fillBlankCorrect = 0, fillBlankReviewed = 0;
-
-        for (Card card : studiedCards) {
-            switch (card.getCardType()) {
-                case BASIC:
-                    basicCount++;
-//                    basicCorrect += card.getCorrectCount();
-//                    basicReviewed += card.getReviewCount();
-                    break;
-                case MULTIPLE_CHOICE:
-                    multipleChoiceCount++;
-//                    multipleChoiceCorrect += card.getCorrectCount();
-//                    multipleChoiceReviewed += card.getReviewCount();
-                    break;
-                case FILL_IN_BLANK:
-                    fillBlankCount++;
-//                    fillBlankCorrect += card.getCorrectCount();
-//                    fillBlankReviewed += card.getReviewCount();
-                    break;
-            }
-        }
-
-        // Display basic cards statistics
-        if (basicCount > 0) {
-            layoutBasicCards.setVisibility(View.VISIBLE);
-            double basicAccuracy = basicReviewed > 0 ? (double) basicCorrect / basicReviewed * 100 : 0;
-            tvBasicStats.setText(String.format(Locale.getDefault(),
-                    "%d thẻ • %.1f%% chính xác", basicCount, basicAccuracy));
-            tvBasicAccuracy.setText(String.format(Locale.getDefault(), "%.1f%%", basicAccuracy));
-        }
-
-        // Display multiple choice cards statistics
-        if (multipleChoiceCount > 0) {
-            layoutMultipleChoiceCards.setVisibility(View.VISIBLE);
-            double multipleChoiceAccuracy = multipleChoiceReviewed > 0 ?
-                    (double) multipleChoiceCorrect / multipleChoiceReviewed * 100 : 0;
-            tvMultipleChoiceStats.setText(String.format(Locale.getDefault(),
-                    "%d thẻ • %.1f%% chính xác", multipleChoiceCount, multipleChoiceAccuracy));
-            tvMultipleChoiceAccuracy.setText(String.format(Locale.getDefault(), "%.1f%%", multipleChoiceAccuracy));
-        }
-
-        // Display fill in blank cards statistics
-        if (fillBlankCount > 0) {
-            layoutFillBlankCards.setVisibility(View.VISIBLE);
-            double fillBlankAccuracy = fillBlankReviewed > 0 ?
-                    (double) fillBlankCorrect / fillBlankReviewed * 100 : 0;
-            tvFillBlankStats.setText(String.format(Locale.getDefault(),
-                    "%d thẻ • %.1f%% chính xác", fillBlankCount, fillBlankAccuracy));
-            tvFillBlankAccuracy.setText(String.format(Locale.getDefault(), "%.1f%%", fillBlankAccuracy));
-        }
-    }
-
     private void setupClickListeners() {
-        btnStudyAgain.setOnClickListener(v -> {
-            // Restart study session
-//            Intent intent = new Intent();
-//            intent.putExtra("action", "study_again");
-//            finish();
-        });
         btnBackToDeck.setOnClickListener(v -> {
             // Go back to deck
             Intent intent = new Intent(this, MainActivity.class);

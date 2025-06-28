@@ -405,8 +405,9 @@ public class DeckRepository {
     public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String token) {
         loadingState.setValue(true);
 
+        String newUrl = convertColorIdToImageUrl(imageUrl);
         // Create request using the new DTO structure
-        DeckUpdateRequest request = new DeckUpdateRequest(name, description, imageUrl, isPublic);
+        DeckUpdateRequest request = new DeckUpdateRequest(name, description, newUrl, isPublic);
 
         Call<DeckResponse> call = apiService.updateDeck("Bearer " + token, deckId, request);
         call.enqueue(new Callback<>() {
