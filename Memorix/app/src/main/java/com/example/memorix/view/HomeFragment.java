@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
@@ -695,7 +696,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     }
 
     @Override
-    public void onDeckCreated(String deckName, int colorId) {
+    public void onDeckCreated(String deckName, String deckDescription, int colorId, int categoryId) {
         if (deckName == null || deckName.trim().isEmpty()) {
             Toast.makeText(getContext(), "Tên bộ thẻ không được để trống", Toast.LENGTH_SHORT).show();
             return;
@@ -706,10 +707,20 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             return;
         }
 
+        if (categoryId < 1 || categoryId > 6) {
+            Toast.makeText(getContext(), "Thể loại được chọn không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
-            String description = "";
+            // Sử dụng description từ input hoặc để trống nếu không có
+            String description = deckDescription != null ? deckDescription.trim() : "";
             String imageUrl = String.valueOf(colorId); // Sử dụng colorId làm imageUrl
             boolean isPublic = false;
+
+            // TODO: Khi có API hỗ trợ category, có thể thêm categoryId vào đây
+            // Hiện tại chỉ log để debug
+            Log.d("HomeFragment", "Creating deck with category: " + getCategoryName(categoryId));
 
             // Call API với imageUrl là colorId
             homeViewModel.createDeck(deckName.trim(), description, imageUrl, isPublic, cachedAuthToken);
@@ -718,19 +729,133 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         }
     }
 
+    private String getCategoryName(int categoryId) {
+        String[] categoryNames = {
+                "Ngôn ngữ", "Khoa học", "Lịch sử",
+                "Toán học", "Nghệ thuật", "Khác"
+        };
+
+        if (categoryId >= 1 && categoryId <= categoryNames.length) {
+            return categoryNames[categoryId - 1];
+        }
+        return "Không xác định";
+    }
+
     private void showEditDeckDialog(Deck deck) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_deck, null);
 
+        // Initialize input fields
         TextInputEditText etDeckName = dialogView.findViewById(R.id.et_deck_name);
         TextInputEditText etDeckDescription = dialogView.findViewById(R.id.et_deck_description);
+        TextView tvSelectedCategory = dialogView.findViewById(R.id.tv_selected_category);
+        TextView tvSelectedColor = dialogView.findViewById(R.id.tv_selected_color);
 
+        // Initialize category options
+        LinearLayout categoryOption1 = dialogView.findViewById(R.id.category_option_1);
+        LinearLayout categoryOption2 = dialogView.findViewById(R.id.category_option_2);
+        LinearLayout categoryOption3 = dialogView.findViewById(R.id.category_option_3);
+        LinearLayout categoryOption4 = dialogView.findViewById(R.id.category_option_4);
+        LinearLayout categoryOption5 = dialogView.findViewById(R.id.category_option_5);
+        LinearLayout categoryOption6 = dialogView.findViewById(R.id.category_option_6);
+        LinearLayout[] categoryOptions = {categoryOption1, categoryOption2, categoryOption3, categoryOption4, categoryOption5, categoryOption6};
+
+        // Initialize color options
+        View colorOption1 = dialogView.findViewById(R.id.color_option_1);
+        View colorOption2 = dialogView.findViewById(R.id.color_option_2);
+        View colorOption3 = dialogView.findViewById(R.id.color_option_3);
+        View colorOption4 = dialogView.findViewById(R.id.color_option_4);
+        View colorOption5 = dialogView.findViewById(R.id.color_option_5);
+        View colorOption6 = dialogView.findViewById(R.id.color_option_6);
+        View[] colorOptions = {colorOption1, colorOption2, colorOption3, colorOption4, colorOption5, colorOption6};
+
+        // Category and color names
+        String[] categoryNames = {"Ngôn ngữ", "Khoa học", "Lịch sử", "Toán học", "Nghệ thuật", "Khác"};
+        String[] colorNames = {"Hồng - Xanh lá", "Xanh lá nhạt", "Vàng - Cam", "Tím", "Hồng - Vàng", "Xanh lá đậm"};
+
+        // Set current values
         etDeckName.setText(deck.getName());
         etDeckDescription.setText(deck.getDescription());
 
+        // Get current color ID from imageUrl (default to 1 if not valid)
+        int currentColorId = 1;
+        try {
+            if (deck.getImageUrl() != null && !deck.getImageUrl().isEmpty()) {
+                currentColorId = Integer.parseInt(deck.getImageUrl());
+                if (currentColorId < 1 || currentColorId > 6) {
+                    currentColorId = 1;
+                }
+            }
+        } catch (NumberFormatException e) {
+            currentColorId = 1;
+        }
+
+        // For now, default category to 1 since we don't have category data from API yet
+        int currentCategoryId = 1;
+
+        // Selection state tracking
+        final int[] selectedColorId = {currentColorId};
+        final int[] selectedCategoryId = {currentCategoryId};
+
+        // Helper method to update category selection
+        @SuppressLint("SetTextI18n") Runnable updateCategorySelection = () -> {
+            for (int i = 0; i < categoryOptions.length; i++) {
+                if (i + 1 == selectedCategoryId[0]) {
+                    categoryOptions[i].setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_category_option_selected));
+                    categoryOptions[i].setScaleX(1.05f);
+                    categoryOptions[i].setScaleY(1.05f);
+                } else {
+                    categoryOptions[i].setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_category_option));
+                    categoryOptions[i].setScaleX(1.0f);
+                    categoryOptions[i].setScaleY(1.0f);
+                }
+            }
+            tvSelectedCategory.setText("Đã chọn: " + categoryNames[selectedCategoryId[0] - 1]);
+        };
+
+        // Helper method to update color selection
+        @SuppressLint("SetTextI18n") Runnable updateColorSelection = () -> {
+            for (int i = 0; i < colorOptions.length; i++) {
+                if (i + 1 == selectedColorId[0]) {
+                    colorOptions[i].setScaleX(1.2f);
+                    colorOptions[i].setScaleY(1.2f);
+                    colorOptions[i].setElevation(8f);
+                } else {
+                    colorOptions[i].setScaleX(1.0f);
+                    colorOptions[i].setScaleY(1.0f);
+                    colorOptions[i].setElevation(0f);
+                }
+            }
+            tvSelectedColor.setText("Đã chọn: " + colorNames[selectedColorId[0] - 1]);
+        };
+
+        // Set initial selections
+        updateCategorySelection.run();
+        updateColorSelection.run();
+
+        // Set up category click listeners
+        for (int i = 0; i < categoryOptions.length; i++) {
+            final int categoryId = i + 1;
+            categoryOptions[i].setOnClickListener(v -> {
+                selectedCategoryId[0] = categoryId;
+                updateCategorySelection.run();
+            });
+        }
+
+        // Set up color click listeners
+        for (int i = 0; i < colorOptions.length; i++) {
+            final int colorId = i + 1;
+            colorOptions[i].setOnClickListener(v -> {
+                selectedColorId[0] = colorId;
+                updateColorSelection.run();
+            });
+        }
+
+        // Create dialog
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
 
+        // Set up button listeners
         dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
 
         dialogView.findViewById(R.id.btn_save).setOnClickListener(v -> {
@@ -744,9 +869,22 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             }
 
             if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
-                // Sử dụng deck ID thay vì tìm position
+                // Log the changes for debugging
                 Log.d("HomeFragment", "Updating deck with ID: " + deck.getId());
-                homeViewModel.updateDeck(deck.getId(), newName, newDescription, false, cachedAuthToken);
+                Log.d("HomeFragment", "New name: " + newName);
+                Log.d("HomeFragment", "New description: " + newDescription);
+                Log.d("HomeFragment", "New category: " + getCategoryName(selectedCategoryId[0]) + " (ID: " + selectedCategoryId[0] + ")");
+                Log.d("HomeFragment", "New color: " + colorNames[selectedColorId[0] - 1] + " (ID: " + selectedColorId[0] + ")");
+
+                // Create updated deck object with new imageUrl (colorId)
+                String newImageUrl = String.valueOf(selectedColorId[0]);
+
+                // Call API to update deck (không gửi categoryId vì API chưa hỗ trợ)
+                homeViewModel.updateDeck(deck.getId(), newName, newDescription, newImageUrl ,false, cachedAuthToken);
+
+                // TODO: Khi API hỗ trợ category và color update, thêm các tham số này vào API call
+                // homeViewModel.updateDeck(deck.getId(), newName, newDescription, false, newImageUrl, selectedCategoryId[0], cachedAuthToken);
+
                 dialog.dismiss();
             } else {
                 Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
