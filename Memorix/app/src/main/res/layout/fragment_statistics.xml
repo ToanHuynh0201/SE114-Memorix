@@ -10,7 +10,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
-
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:scrollbarStyle="insideInset"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"/>
         <!-- Header -->
         <TextView
             android:layout_width="match_parent"
