@@ -14,6 +14,7 @@
         android:layout_height="match_parent"
         android:padding="20dp">
 
+        <!-- Header Section -->
         <TextView
             android:id="@+id/tv_deck_name"
             android:layout_width="0dp"
@@ -29,7 +30,21 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tiếng Việt" />
 
-        <!-- Nút 3 chấm (Overflow menu) -->
+        <!-- Due Indicator -->
+        <ImageView
+            android:id="@+id/iv_due_indicator"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_notification"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/tv_deck_name"
+            app:layout_constraintTop_toTopOf="@+id/tv_deck_name"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_deck_name"
+            tools:visibility="visible"
+            app:tint="@color/warning_color" />
+
+        <!-- Overflow Menu Button -->
         <ImageButton
             android:id="@+id/btn_overflow_menu"
             android:layout_width="28dp"
@@ -37,64 +52,174 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="2dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/menu"
+            android:contentDescription="Menu"
             android:src="@drawable/ic_more_vert"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/secondary_color" />
 
+        <!-- Category -->
+        <TextView
+            android:id="@+id/tv_deck_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_category_chip"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@color/primary_color"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_deck_name"
+            tools:text="Ngôn ngữ" />
+
+        <!-- Description -->
         <TextView
             android:id="@+id/tv_deck_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@color/secondary_text_color"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_deck_name"
-            tools:text="Vietnamese language flashcards" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_deck_category"
+            tools:text="Vietnamese language flashcards for beginners" />
 
+        <!-- Cards Statistics Section -->
         <LinearLayout
-            android:id="@+id/layout_card_count"
-            android:layout_width="wrap_content"
+            android:id="@+id/layout_cards_stats"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal"
+            android:weightSum="4"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_deck_description"
-            tools:ignore="UseCompoundDrawables">
+            app:layout_constraintTop_toBottomOf="@+id/tv_deck_description">
 
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:contentDescription="@string/card_count"
-                android:src="@drawable/ic_cards"
-                app:tint="@color/secondary_color" />
-
-            <TextView
-                android:id="@+id/tv_card_count"
-                android:layout_width="wrap_content"
+            <!-- Total Cards -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="@color/secondary_text_color"
-                tools:text="25 cards" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_cards"
+                    android:contentDescription="Tổng số thẻ"
+                    app:tint="@color/primary_color" />
+
+                <TextView
+                    android:id="@+id/tv_total_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/text_color"
+                    android:textStyle="bold"
+                    tools:text="25 thẻ" />
+            </LinearLayout>
+
+            <!-- Learned Cards -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_check_circle"
+                    android:contentDescription="Thẻ đã học"
+                    app:tint="@color/success_color" />
+
+                <TextView
+                    android:id="@+id/tv_learned_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/success_color"
+                    android:textStyle="bold"
+                    tools:text="15 đã học" />
+            </LinearLayout>
+
+            <!-- Due Cards -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_schedule"
+                    android:contentDescription="Thẻ cần ôn"
+                    app:tint="@color/warning_color" />
+
+                <TextView
+                    android:id="@+id/tv_due_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/warning_color"
+                    android:textStyle="bold"
+                    tools:text="5 cần ôn" />
+            </LinearLayout>
+
+            <!-- Unlearned Cards -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_circle"
+                    android:contentDescription="Thẻ chưa học"
+                    app:tint="@color/secondary_color" />
+
+                <TextView
+                    android:id="@+id/tv_unlearned_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/secondary_color"
+                    android:textStyle="bold"
+                    tools:text="5 chưa học" />
+            </LinearLayout>
+
         </LinearLayout>
 
+        <!-- Progress Section (decorative only) -->
         <ProgressBar
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
             android:layout_height="6dp"
             android:layout_marginTop="12dp"
+            android:progress="25"
+            android:background="@drawable/custom_progress_bar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layout_card_count"
-            tools:progress="60" />
+            app:layout_constraintTop_toBottomOf="@+id/layout_cards_stats"
+            tools:progress="25" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

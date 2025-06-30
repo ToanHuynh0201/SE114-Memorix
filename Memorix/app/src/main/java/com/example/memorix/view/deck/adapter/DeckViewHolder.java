@@ -11,10 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.memorix.R;
@@ -25,9 +27,14 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
     private Deck currentDeck;
     private final TextView tvDeckName;
     private final TextView tvDeckDescription;
-    private final TextView tvCardCount;
+    private final TextView tvDeckCategory;
+    private final TextView tvTotalCards;
+    private final TextView tvLearnedCards;
+    private final TextView tvDueCards;
+    private final TextView tvUnlearnedCards;
     private final ProgressBar progressBar;
     private final ImageButton btnOverflowMenu;
+    private final ImageView ivDueIndicator;
     private final Context context;
     private int currentPosition;
     private final DeckActionListener listener;
@@ -46,11 +53,18 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         super(itemView);
         context = itemView.getContext();
         this.listener = listener;
+
+        // Initialize views
         tvDeckName = itemView.findViewById(R.id.tv_deck_name);
         tvDeckDescription = itemView.findViewById(R.id.tv_deck_description);
-        tvCardCount = itemView.findViewById(R.id.tv_card_count);
+        tvDeckCategory = itemView.findViewById(R.id.tv_deck_category);
+        tvTotalCards = itemView.findViewById(R.id.tv_total_cards);
+        tvLearnedCards = itemView.findViewById(R.id.tv_learned_cards);
+        tvDueCards = itemView.findViewById(R.id.tv_due_cards);
+        tvUnlearnedCards = itemView.findViewById(R.id.tv_unlearned_cards);
         progressBar = itemView.findViewById(R.id.progress_bar);
         btnOverflowMenu = itemView.findViewById(R.id.btn_overflow_menu);
+        ivDueIndicator = itemView.findViewById(R.id.iv_due_indicator);
 
         btnOverflowMenu.setOnClickListener(v -> showPopupMenu());
     }
@@ -297,22 +311,39 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         // Debug log để kiểm tra dữ liệu
         Log.d(TAG, "Binding deck: " + deck.getName());
         Log.d(TAG, "Total cards: " + deck.getTotalCards());
+        Log.d(TAG, "Learned cards: " + deck.getLearnedCards());
+        Log.d(TAG, "Due cards: " + deck.getDueCards());
+        Log.d(TAG, "Unlearned cards: " + deck.getUnlearnedCards());
+        Log.d(TAG, "Category: " + deck.getCategory());
 
+        // Set basic info
         tvDeckName.setText(deck.getName());
         tvDeckDescription.setText(deck.getDescription());
 
-        // SỬA: Sử dụng getTotalCards() thay vì getCardCount()
-        int cardCount = deck.getTotalCards();
-        if (cardCount <= 0) {
-            tvCardCount.setText("0 cards");
-            Log.w(TAG, "Deck has 0 cards: " + deck.getName());
+        // Set category
+        String category = deck.getCategory();
+        if (category != null && !category.isEmpty()) {
+            tvDeckCategory.setText(category);
+            tvDeckCategory.setVisibility(View.VISIBLE);
         } else {
-            tvCardCount.setText(cardCount + " cards");
+            tvDeckCategory.setVisibility(View.GONE);
         }
 
-        // Áp dụng màu dựa trên deck
-        applyDeckColors(deck);
-        progressBar.setProgress(25);
-    }
+        // Set card counts
+        tvTotalCards.setText(deck.getTotalCards() + " thẻ");
+        tvLearnedCards.setText(deck.getLearnedCards() + " đã học");
+        tvDueCards.setText(deck.getDueCards() + " cần ôn");
+        tvUnlearnedCards.setText(deck.getUnlearnedCards() + " chưa học");
 
+        // Show due indicator if there are due cards
+        if (deck.hasDueCards()) {
+            ivDueIndicator.setVisibility(View.VISIBLE);
+            ivDueIndicator.setColorFilter(ContextCompat.getColor(context, R.color.warning_color));
+        } else {
+            ivDueIndicator.setVisibility(View.GONE);
+        }
+
+        // Apply colors (progress bar will keep gradient from applyDeckColors)
+        applyDeckColors(deck);
+    }
 }

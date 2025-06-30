@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeckLibraryViewModel extends ViewModel {
-    private DeckLibraryRepository repository;
-    private MutableLiveData<List<Deck>> filteredDecksLiveData;
+    private final DeckLibraryRepository repository;
+    private final MutableLiveData<List<Deck>> filteredDecksLiveData;
     private List<Deck> originalDecks;
 
     public DeckLibraryViewModel() {
@@ -37,7 +37,7 @@ public class DeckLibraryViewModel extends ViewModel {
         return repository.getError();
     }
 
-    // New methods for clone functionality
+    // Clone functionality methods
     public LiveData<Boolean> getCloneLoading() {
         return repository.getCloneLoading();
     }
@@ -59,6 +59,42 @@ public class DeckLibraryViewModel extends ViewModel {
         filteredDecksLiveData.setValue(decks);
     }
 
+    // Updated filter method to support both search and category
+    public void filterDecksWithCategory(String searchQuery, String category) {
+        if (originalDecks == null || originalDecks.isEmpty()) {
+            filteredDecksLiveData.setValue(new ArrayList<>());
+            return;
+        }
+
+        List<Deck> filtered = new ArrayList<>();
+        String query = searchQuery != null ? searchQuery.toLowerCase().trim() : "";
+
+        for (Deck deck : originalDecks) {
+            boolean matchesSearch = true;
+            boolean matchesCategory = true;
+
+            // Check search query
+            if (!query.isEmpty()) {
+                matchesSearch = deck.getName().toLowerCase().contains(query) ||
+                        (deck.getDescription() != null &&
+                                deck.getDescription().toLowerCase().contains(query));
+            }
+
+            // Check category
+            if (category != null && !category.isEmpty()) {
+                matchesCategory = category.equals(deck.getCategory());
+            }
+
+            // Add deck if it matches both criteria
+            if (matchesSearch && matchesCategory) {
+                filtered.add(deck);
+            }
+        }
+
+        filteredDecksLiveData.setValue(filtered);
+    }
+
+    // Original filter method (search only) - maintained for backward compatibility
     public void filterDecks(String query) {
         if (originalDecks == null) return;
 
@@ -79,6 +115,47 @@ public class DeckLibraryViewModel extends ViewModel {
         }
     }
 
+    // Method to filter by category only
+    public void filterByCategory(String category) {
+        if (originalDecks == null || originalDecks.isEmpty()) {
+            filteredDecksLiveData.setValue(new ArrayList<>());
+            return;
+        }
+
+        if (category == null || category.isEmpty()) {
+            filteredDecksLiveData.setValue(originalDecks);
+            return;
+        }
+
+        List<Deck> filtered = new ArrayList<>();
+
+        for (Deck deck : originalDecks) {
+            if (category.equals(deck.getCategory())) {
+                filtered.add(deck);
+            }
+        }
+
+        filteredDecksLiveData.setValue(filtered);
+    }
+
+    // Method to clear all filters
+    public void clearFilters() {
+        if (originalDecks != null) {
+            filteredDecksLiveData.setValue(originalDecks);
+        }
+    }
+
+    // Utility methods
+    public int getOriginalDecksCount() {
+        return originalDecks != null ? originalDecks.size() : 0;
+    }
+
+    public int getFilteredDecksCount() {
+        List<Deck> current = filteredDecksLiveData.getValue();
+        return current != null ? current.size() : 0;
+    }
+
+    // Clone methods
     public void cloneDeck(Deck deck, String token) {
         repository.cloneDeck(deck.getId(), token);
     }

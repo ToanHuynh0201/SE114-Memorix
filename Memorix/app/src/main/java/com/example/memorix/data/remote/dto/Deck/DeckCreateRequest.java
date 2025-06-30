@@ -5,12 +5,23 @@ public class DeckCreateRequest {
     private String description;
     private String image_url;
     private boolean is_public;
+    private String category;
 
+    public DeckCreateRequest(String name, String description, String image_url, boolean is_public, String category) {
+        this.name = name;
+        this.description = description;
+        this.image_url = image_url;
+        this.is_public = is_public;
+        this.category = category;
+    }
+
+    // Constructor without category (for backward compatibility)
     public DeckCreateRequest(String name, String description, String image_url, boolean is_public) {
         this.name = name;
         this.description = description;
         this.image_url = image_url;
         this.is_public = is_public;
+        this.category = null;
     }
 
     // Constructor without image_url (for cases where image is optional)
@@ -19,6 +30,7 @@ public class DeckCreateRequest {
         this.description = description;
         this.image_url = null;
         this.is_public = is_public;
+        this.category = null;
     }
 
     // Getters
@@ -38,6 +50,10 @@ public class DeckCreateRequest {
         return is_public;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
     // Setters
     public void setName(String name) {
         this.name = name;
@@ -53,5 +69,20 @@ public class DeckCreateRequest {
 
     public void setIs_public(boolean is_public) {
         this.is_public = is_public;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "DeckCreateRequest{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", image_url='" + image_url + '\'' +
+                ", is_public=" + is_public +
+                ", category='" + category + '\'' +
+                '}';
     }
 }

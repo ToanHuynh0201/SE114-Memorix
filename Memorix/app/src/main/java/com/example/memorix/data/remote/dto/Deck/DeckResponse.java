@@ -10,11 +10,17 @@ public class DeckResponse {
     private String image_url;
     private boolean is_public;
     private int total_cards;
+    private int unlearned_cards;
+    private int learned_cards;
+    private int due_cards;
+    private String category;
 
     public DeckResponse() {
     }
 
-    public DeckResponse(int deck_id, int user_id, String name, String description, String image_url, boolean is_public, int total_cards) {
+    public DeckResponse(int deck_id, int user_id, String name, String description, String image_url,
+                        boolean is_public, int total_cards, int unlearned_cards, int learned_cards,
+                        int due_cards, String category) {
         this.deck_id = deck_id;
         this.user_id = user_id;
         this.name = name;
@@ -22,6 +28,10 @@ public class DeckResponse {
         this.image_url = image_url;
         this.is_public = is_public;
         this.total_cards = total_cards;
+        this.unlearned_cards = unlearned_cards;
+        this.learned_cards = learned_cards;
+        this.due_cards = due_cards;
+        this.category = category;
     }
 
     // Getters
@@ -49,6 +59,26 @@ public class DeckResponse {
         return is_public;
     }
 
+    public int getTotal_cards() {
+        return total_cards;
+    }
+
+    public int getUnlearned_cards() {
+        return unlearned_cards;
+    }
+
+    public int getLearned_cards() {
+        return learned_cards;
+    }
+
+    public int getDue_cards() {
+        return due_cards;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
     // Setters
     public void setDeck_id(int deck_id) {
         this.deck_id = deck_id;
@@ -74,12 +104,24 @@ public class DeckResponse {
         this.is_public = is_public;
     }
 
-    public int getTotal_cards(){
-        return this.total_cards;
+    public void setTotal_cards(int total_cards) {
+        this.total_cards = total_cards;
     }
 
-    public void setTotal_cards(int total_cards){
-        this.total_cards = total_cards;
+    public void setUnlearned_cards(int unlearned_cards) {
+        this.unlearned_cards = unlearned_cards;
+    }
+
+    public void setLearned_cards(int learned_cards) {
+        this.learned_cards = learned_cards;
+    }
+
+    public void setDue_cards(int due_cards) {
+        this.due_cards = due_cards;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     // Utility method to convert to Deck object
@@ -88,9 +130,13 @@ public class DeckResponse {
                 this.deck_id,
                 this.name,
                 this.description != null ? this.description : "",
-                this.total_cards,  // Đang truyền vào cardCount thay vì totalCards
+                this.total_cards,
+                this.unlearned_cards,
+                this.learned_cards,
+                this.due_cards,
                 this.image_url,
-                false
+                this.is_public,
+                this.category != null ? this.category : ""
         );
     }
 }

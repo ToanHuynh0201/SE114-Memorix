@@ -227,9 +227,7 @@ public class DeckRepository {
                 break;
         }
     }
-    /**
-     * Convert color ID (1-6) to valid image URL
-     */
+
     private String convertColorIdToImageUrl(String colorId) {
         if (colorId == null || colorId.trim().isEmpty()) {
             return "https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Color1"; // Default color 1
@@ -259,9 +257,6 @@ public class DeckRepository {
         }
     }
 
-    /**
-     * Extract color ID from image URL
-     */
     private String extractColorIdFromImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return "1"; // Default color ID
@@ -289,12 +284,13 @@ public class DeckRepository {
     }
 
     // Updated createDeck method to handle color ID conversion
-    public void createDeck(String name, String description, String colorId, boolean isPublic, String token) {
+    public void createDeck(String name, String description, String imageUrl, boolean isPublic, String category, String token) {
         Log.d(TAG, "Creating deck with params:");
         Log.d(TAG, "Name: " + name);
         Log.d(TAG, "Description: " + description);
-        Log.d(TAG, "ColorId: " + colorId);
+        Log.d(TAG, "ImageUrl: " + imageUrl);
         Log.d(TAG, "IsPublic: " + isPublic);
+        Log.d(TAG, "Category: " + category);
 
         loadingState.setValue(true);
 
@@ -313,16 +309,17 @@ public class DeckRepository {
             return;
         }
 
-        // Convert color ID to valid image URL
-        String imageUrl = convertColorIdToImageUrl(colorId);
-        Log.d(TAG, "Converted colorId " + colorId + " to imageUrl: " + imageUrl);
+        // Convert color ID to valid image URL if needed
+        String finalImageUrl = convertColorIdToImageUrl(imageUrl);
+        Log.d(TAG, "Converted imageUrl " + imageUrl + " to finalImageUrl: " + finalImageUrl);
 
-        // Create request using the new DTO structure
+        // Create request with category
         DeckCreateRequest request = new DeckCreateRequest(
                 name.trim(),
                 description != null ? description.trim() : "",
-                imageUrl,  // Use converted URL instead of ID
-                isPublic
+                finalImageUrl,
+                isPublic,
+                category
         );
 
         Log.d(TAG, "Request object: " + request.toString());
@@ -369,8 +366,8 @@ public class DeckRepository {
 
     // Overloaded method for backward compatibility (without colorId)
     public void createDeck(String name, String description, boolean isPublic, String token) {
-        Log.d(TAG, "Creating deck without colorId - using default color");
-        createDeck(name, description, "1", isPublic, token); // Default to color ID 1
+        Log.d(TAG, "Creating deck without imageUrl and category - using defaults");
+        createDeck(name, description, "1", isPublic, null, token); // Default to color ID 1
     }
 
     private void handleCreateDeckError(int responseCode) {
@@ -402,12 +399,15 @@ public class DeckRepository {
         errorMessage.setValue(errorMsg);
     }
 
-    public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String token) {
+    public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String category, String token) {
         loadingState.setValue(true);
 
-        String newUrl = convertColorIdToImageUrl(imageUrl);
-        // Create request using the new DTO structure
-        DeckUpdateRequest request = new DeckUpdateRequest(name, description, newUrl, isPublic);
+        String finalImageUrl = convertColorIdToImageUrl(imageUrl);
+
+        // Create request with category
+        DeckUpdateRequest request = new DeckUpdateRequest(name, description, finalImageUrl, isPublic, category);
+
+        Log.d(TAG, "Updating deck with request: " + request.toString());
 
         Call<DeckResponse> call = apiService.updateDeck("Bearer " + token, deckId, request);
         call.enqueue(new Callback<>() {
@@ -433,13 +433,21 @@ public class DeckRepository {
         });
     }
 
+    // Overloaded method for backward compatibility (without category)
+    public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String token) {
+        updateDeck(deckId, name, description, imageUrl, isPublic, null, token);
+    }
+
+    // Overloaded method for backward compatibility (without imageUrl and category)
     public void updateDeck(long deckId, String name, String description, boolean isPublic, String token) {
-        updateDeck(deckId, name, description, null, isPublic, token);
+        updateDeck(deckId, name, description, null, isPublic, null, token);
     }
 
     // Old method for compatibility with existing Deck object
     public void updateDeck(long deckId, Deck updatedDeck, String token) {
-        updateDeck(deckId, updatedDeck.getName(), updatedDeck.getDescription(), null, false, token);
+        updateDeck(deckId, updatedDeck.getName(), updatedDeck.getDescription(),
+                updatedDeck.getImageUrl(), updatedDeck.isPublic(),
+                updatedDeck.getCategory(), token);
     }
 
     private void handleUpdateDeckError(int responseCode) {
@@ -466,6 +474,76 @@ public class DeckRepository {
                 errorMessage.setValue("Failed to update deck");
                 break;
         }
+    }
+
+    public void searchDecksWithCategory(String token, String searchQuery, String category) {
+        loadingState.setValue(true);
+
+        Call<List<DeckResponse>> call;
+        if (searchQuery != null && !searchQuery.isEmpty() && category != null && !category.isEmpty()) {
+            // Both search and category
+            call = apiService.getDecksWithSearchAndCategory("Bearer " + token, searchQuery, category);
+        } else if (searchQuery != null && !searchQuery.isEmpty()) {
+            // Only search
+            call = apiService.getDecksWithSearch("Bearer " + token, searchQuery);
+        } else if (category != null && !category.isEmpty()) {
+            // Only category
+            call = apiService.getDecksWithCategory("Bearer " + token, category);
+        } else {
+            // No filters
+            call = apiService.getDecks("Bearer " + token);
+        }
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<DeckResponse>> call, @NonNull Response<List<DeckResponse>> response) {
+                loadingState.setValue(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    // Convert DeckResponse list to Deck list
+                    List<Deck> deckList = new ArrayList<>();
+                    for (DeckResponse deckResponse : response.body()) {
+                        deckList.add(deckResponse.toDeck());
+                    }
+                    decksLiveData.setValue(deckList);
+                } else {
+                    handleFetchDecksError(response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<DeckResponse>> call, @NonNull Throwable t) {
+                loadingState.setValue(false);
+                errorMessage.setValue("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void filterDecksByCategory(String token, String category) {
+        loadingState.setValue(true);
+
+        Call<List<DeckResponse>> call = apiService.getDecksWithCategory("Bearer " + token, category);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<DeckResponse>> call, @NonNull Response<List<DeckResponse>> response) {
+                loadingState.setValue(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    // Convert DeckResponse list to Deck list
+                    List<Deck> deckList = new ArrayList<>();
+                    for (DeckResponse deckResponse : response.body()) {
+                        deckList.add(deckResponse.toDeck());
+                    }
+                    decksLiveData.setValue(deckList);
+                } else {
+                    handleFetchDecksError(response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<DeckResponse>> call, @NonNull Throwable t) {
+                loadingState.setValue(false);
+                errorMessage.setValue("Network error: " + t.getMessage());
+            }
+        });
     }
     public void clearErrorMessage() {
         errorMessage.setValue(null);

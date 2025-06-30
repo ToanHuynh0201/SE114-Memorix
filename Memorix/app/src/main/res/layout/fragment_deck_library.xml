@@ -137,7 +137,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="24dp">
 
-            <!-- Header with count and sort -->
+            <!-- Header with count and category filter -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -146,6 +146,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tv_deck_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -154,7 +155,58 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
+                <!-- Category Filter Spinner -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="1dp"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/ic_filter"
+                            android:contentDescription="Lọc theo thể loại"
+                            app:tint="@color/primary_color" />
+
+                        <Spinner
+                            android:id="@+id/spinner_category_filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
+                            android:background="@null"
+                            android:minWidth="100dp"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
             </LinearLayout>
+
+            <!-- Search Results Count (Optional) -->
+            <TextView
+                android:id="@+id/tv_search_results"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Kết quả tìm kiếm"
+                android:textColor="@color/secondary_text_color"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="Tìm thấy 5 kết quả cho 'android' trong Ngôn ngữ" />
 
             <!-- Deck List -->
             <androidx.recyclerview.widget.RecyclerView
@@ -215,6 +267,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tv_empty_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"

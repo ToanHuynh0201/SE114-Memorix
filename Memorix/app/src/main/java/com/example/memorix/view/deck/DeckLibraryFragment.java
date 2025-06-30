@@ -9,12 +9,16 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,16 +41,39 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.DeckLibraryListener {
+
+    private static final String TAG = "DeckLibraryFragment";
+
+    // Views
     private EditText etSearch;
     private RecyclerView rvAllDecks;
     private ProgressBar progressBar;
     private LinearLayout layoutEmptyState;
     private NestedScrollView scrollView;
+    private Spinner spinnerCategoryFilter;
+    private TextView tvDeckTitle;
+    private TextView tvSearchResults;
+    private TextView tvEmptyDescription;
 
+    // Components
     private DeckLibraryAdapter deckAdapter;
     private DeckLibraryViewModel viewModel;
 
+    // State
     private String cachedAuthToken;
+    private String currentSearchQuery = "";
+    private String selectedCategory = "";
+
+    // Category options
+    private final String[] categoryOptions = {
+            "Tất cả thể loại",
+            "Ngôn ngữ",
+            "Khoa học",
+            "Lịch sử",
+            "Toán học",
+            "Nghệ thuật",
+            "Khác"
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,6 +89,7 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         initViews(view);
         setupViewModel();
         setupRecyclerView();
+        setupCategorySpinner();
         setupSearchFunctionality();
         observeData();
 
@@ -75,6 +103,10 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         progressBar = view.findViewById(R.id.progress_bar);
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
         scrollView = view.findViewById(R.id.scroll_view);
+        spinnerCategoryFilter = view.findViewById(R.id.spinner_category_filter);
+        tvDeckTitle = view.findViewById(R.id.tv_deck_title);
+        tvSearchResults = view.findViewById(R.id.tv_search_results);
+        tvEmptyDescription = view.findViewById(R.id.tv_empty_description);
     }
 
     private void setupViewModel() {
@@ -87,6 +119,47 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         rvAllDecks.setAdapter(deckAdapter);
     }
 
+    private void setupCategorySpinner() {
+        Log.d(TAG, "Setting up category spinner");
+
+        // Create adapter for spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                categoryOptions
+        );
+
+        // Set dropdown layout
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinnerCategoryFilter.setAdapter(adapter);
+
+        // Set listener for category selection
+        spinnerCategoryFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String newCategory = position == 0 ? "" : categoryOptions[position];
+
+                // Only perform filter if category actually changed
+                if (!newCategory.equals(selectedCategory)) {
+                    selectedCategory = newCategory;
+                    Log.d(TAG, "Category filter changed to: " +
+                            (selectedCategory.isEmpty() ? "All" : selectedCategory));
+
+                    // Perform local filtering
+                    performLocalFiltering();
+
+                    // Update UI
+                    updateUIForFilterState();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+
     private void setupSearchFunctionality() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -94,7 +167,9 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                viewModel.filterDecks(s.toString());
+                currentSearchQuery = s.toString().trim();
+                performLocalFiltering();
+                updateUIForFilterState();
             }
 
             @Override
@@ -102,11 +177,95 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         });
     }
 
+    private void performLocalFiltering() {
+        if (currentSearchQuery.isEmpty() && selectedCategory.isEmpty()) {
+            // No filters - show all decks
+            viewModel.filterDecks("");
+        } else {
+            // Apply local filtering with both search and category
+            viewModel.filterDecksWithCategory(currentSearchQuery, selectedCategory);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateUIForFilterState() {
+        boolean hasSearchQuery = !currentSearchQuery.isEmpty();
+        boolean hasCategoryFilter = !selectedCategory.isEmpty();
+
+        if (hasSearchQuery || hasCategoryFilter) {
+            // Build dynamic title
+            StringBuilder titleBuilder = new StringBuilder();
+            if (hasSearchQuery && hasCategoryFilter) {
+                titleBuilder.append("Kết quả cho '").append(currentSearchQuery)
+                        .append("' trong ").append(selectedCategory);
+            } else if (hasSearchQuery) {
+                titleBuilder.append("Kết quả tìm kiếm");
+            } else {
+                titleBuilder.append("Thư viện ").append(selectedCategory);
+            }
+
+            tvDeckTitle.setText(titleBuilder.toString());
+            tvSearchResults.setVisibility(View.VISIBLE);
+
+            // Update empty state for search/filter
+            if (hasSearchQuery && hasCategoryFilter) {
+                tvEmptyDescription.setText("Không tìm thấy deck nào cho '" +
+                        currentSearchQuery + "' trong thể loại " + selectedCategory);
+            } else if (hasSearchQuery) {
+                tvEmptyDescription.setText("Thử tìm kiếm với từ khóa khác");
+            } else {
+                tvEmptyDescription.setText("Không có deck nào trong thể loại " + selectedCategory);
+            }
+        } else {
+            tvDeckTitle.setText("✨ Khám phá các bộ deck tuyệt vời");
+            tvSearchResults.setVisibility(View.GONE);
+
+            // Reset empty state
+            tvEmptyDescription.setText("Thử tìm kiếm với từ khóa khác hoặc kiểm tra lại kết nối mạng");
+        }
+    }
+
+    private void updateSearchResultsCount(int count) {
+        boolean hasSearchQuery = !currentSearchQuery.isEmpty();
+        boolean hasCategoryFilter = !selectedCategory.isEmpty();
+
+        if (hasSearchQuery || hasCategoryFilter) {
+            String resultText;
+
+            if (count == 0) {
+                if (hasSearchQuery && hasCategoryFilter) {
+                    resultText = "Không tìm thấy kết quả cho '" + currentSearchQuery +
+                            "' trong " + selectedCategory;
+                } else if (hasSearchQuery) {
+                    resultText = "Không tìm thấy kết quả cho '" + currentSearchQuery + "'";
+                } else {
+                    resultText = "Không có deck nào trong " + selectedCategory;
+                }
+            } else {
+                String countText = count == 1 ? "1 deck" : count + " deck";
+                if (hasSearchQuery && hasCategoryFilter) {
+                    resultText = "Tìm thấy " + countText + " cho '" + currentSearchQuery +
+                            "' trong " + selectedCategory;
+                } else if (hasSearchQuery) {
+                    resultText = "Tìm thấy " + countText + " cho '" + currentSearchQuery + "'";
+                } else {
+                    resultText = "Tìm thấy " + countText + " trong " + selectedCategory;
+                }
+            }
+
+            tvSearchResults.setText(resultText);
+            tvSearchResults.setVisibility(View.VISIBLE);
+        } else {
+            tvSearchResults.setVisibility(View.GONE);
+        }
+    }
+
     private void observeData() {
         // Observe public decks from API
         viewModel.getPublicDecks().observe(getViewLifecycleOwner(), decks -> {
             if (decks != null) {
                 viewModel.setOriginalDecks(decks);
+                Log.d(TAG, "Loaded " + decks.size() + " public decks from API");
             }
         });
 
@@ -115,6 +274,8 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
             if (decks != null) {
                 deckAdapter.updateData(decks);
                 updateEmptyState(decks.isEmpty());
+                updateSearchResultsCount(decks.size());
+                Log.d(TAG, "Displaying " + decks.size() + " filtered decks");
             }
         });
 
@@ -132,9 +293,9 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
 
         // Observe clone loading state
         viewModel.getCloneLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            // You can show a loading indicator during clone operation
+            // Optional: Show loading dialog or disable buttons during clone
             if (isLoading) {
-                // Optional: Show loading dialog or disable buttons
+                Log.d(TAG, "Clone operation in progress...");
             }
         });
 
@@ -178,14 +339,32 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         }
     }
 
+    public void clearFilters() {
+        Log.d(TAG, "Clearing all filters");
+
+        currentSearchQuery = "";
+        selectedCategory = "";
+        etSearch.setText("");
+        etSearch.clearFocus();
+
+        // Reset category filter to "All"
+        spinnerCategoryFilter.setSelection(0);
+
+        // Reset filtering
+        performLocalFiltering();
+        updateUIForFilterState();
+    }
+
     // Implement DeckLibraryListener methods
     @Override
     public void onDeckClick(Deck deck, int position) {
+        Log.d(TAG, "Deck clicked: " + deck.getName());
         showDeckPreviewDialog(deck);
     }
 
     @Override
     public void onCloneDeck(Deck deck, int position) {
+        Log.d(TAG, "Clone deck clicked: " + deck.getName());
         showCloneConfirmationDialog(deck);
     }
 
@@ -257,10 +436,10 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     }
 
     private void cloneDeck(Deck deck) {
+        Log.d(TAG, "Cloning deck: " + deck.getName());
         viewModel.cloneDeck(deck, cachedAuthToken);
     }
 
-    // Add this method to get token - implement according to your auth system
     private String getAuthToken() {
         if (cachedAuthToken != null) {
             return cachedAuthToken;

@@ -1,4 +1,5 @@
 package com.example.memorix.data.remote.api;
+
 import com.example.memorix.data.remote.dto.Deck.CloneResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckDeleteResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckUpdateRequest;
@@ -25,7 +26,23 @@ public interface DeckApi {
     Call<List<DeckResponse>> getDecks(@Header("Authorization") String token);
 
     @GET("api/decks")
-    Call<List<DeckResponse>> getDecksWithSearch(@Header("Authorization") String token, @Query("q") String searchQuery);
+    Call<List<DeckResponse>> getDecksWithSearch(
+            @Header("Authorization") String token,
+            @Query("q") String searchQuery
+    );
+
+    @GET("api/decks")
+    Call<List<DeckResponse>> getDecksWithCategory(
+            @Header("Authorization") String token,
+            @Query("category") String category
+    );
+
+    @GET("api/decks")
+    Call<List<DeckResponse>> getDecksWithSearchAndCategory(
+            @Header("Authorization") String token,
+            @Query("q") String searchQuery,
+            @Query("category") String category
+    );
 
     @GET("api/decks/{deckId}")
     Call<Deck> getDeckById(@Header("Authorization") String token, @Path("deckId") long deckId);
@@ -42,6 +59,7 @@ public interface DeckApi {
             @Path("id") long deckId,
             @Body DeckUpdateRequest request
     );
+
     @POST("api/decks")
     Call<DeckCreateResponse> createDeck(@Header("Authorization") String token, @Body DeckCreateRequest request);
 

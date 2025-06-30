@@ -11,6 +11,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,7 +35,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-//import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,6 +59,9 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         AddOptionsBottomSheet.OptionClickListener,
         CreateDeckBottomSheet.CreateDeckListener{
 
+    private static final String TAG = "HomeFragment";
+    private static final long SEARCH_DELAY_MS = 500;
+
     // Views
     private RecyclerView recyclerFlashcardSets;
     private LinearLayout layoutEmptyState;
@@ -72,15 +77,16 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     private TextView txtEmptyTitle;
     private TextView txtEmptyDescription;
     private TextView txtSearchQuery;
+    private Spinner spinnerCategoryFilter;
 
-    // Search state
+    // Search and filter state
     private boolean isSearching = false;
     private String currentSearchQuery = "";
+    private String selectedCategory = "";
 
     // Debounce handling
     private Handler searchHandler;
     private Runnable searchRunnable;
-    private static final long SEARCH_DELAY_MS = 500; // Reduced from 1000ms to 500ms
 
     // MVVM components
     private HomeViewModel homeViewModel;
@@ -88,12 +94,26 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     // Cache for auth token
     private String cachedAuthToken;
 
+    // Category options
+    private final String[] categoryOptions = {
+            "Tất cả thể loại",
+            "Ngôn ngữ",
+            "Khoa học",
+            "Lịch sử",
+            "Toán học",
+            "Nghệ thuật",
+            "Khác"
+    };
+
     public HomeFragment() {
+        // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
+
         // Initialize ViewModel
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -107,42 +127,54 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "onViewCreated");
 
         // Initialize views
         initViews(view);
 
         // Setup components
         setupRecyclerView();
+        setupCategorySpinner();
         setupObservers();
         setupClickListeners();
         setupSearchListener();
 
         // Load data from API
-        if (cachedAuthToken != null) {
-            homeViewModel.loadDecks(cachedAuthToken);
-        } else {
-            showAuthError();
-        }
+        loadInitialData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume - refreshing decks");
+        // Refresh dữ liệu khi quay lại fragment
+        refreshDecks();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy");
+
         // Cancel any pending search operations
         if (searchHandler != null && searchRunnable != null) {
             searchHandler.removeCallbacks(searchRunnable);
         }
+
         // Clear references to prevent memory leaks
         searchHandler = null;
         searchRunnable = null;
         deckAdapter = null;
     }
+
+    // ========== INITIALIZATION METHODS ==========
 
     private void initViews(View view) {
         recyclerFlashcardSets = view.findViewById(R.id.recycler_flashcard_sets);
@@ -157,22 +189,12 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         txtEmptyTitle = view.findViewById(R.id.txt_empty_title);
         txtEmptyDescription = view.findViewById(R.id.txt_empty_description);
         txtSearchQuery = view.findViewById(R.id.txt_search_query);
-    }
-
-    private String getAuthToken() {
-        if (cachedAuthToken != null) {
-            return cachedAuthToken;
-        }
-        SharedPreferences prefs = requireActivity().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        cachedAuthToken = prefs.getString("access_token", null);
-        return cachedAuthToken;
-    }
-
-    private void showAuthError() {
-        Toast.makeText(getContext(), "Vui lòng đăng nhập để xem danh sách bộ thẻ", Toast.LENGTH_LONG).show();
+        spinnerCategoryFilter = view.findViewById(R.id.spinner_category_filter);
     }
 
     private void setupRecyclerView() {
+        Log.d(TAG, "Setting up RecyclerView");
+
         // Enable recycling and optimizations
         recyclerFlashcardSets.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerFlashcardSets.setHasFixedSize(true); // Performance optimization
@@ -181,6 +203,47 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         deckList = new ArrayList<>();
         deckAdapter = new DeckAdapter(deckList, this);
         recyclerFlashcardSets.setAdapter(deckAdapter);
+    }
+
+    private void setupCategorySpinner() {
+        Log.d(TAG, "Setting up category spinner");
+
+        // Create adapter for spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                categoryOptions
+        );
+
+        // Set dropdown layout
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinnerCategoryFilter.setAdapter(adapter);
+
+        // Set listener for category selection
+        spinnerCategoryFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String newCategory = position == 0 ? "" : categoryOptions[position];
+
+                // Only perform search if category actually changed
+                if (!newCategory.equals(selectedCategory)) {
+                    selectedCategory = newCategory;
+                    Log.d(TAG, "Category filter changed to: " +
+                            (selectedCategory.isEmpty() ? "All" : selectedCategory));
+
+                    // Perform filtered search
+                    performFilteredSearch();
+
+                    // Update UI
+                    updateUIForFilterState();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
     }
 
     private void setupSearchListener() {
@@ -250,52 +313,23 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         }
     }
 
-    private void performDebouncedSearch(String query) {
-        if (cachedAuthToken != null) {
-            if (query.isEmpty()) {
-                // Reset search state
-                isSearching = false;
-                homeViewModel.loadDecks(cachedAuthToken);
-            } else {
-                // Set search state
-                isSearching = true;
-                homeViewModel.searchDecks(cachedAuthToken, query);
-            }
-        }
-    }
+    private void setupClickListeners() {
+        fabAdd.setOnClickListener(v -> showBottomSheet());
+        btnCreateFirstSet.setOnClickListener(v -> onCreateDeckClicked());
 
-    @SuppressLint("SetTextI18n")
-    private void updateUIForSearchState() {
-        if (isSearching && !currentSearchQuery.isEmpty()) {
-            txtMyFsets.setText("Kết quả tìm kiếm");
-            txtSearchResults.setVisibility(View.VISIBLE);
-
-            // Update empty state for search
-            txtEmptyTitle.setText("Không tìm thấy kết quả");
-            txtEmptyDescription.setText("Thử tìm kiếm với từ khóa khác");
-            btnCreateFirstSet.setVisibility(View.GONE);
-        } else {
-            txtMyFsets.setText(getString(R.string.my_sets));
-            txtSearchResults.setVisibility(View.GONE);
-
-            // Reset empty state
-            txtEmptyTitle.setText(getString(R.string.empty_state_title));
-            txtEmptyDescription.setText(getString(R.string.empty_state_description));
-            btnCreateFirstSet.setVisibility(View.VISIBLE);
-        }
+        // Clear search button
+        ivClearSearch.setOnClickListener(v -> clearSearch());
     }
 
     private void setupObservers() {
+        Log.d(TAG, "Setting up observers");
+
         // Observe decks data with DiffUtil for better performance
         homeViewModel.getDecks().observe(getViewLifecycleOwner(), this::updateDeckList);
 
         homeViewModel.getLoadingState().observe(getViewLifecycleOwner(), isLoading -> {
-            // Có thể hiển thị progress bar ở đây nếu cần
-//            if (isLoading != null && isLoading) {
-//                // Show loading
-//            } else {
-//                // Hide loading
-//            }
+            // Could show progress bar here if needed
+            Log.d(TAG, "Loading state: " + isLoading);
         });
 
         homeViewModel.getDeleteSuccess().observe(getViewLifecycleOwner(), isSuccess -> {
@@ -326,15 +360,221 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         });
     }
 
+    // ========== DATA LOADING METHODS ==========
+
+    private String getAuthToken() {
+        if (cachedAuthToken != null) {
+            return cachedAuthToken;
+        }
+        SharedPreferences prefs = requireActivity().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        cachedAuthToken = prefs.getString("access_token", null);
+        return cachedAuthToken;
+    }
+
+    private void loadInitialData() {
+        if (cachedAuthToken != null) {
+            Log.d(TAG, "Loading initial data with token");
+            homeViewModel.loadDecks(cachedAuthToken);
+        } else {
+            Log.w(TAG, "No auth token available");
+            showAuthError();
+        }
+    }
+
+    private void showAuthError() {
+        Toast.makeText(getContext(), "Vui lòng đăng nhập để xem danh sách bộ thẻ", Toast.LENGTH_LONG).show();
+    }
+
+    // ========== SEARCH AND FILTER METHODS ==========
+
+    private void performDebouncedSearch(String query) {
+        currentSearchQuery = query;
+        performFilteredSearch();
+    }
+
+    private void performFilteredSearch() {
+        if (cachedAuthToken != null) {
+            if (currentSearchQuery.isEmpty() && selectedCategory.isEmpty()) {
+                // No filters applied
+                isSearching = false;
+                homeViewModel.loadDecks(cachedAuthToken);
+                Log.d(TAG, "Loading all decks (no filters)");
+            } else {
+                // Apply search and/or category filter
+                isSearching = true;
+
+                Log.d(TAG, "Performing filtered search - Query: '" +
+                        currentSearchQuery + "', Category: '" + selectedCategory + "'");
+
+                // Use the new method that supports both search and category
+                homeViewModel.searchDecksWithCategory(cachedAuthToken,
+                        currentSearchQuery.isEmpty() ? null : currentSearchQuery,
+                        selectedCategory.isEmpty() ? null : selectedCategory);
+            }
+        }
+    }
+
+    public void clearSearch() {
+        Log.d(TAG, "Clearing search and filters");
+
+        // Cancel any pending search
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
+
+        isSearching = false;
+        currentSearchQuery = "";
+        etSearch.setText("");
+        etSearch.clearFocus();
+
+        // Reset category filter to "All"
+        spinnerCategoryFilter.setSelection(0);
+        selectedCategory = "";
+
+        if (cachedAuthToken != null) {
+            homeViewModel.loadDecks(cachedAuthToken);
+        }
+
+        updateUIForSearchState();
+    }
+
+    public void refreshDecks() {
+        if (cachedAuthToken != null) {
+            performFilteredSearch(); // This will respect current filters
+        } else {
+            Toast.makeText(getContext(), "Vui lòng đăng nhập để tải dữ liệu", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ========== UI UPDATE METHODS ==========
+
+    @SuppressLint("SetTextI18n")
+    private void updateUIForSearchState() {
+        boolean hasSearchQuery = !currentSearchQuery.isEmpty();
+        boolean hasCategoryFilter = !selectedCategory.isEmpty();
+
+        if (hasSearchQuery || hasCategoryFilter) {
+            // Build dynamic title
+            StringBuilder titleBuilder = new StringBuilder();
+            if (hasSearchQuery && hasCategoryFilter) {
+                titleBuilder.append("Kết quả cho '").append(currentSearchQuery)
+                        .append("' trong ").append(selectedCategory);
+            } else if (hasSearchQuery) {
+                titleBuilder.append("Kết quả tìm kiếm");
+            } else {
+                titleBuilder.append("Lọc theo ").append(selectedCategory);
+            }
+
+            txtMyFsets.setText(titleBuilder.toString());
+            txtSearchResults.setVisibility(View.VISIBLE);
+
+            // Update empty state for search/filter
+            txtEmptyTitle.setText("Không tìm thấy kết quả");
+            if (hasSearchQuery && hasCategoryFilter) {
+                txtEmptyDescription.setText("Không tìm thấy bộ thẻ nào cho '" +
+                        currentSearchQuery + "' trong thể loại " + selectedCategory);
+            } else if (hasSearchQuery) {
+                txtEmptyDescription.setText("Thử tìm kiếm với từ khóa khác");
+            } else {
+                txtEmptyDescription.setText("Không có bộ thẻ nào trong thể loại " + selectedCategory);
+            }
+            btnCreateFirstSet.setVisibility(View.GONE);
+        } else {
+            txtMyFsets.setText("Bộ thẻ của tôi");
+            txtSearchResults.setVisibility(View.GONE);
+
+            // Reset empty state
+            txtEmptyTitle.setText("Chưa có bộ thẻ nào");
+            txtEmptyDescription.setText("Hãy tạo bộ thẻ đầu tiên để bắt đầu học");
+            btnCreateFirstSet.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateUIForFilterState() {
+        updateUIForSearchState(); // Reuse the same logic
+    }
+
+    private void updateSearchResultsCount(int count) {
+        if (isSearching) {
+            String resultText;
+            boolean hasSearchQuery = !currentSearchQuery.isEmpty();
+            boolean hasCategoryFilter = !selectedCategory.isEmpty();
+
+            if (count == 0) {
+                if (hasSearchQuery && hasCategoryFilter) {
+                    resultText = "Không tìm thấy kết quả cho '" + currentSearchQuery +
+                            "' trong " + selectedCategory;
+                } else if (hasSearchQuery) {
+                    resultText = "Không tìm thấy kết quả cho '" + currentSearchQuery + "'";
+                } else {
+                    resultText = "Không có bộ thẻ nào trong " + selectedCategory;
+                }
+            } else {
+                String countText = count == 1 ? "1 kết quả" : count + " kết quả";
+                if (hasSearchQuery && hasCategoryFilter) {
+                    resultText = "Tìm thấy " + countText + " cho '" + currentSearchQuery +
+                            "' trong " + selectedCategory;
+                } else if (hasSearchQuery) {
+                    resultText = "Tìm thấy " + countText + " cho '" + currentSearchQuery + "'";
+                } else {
+                    resultText = "Tìm thấy " + countText + " trong " + selectedCategory;
+                }
+            }
+
+            txtSearchResults.setText(resultText);
+            txtSearchResults.setVisibility(View.VISIBLE);
+        } else {
+            txtSearchResults.setVisibility(View.GONE);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void checkEmptyState() {
+        boolean hasData = !deckList.isEmpty();
+
+        if (hasData) {
+            layoutEmptyState.setVisibility(View.GONE);
+            layoutNoSearchResults.setVisibility(View.GONE);
+            recyclerFlashcardSets.setVisibility(View.VISIBLE);
+        } else {
+            recyclerFlashcardSets.setVisibility(View.GONE);
+
+            if (isSearching) {
+                // Show no search results state
+                layoutEmptyState.setVisibility(View.GONE);
+                layoutNoSearchResults.setVisibility(View.VISIBLE);
+
+                boolean hasSearchQuery = !currentSearchQuery.isEmpty();
+                boolean hasCategoryFilter = !selectedCategory.isEmpty();
+
+                if (hasSearchQuery && hasCategoryFilter) {
+                    txtSearchQuery.setText("Không tìm thấy kết quả nào cho '" + currentSearchQuery +
+                            "' trong thể loại " + selectedCategory);
+                } else if (hasSearchQuery) {
+                    txtSearchQuery.setText("Không tìm thấy kết quả nào cho '" + currentSearchQuery + "'");
+                } else {
+                    txtSearchQuery.setText("Không có bộ thẻ nào trong thể loại " + selectedCategory);
+                }
+            } else {
+                // Show regular empty state
+                layoutEmptyState.setVisibility(View.VISIBLE);
+                layoutNoSearchResults.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    // ========== DATA HANDLING METHODS ==========
+
     // Optimized deck list update using DiffUtil
     @SuppressLint("NotifyDataSetChanged")
     private void updateDeckList(List<Deck> newDecks) {
         if (newDecks == null) return;
+
         debugDeckData(newDecks);
 
         if (deckList.isEmpty()) {
             // First load - just set the data
-            // deckList.clear();
             deckList.addAll(newDecks);
             deckAdapter.notifyDataSetChanged();
         } else {
@@ -348,7 +588,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         }
 
         // Update search results count
-        if (isSearching && !currentSearchQuery.isEmpty()) {
+        if (isSearching) {
             updateSearchResultsCount(newDecks.size());
         }
 
@@ -356,17 +596,17 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     }
 
     private void debugDeckData(List<Deck> decks) {
-        Log.d("HomeFragment", "=== DEBUG DECK DATA ===");
-        for (int i = 0; i < decks.size(); i++) {
+        Log.d(TAG, "=== DEBUG DECK DATA ===");
+        Log.d(TAG, "Total decks: " + decks.size());
+        Log.d(TAG, "Search query: '" + currentSearchQuery + "'");
+        Log.d(TAG, "Selected category: '" + selectedCategory + "'");
+
+        for (int i = 0; i < Math.min(decks.size(), 3); i++) { // Show only first 3 for brevity
             Deck deck = decks.get(i);
-            Log.d("HomeFragment", "Deck " + i + ":");
-            Log.d("HomeFragment", "  Name: " + deck.getName());
-            Log.d("HomeFragment", "  Description: " + deck.getDescription());
-            Log.d("HomeFragment", "  ImageUrl: " + deck.getImageUrl());
-            Log.d("HomeFragment", "  CardCount: " + deck.getTotalCards());
-            Log.d("HomeFragment", "  IsPublic: " + deck.isPublic());
+            Log.d(TAG, "Deck " + i + ": " + deck.getName() +
+                    " (" + deck.getCategory() + ") - " + deck.getTotalCards() + " cards");
         }
-        Log.d("HomeFragment", "=== END DEBUG ===");
+        Log.d(TAG, "=== END DEBUG ===");
     }
 
     // Optimized error handling
@@ -387,85 +627,18 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
-    private void updateSearchResultsCount(int count) {
-        if (isSearching && !currentSearchQuery.isEmpty()) {
-            String resultText;
-            if (count == 0) {
-                resultText = "Không tìm thấy kết quả cho '" + currentSearchQuery + "'";
-            } else if (count == 1) {
-                resultText = "Tìm thấy 1 kết quả cho '" + currentSearchQuery + "'";
-            } else {
-                resultText = "Tìm thấy " + count + " kết quả cho '" + currentSearchQuery + "'";
-            }
-            txtSearchResults.setText(resultText);
-            txtSearchResults.setVisibility(View.VISIBLE);
-        } else {
-            txtSearchResults.setVisibility(View.GONE);
-        }
-    }
-
-    public void clearSearch() {
-        // Cancel any pending search
-        if (searchRunnable != null) {
-            searchHandler.removeCallbacks(searchRunnable);
-        }
-
-        isSearching = false;
-        currentSearchQuery = "";
-        etSearch.setText("");
-        etSearch.clearFocus();
-
-        if (cachedAuthToken != null) {
-            homeViewModel.loadDecks(cachedAuthToken);
-        }
-
-        updateUIForSearchState();
-    }
-
-    // Method to refresh decks list
-    public void refreshDecks() {
-        if (cachedAuthToken != null) {
-            if (isSearching && !currentSearchQuery.isEmpty()) {
-                homeViewModel.searchDecks(cachedAuthToken, currentSearchQuery);
-            } else {
-                homeViewModel.loadDecks(cachedAuthToken);
-            }
-        } else {
-            Toast.makeText(getContext(), "Vui lòng đăng nhập để tải dữ liệu", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void checkEmptyState() {
-        boolean hasData = !deckList.isEmpty();
-
-        if (hasData) {
-            layoutEmptyState.setVisibility(View.GONE);
-            layoutNoSearchResults.setVisibility(View.GONE);
-            recyclerFlashcardSets.setVisibility(View.VISIBLE);
-        } else {
-            recyclerFlashcardSets.setVisibility(View.GONE);
-
-            if (isSearching && !currentSearchQuery.isEmpty()) {
-                // Show no search results state
-                layoutEmptyState.setVisibility(View.GONE);
-                layoutNoSearchResults.setVisibility(View.VISIBLE);
-                txtSearchQuery.setText("Không tìm thấy kết quả nào cho '" + currentSearchQuery + "'");
-            } else {
-                // Show regular empty state
-                layoutEmptyState.setVisibility(View.VISIBLE);
-                layoutNoSearchResults.setVisibility(View.GONE);
+    private Deck findDeckById(long deckId) {
+        if (deckList != null) {
+            for (Deck deck : deckList) {
+                if (deck.getId() == deckId) {
+                    return deck;
+                }
             }
         }
+        return null;
     }
 
-    private void setupClickListeners() {
-        fabAdd.setOnClickListener(v -> showBottomSheet());
-        btnCreateFirstSet.setOnClickListener(v -> onCreateDeckClicked());
-
-        // Clear search button
-        ivClearSearch.setOnClickListener(v -> clearSearch());
-    }
+    // ========== BOTTOM SHEET AND DIALOG METHODS ==========
 
     private void showBottomSheet() {
         AddOptionsBottomSheet bottomSheet = AddOptionsBottomSheet.newInstance();
@@ -473,14 +646,24 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         bottomSheet.show(getParentFragmentManager(), "AddOptionsBottomSheet");
     }
 
+    // ========== DECK ACTION LISTENER IMPLEMENTATION ==========
+
+    @Override
+    public void onDeckClick(Deck deck, int position) {
+        Log.d(TAG, "Deck clicked: " + deck.getName());
+        Intent intent = new Intent(getContext(), DeckManagementActivity.class);
+        intent.putExtra("deck_id", deck.getId());
+        startActivity(intent);
+    }
+
     @Override
     public void onEditDeck(long deckId) {
         Deck deckToEdit = findDeckById(deckId);
         if (deckToEdit != null) {
-            Log.d("HomeFragment", "Editing deck with ID: " + deckId + ", Name: " + deckToEdit.getName());
+            Log.d(TAG, "Editing deck with ID: " + deckId + ", Name: " + deckToEdit.getName());
             showEditDeckDialog(deckToEdit);
         } else {
-            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Log.w(TAG, "Cannot find deck with ID: " + deckId);
             Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
         }
     }
@@ -489,159 +672,31 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     public void onShareDeck(long deckId) {
         Deck deckToShare = findDeckById(deckId);
         if (deckToShare != null) {
-            Log.d("HomeFragment", "Sharing deck with ID: " + deckId + ", Name: " + deckToShare.getName());
+            Log.d(TAG, "Sharing deck with ID: " + deckId + ", Name: " + deckToShare.getName());
             showShareDeckDialog(deckToShare);
         } else {
-            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Log.w(TAG, "Cannot find deck with ID: " + deckId);
             Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void showShareDeckDialog(Deck deck) {
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_share_deck, null);
-
-        // Initialize views
-        TextView txtDeckName = dialogView.findViewById(R.id.txt_deck_name);
-        TextView txtDeckDescription = dialogView.findViewById(R.id.txt_deck_description);
-        TextInputEditText etReceiverEmail = dialogView.findViewById(R.id.et_receiver_email);
-        RadioGroup radioGroupPermission = dialogView.findViewById(R.id.radio_group_permission);
-//        RadioButton radioView = dialogView.findViewById(R.id.radio_view);
-        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-        Button btnShare = dialogView.findViewById(R.id.btn_share);
-        ProgressBar progressSharing = dialogView.findViewById(R.id.progress_sharing);
-
-        // Set deck info
-        txtDeckName.setText(deck.getName());
-        txtDeckDescription.setText(deck.getDescription());
-
-        // Create dialog
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .setCancelable(true)
-                .create();
-
-        // Set up listeners
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnShare.setOnClickListener(v -> {
-            String receiverEmail = Objects.requireNonNull(etReceiverEmail.getText()).toString().trim();
-
-            // Validate email
-            if (receiverEmail.isEmpty()) {
-                etReceiverEmail.setError("Vui lòng nhập email người nhận");
-                etReceiverEmail.requestFocus();
-                return;
-            }
-
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(receiverEmail).matches()) {
-                etReceiverEmail.setError("Email không hợp lệ");
-                etReceiverEmail.requestFocus();
-                return;
-            }
-
-            // Get permission level
-            String permissionLevel = "view"; // Default
-            int selectedRadioId = radioGroupPermission.getCheckedRadioButtonId();
-            if (selectedRadioId == R.id.radio_view) {
-                permissionLevel = "view";
-            }
-
-            // Show loading
-            progressSharing.setVisibility(View.VISIBLE);
-            btnShare.setEnabled(false);
-            btnCancel.setEnabled(false);
-
-            // Call share API
-            if (cachedAuthToken != null) {
-                shareDeck(deck.getId(), receiverEmail, permissionLevel, dialog, progressSharing, btnShare, btnCancel);
-            } else {
-                hideLoading(progressSharing, btnShare, btnCancel);
-                Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        dialog.show();
-    }
-
-    private void shareDeck(long deckId, String receiverEmail, String permissionLevel,
-                           AlertDialog dialog, ProgressBar progressSharing,
-                           Button btnShare, Button btnCancel) {
-
-        // Reset previous states
-        homeViewModel.resetShareStates();
-
-        // Call share API
-        homeViewModel.shareDeck(deckId, receiverEmail, permissionLevel, cachedAuthToken);
-
-        // Observe loading state
-        homeViewModel.getShareLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) {
-                if (isLoading) {
-                    showLoading(progressSharing, btnShare, btnCancel);
-                } else {
-                    hideLoading(progressSharing, btnShare, btnCancel);
-                }
-            }
-        });
-
-        // Observe share result
-        homeViewModel.getShareSuccess().observe(getViewLifecycleOwner(), success -> {
-            if (success != null) {
-                if (success) {
-                    Toast.makeText(getContext(), "Đã gửi lời mời chia sẻ thành công!", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                    // Remove observers after successful share
-                    removeShareObservers();
-                }
-                // Note: Error case is handled by shareError observer
-            }
-        });
-
-        // Observe share error
-        homeViewModel.getShareError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null && !error.isEmpty()) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
-                removeShareObservers();
-            }
-        });
-    }
-
-    private void hideLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
-        progressSharing.setVisibility(View.GONE);
-        btnShare.setEnabled(true);
-        btnCancel.setEnabled(true);
-    }
-
-    private void showLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
-        progressSharing.setVisibility(View.VISIBLE);
-        btnShare.setEnabled(false);
-        btnCancel.setEnabled(false);
-    }
-
-    private void removeShareObservers() {
-        // Remove observers to prevent memory leaks and multiple triggers
-        homeViewModel.getShareLoading().removeObservers(getViewLifecycleOwner());
-        homeViewModel.getShareSuccess().removeObservers(getViewLifecycleOwner());
-        homeViewModel.getShareError().removeObservers(getViewLifecycleOwner());
-    }
-
-
     @Override
     public void onResetProgress(long deckId) {
-        // Implementation for resetting progress by ID
-        Log.d("HomeFragment", "Reset progress for deck ID: " + deckId);
+        Log.d(TAG, "Reset progress for deck ID: " + deckId);
+        // TODO: Implement reset progress functionality
+        Toast.makeText(getContext(), "Tính năng đặt lại tiến độ sẽ được cập nhật sớm", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onDeleteDeck(long deckId) {
         Deck deckToDelete = findDeckById(deckId);
         if (deckToDelete == null) {
-            Log.w("HomeFragment", "Cannot find deck with ID: " + deckId);
+            Log.w(TAG, "Cannot find deck with ID: " + deckId);
             Toast.makeText(getContext(), "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d("HomeFragment", "Deleting deck with ID: " + deckId + ", Name: " + deckToDelete.getName());
+        Log.d(TAG, "Deleting deck with ID: " + deckId + ", Name: " + deckToDelete.getName());
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Xác nhận xóa")
@@ -659,23 +714,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
                 .show();
     }
 
-    private Deck findDeckById(long deckId) {
-        if (deckList != null) {
-            for (Deck deck : deckList) {
-                if (deck.getId() == deckId) {
-                    return deck;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void onDeckClick(Deck deck, int position) {
-        Intent intent = new Intent(getContext(), DeckManagementActivity.class);
-        intent.putExtra("deck_id", deck.getId());
-        startActivity(intent);
-    }
+    // ========== CREATE DECK LISTENER IMPLEMENTATION ==========
 
     @Override
     public void onCreateDeckClicked() {
@@ -688,15 +727,17 @@ public class HomeFragment extends Fragment implements DeckActionListener,
     public void onGoToLibrary() {
         // Điều hướng đến Library fragment thay vì tạo folder
         if (getActivity() instanceof MainActivity) {
-         BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
-         if (bottomNav != null) {
-             bottomNav.setSelectedItemId(R.id.nav_library);
-         }
-     }
+            BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
+            if (bottomNav != null) {
+                bottomNav.setSelectedItemId(R.id.nav_library);
+            }
+        }
     }
 
     @Override
     public void onDeckCreated(String deckName, String deckDescription, int colorId, int categoryId) {
+        Log.d(TAG, "Creating new deck: " + deckName);
+
         if (deckName == null || deckName.trim().isEmpty()) {
             Toast.makeText(getContext(), "Tên bộ thẻ không được để trống", Toast.LENGTH_SHORT).show();
             return;
@@ -718,12 +759,13 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             String imageUrl = String.valueOf(colorId); // Sử dụng colorId làm imageUrl
             boolean isPublic = false;
 
-            // TODO: Khi có API hỗ trợ category, có thể thêm categoryId vào đây
-            // Hiện tại chỉ log để debug
-            Log.d("HomeFragment", "Creating deck with category: " + getCategoryName(categoryId));
+            // Convert categoryId to category name
+            String categoryName = getCategoryName(categoryId);
 
-            // Call API với imageUrl là colorId
-            homeViewModel.createDeck(deckName.trim(), description, imageUrl, isPublic, cachedAuthToken);
+            Log.d(TAG, "Creating deck with category: " + categoryName + " (ID: " + categoryId + ")");
+
+            // Call API với imageUrl là colorId và category name
+            homeViewModel.createDeck(deckName.trim(), description, imageUrl, isPublic, categoryName, cachedAuthToken);
         } else {
             Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
         }
@@ -740,6 +782,8 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         }
         return "Không xác định";
     }
+
+    // ========== DIALOG METHODS ==========
 
     private void showEditDeckDialog(Deck deck) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_deck, null);
@@ -789,8 +833,18 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             currentColorId = 1;
         }
 
-        // For now, default category to 1 since we don't have category data from API yet
+        // For now, get category from existing deck data or default to first category
         int currentCategoryId = 1;
+
+        // Try to get category from deck if available
+        if (deck.getCategory() != null && !deck.getCategory().isEmpty()) {
+            for (int i = 0; i < categoryNames.length; i++) {
+                if (categoryNames[i].equals(deck.getCategory())) {
+                    currentCategoryId = i + 1;
+                    break;
+                }
+            }
+        }
 
         // Selection state tracking
         final int[] selectedColorId = {currentColorId};
@@ -870,20 +924,18 @@ public class HomeFragment extends Fragment implements DeckActionListener,
 
             if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
                 // Log the changes for debugging
-                Log.d("HomeFragment", "Updating deck with ID: " + deck.getId());
-                Log.d("HomeFragment", "New name: " + newName);
-                Log.d("HomeFragment", "New description: " + newDescription);
-                Log.d("HomeFragment", "New category: " + getCategoryName(selectedCategoryId[0]) + " (ID: " + selectedCategoryId[0] + ")");
-                Log.d("HomeFragment", "New color: " + colorNames[selectedColorId[0] - 1] + " (ID: " + selectedColorId[0] + ")");
+                Log.d(TAG, "Updating deck with ID: " + deck.getId());
+                Log.d(TAG, "New name: " + newName);
+                Log.d(TAG, "New description: " + newDescription);
+                Log.d(TAG, "New category: " + getCategoryName(selectedCategoryId[0]) + " (ID: " + selectedCategoryId[0] + ")");
+                Log.d(TAG, "New color: " + colorNames[selectedColorId[0] - 1] + " (ID: " + selectedColorId[0] + ")");
 
-                // Create updated deck object with new imageUrl (colorId)
+                // Create updated deck object with new imageUrl (colorId) and category
                 String newImageUrl = String.valueOf(selectedColorId[0]);
+                String newCategoryName = getCategoryName(selectedCategoryId[0]);
 
-                // Call API to update deck (không gửi categoryId vì API chưa hỗ trợ)
-                homeViewModel.updateDeck(deck.getId(), newName, newDescription, newImageUrl ,false, cachedAuthToken);
-
-                // TODO: Khi API hỗ trợ category và color update, thêm các tham số này vào API call
-                // homeViewModel.updateDeck(deck.getId(), newName, newDescription, false, newImageUrl, selectedCategoryId[0], cachedAuthToken);
+                // Call API to update deck with category support
+                homeViewModel.updateDeck(deck.getId(), newName, newDescription, newImageUrl, false, newCategoryName, cachedAuthToken);
 
                 dialog.dismiss();
             } else {
@@ -893,6 +945,138 @@ public class HomeFragment extends Fragment implements DeckActionListener,
 
         dialog.show();
     }
+
+    private void showShareDeckDialog(Deck deck) {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_share_deck, null);
+
+        // Initialize views
+        TextView txtDeckName = dialogView.findViewById(R.id.txt_deck_name);
+        TextView txtDeckDescription = dialogView.findViewById(R.id.txt_deck_description);
+        TextInputEditText etReceiverEmail = dialogView.findViewById(R.id.et_receiver_email);
+        RadioGroup radioGroupPermission = dialogView.findViewById(R.id.radio_group_permission);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        Button btnShare = dialogView.findViewById(R.id.btn_share);
+        ProgressBar progressSharing = dialogView.findViewById(R.id.progress_sharing);
+
+        // Set deck info
+        txtDeckName.setText(deck.getName());
+        txtDeckDescription.setText(deck.getDescription());
+
+        // Create dialog
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        // Set up listeners
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnShare.setOnClickListener(v -> {
+            String receiverEmail = Objects.requireNonNull(etReceiverEmail.getText()).toString().trim();
+
+            // Validate email
+            if (receiverEmail.isEmpty()) {
+                etReceiverEmail.setError("Vui lòng nhập email người nhận");
+                etReceiverEmail.requestFocus();
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(receiverEmail).matches()) {
+                etReceiverEmail.setError("Email không hợp lệ");
+                etReceiverEmail.requestFocus();
+                return;
+            }
+
+            // Get permission level
+            String permissionLevel = "view"; // Default
+            int selectedRadioId = radioGroupPermission.getCheckedRadioButtonId();
+            if (selectedRadioId == R.id.radio_view) {
+                permissionLevel = "view";
+            }
+
+            // Show loading
+            progressSharing.setVisibility(View.VISIBLE);
+            btnShare.setEnabled(false);
+            btnCancel.setEnabled(false);
+
+            // Call share API
+            if (cachedAuthToken != null) {
+                shareDeck(deck.getId(), receiverEmail, permissionLevel, dialog, progressSharing, btnShare, btnCancel);
+            } else {
+                hideLoading(progressSharing, btnShare, btnCancel);
+                Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        dialog.show();
+    }
+
+    // ========== SHARE DECK METHODS ==========
+
+    private void shareDeck(long deckId, String receiverEmail, String permissionLevel,
+                           AlertDialog dialog, ProgressBar progressSharing,
+                           Button btnShare, Button btnCancel) {
+
+        Log.d(TAG, "Sharing deck " + deckId + " with " + receiverEmail);
+
+        // Reset previous states
+        homeViewModel.resetShareStates();
+
+        // Call share API
+        homeViewModel.shareDeck(deckId, receiverEmail, permissionLevel, cachedAuthToken);
+
+        // Observe loading state
+        homeViewModel.getShareLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    showLoading(progressSharing, btnShare, btnCancel);
+                } else {
+                    hideLoading(progressSharing, btnShare, btnCancel);
+                }
+            }
+        });
+
+        // Observe share result
+        homeViewModel.getShareSuccess().observe(getViewLifecycleOwner(), success -> {
+            if (success != null) {
+                if (success) {
+                    Toast.makeText(getContext(), "Đã gửi lời mời chia sẻ thành công!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    // Remove observers after successful share
+                    removeShareObservers();
+                }
+            }
+        });
+
+        // Observe share error
+        homeViewModel.getShareError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                removeShareObservers();
+            }
+        });
+    }
+
+    private void showLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
+        progressSharing.setVisibility(View.VISIBLE);
+        btnShare.setEnabled(false);
+        btnCancel.setEnabled(false);
+    }
+
+    private void hideLoading(ProgressBar progressSharing, Button btnShare, Button btnCancel) {
+        progressSharing.setVisibility(View.GONE);
+        btnShare.setEnabled(true);
+        btnCancel.setEnabled(true);
+    }
+
+    private void removeShareObservers() {
+        // Remove observers to prevent memory leaks and multiple triggers
+        homeViewModel.getShareLoading().removeObservers(getViewLifecycleOwner());
+        homeViewModel.getShareSuccess().removeObservers(getViewLifecycleOwner());
+        homeViewModel.getShareError().removeObservers(getViewLifecycleOwner());
+    }
+
+    // ========== DIFFUTIL CALLBACK ==========
 
     // DiffUtil callback for efficient RecyclerView updates
     private static class DeckDiffCallback extends DiffUtil.Callback {
@@ -919,7 +1103,6 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             return oldList.get(oldItemPosition).getId() == newList.get(newItemPosition).getId();
         }
 
-
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
             Deck oldDeck = oldList.get(oldItemPosition);
@@ -928,14 +1111,12 @@ public class HomeFragment extends Fragment implements DeckActionListener,
             return Objects.equals(oldDeck.getName(), newDeck.getName()) &&
                     Objects.equals(oldDeck.getDescription(), newDeck.getDescription()) &&
                     oldDeck.getTotalCards() == newDeck.getTotalCards() &&
+                    oldDeck.getLearnedCards() == newDeck.getLearnedCards() &&
+                    oldDeck.getDueCards() == newDeck.getDueCards() &&
+                    oldDeck.getUnlearnedCards() == newDeck.getUnlearnedCards() &&
                     oldDeck.isPublic() == newDeck.isPublic() &&
-                    Objects.equals(oldDeck.getImageUrl(), newDeck.getImageUrl());
+                    Objects.equals(oldDeck.getImageUrl(), newDeck.getImageUrl()) &&
+                    Objects.equals(oldDeck.getCategory(), newDeck.getCategory());
         }
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Refresh dữ liệu khi quay lại fragment
-        refreshDecks();
     }
 }
