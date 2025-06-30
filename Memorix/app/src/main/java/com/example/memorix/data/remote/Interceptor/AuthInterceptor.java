@@ -98,6 +98,9 @@ public class AuthInterceptor implements Interceptor {
         editor.remove("refresh_token");
         editor.apply();
 
+        Intent broadcastIntent = new Intent("com.example.ACTION_LOGOUT");
+        context.sendBroadcast(broadcastIntent);
+
         // Chuyển về LoginActivity (bắt buộc phải gọi trên main thread, xử lý bên ngoài nếu cần)
         Intent intent = new Intent(context, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
