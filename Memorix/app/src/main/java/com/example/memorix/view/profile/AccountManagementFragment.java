@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ import com.example.memorix.viewmodel.UserViewModel;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.Objects;
+import com.bumptech.glide.Glide;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,6 +55,9 @@ public class AccountManagementFragment extends Fragment {
     private MaterialButton logoutButton;
     private View changePasswordLayout;
     private View languageLayout;
+
+    private ImageView userAvatarImageView;
+
 
     public AccountManagementFragment() {
         // Required empty public constructor
@@ -114,12 +119,24 @@ public class AccountManagementFragment extends Fragment {
             if(u!=null){
                 userNameTextView .setText(u.getUsername());
                 userEmailTextView.setText(u.getEmail());
+                userPhoneTextView.setText(u.getPhone() != null ? u.getPhone() : "Chưa có");
+
+                String imageUrl = u.getImage_url();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Glide.with(this)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.ic_memorix_logo)
+                            .error(R.drawable.ic_memorix_logo)
+                            .circleCrop()
+                            .into(userAvatarImageView);
+                }
 
                 // cache xuống SharedPreferences
                 SharedPreferences.Editor ed = requireContext()
                         .getSharedPreferences("UserPrefs",Context.MODE_PRIVATE).edit();
                 ed.putString("user_name",u.getUsername());
                 ed.putString("user_email",u.getEmail());
+                ed.putString("user_phone", u.getPhone());
                 ed.apply();
             }
         });
@@ -134,6 +151,7 @@ public class AccountManagementFragment extends Fragment {
         logoutButton = view.findViewById(R.id.btn_logout);
         changePasswordLayout = view.findViewById(R.id.layout_change_password);
         languageLayout = view.findViewById(R.id.layout_language);
+        userAvatarImageView = view.findViewById(R.id.profile_image);
     }
 
     private void loadUserData() {
@@ -257,6 +275,10 @@ public class AccountManagementFragment extends Fragment {
     private void clearTokenAndNavigateToLogin() {
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
+
+        SharedPreferences userPrefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        userPrefs.edit().clear().apply();
+
 
         editor.remove("access_token");
         editor.remove("refresh_token");

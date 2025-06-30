@@ -70,13 +70,22 @@ public class LoginActivity extends AppCompatActivity {
         });
         HideSoftKeyboard.setupHideKeyboard(this, findViewById(R.id.main));
         initViews();
+
+        SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        boolean remember = loginPrefs.getBoolean("remember_password", false);
+        if (remember) {
+            editTextAccount.setText(loginPrefs.getString("saved_email", ""));
+            editTextPassword.setText(loginPrefs.getString("saved_password", ""));
+            checkboxRememberPassword.setChecked(true);
+        }
+        setupClickListeners();
         String passedEmail = getIntent().getStringExtra("EMAIL");
         if (passedEmail != null) {
             editTextAccount.setText(passedEmail);
         }
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String savedToken = prefs.getString("access_token", null);
-        boolean remember = prefs.getBoolean("remember_password", false);
+
 
         if (savedToken != null) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -119,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String inputEmail = s.toString().trim();
                 if (Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches()) {
-                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                    SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
                     String savedEmail = prefs.getString("saved_email", "");
                     String savedPassword = prefs.getString("saved_password", "");
 
@@ -190,6 +199,11 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString("access_token", loginResponse.getAccess_token());
                         editor.putString("refresh_token", loginResponse.getRefresh_token());
+                        editor.putBoolean("user_verified", loginResponse.getUser().isVerified());
+                        editor.putString("user_name", loginResponse.getUser().getUsername());
+                        editor.putString("user_email", loginResponse.getUser().getEmail());
+                        editor.putString("user_phone", loginResponse.getUser().getPhone());
+                        editor.putString("user_image", loginResponse.getUser().getImageUrl());
                         editor.apply();
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -282,19 +296,29 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
 
+                    SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor loginEditor = loginPrefs.edit();
+
                     editor.putString("access_token", accessToken);
                     editor.putString("refresh_token", refreshToken);
 
-                    if (checkboxRememberPassword.isChecked()) {
-                        editor.putString("saved_email", email);
-                        editor.putString("saved_password", password);  // lưu tạm thời, nhớ mã hóa nếu cần bảo mật
-                        editor.putBoolean("remember_password", true);
-                    } else {
-                        editor.remove("saved_email");
-                        editor.remove("saved_password");
-                        editor.putBoolean("remember_password", false);
-                    }
+                    editor.putBoolean("user_verified", loginResponse.getUser().isVerified());
+                    editor.putString("user_name", loginResponse.getUser().getUsername());
+                    editor.putString("user_email", loginResponse.getUser().getEmail());
+                    editor.putString("user_phone", loginResponse.getUser().getPhone());
+                    editor.putString("user_image", loginResponse.getUser().getImageUrl());
 
+
+                    if (checkboxRememberPassword.isChecked()) {
+                        loginEditor.putString("saved_email", email);
+                        loginEditor.putString("saved_password", password);
+                        loginEditor.putBoolean("remember_password", true);
+                    } else {
+                        loginEditor.remove("saved_email");
+                        loginEditor.remove("saved_password");
+                        loginEditor.putBoolean("remember_password", false);
+                    }
+                    loginEditor.apply();
                     editor.apply();
 
                     Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
