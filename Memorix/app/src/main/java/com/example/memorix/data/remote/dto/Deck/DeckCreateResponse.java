@@ -7,10 +7,22 @@ public class DeckCreateResponse {
     private String description;
     private String image_url;
     private boolean is_public;
+    private String category;
 
     public DeckCreateResponse() {
     }
 
+    public DeckCreateResponse(int deck_id, int user_id, String name, String description, String image_url, boolean is_public, String category) {
+        this.deck_id = deck_id;
+        this.user_id = user_id;
+        this.name = name;
+        this.description = description;
+        this.image_url = image_url;
+        this.is_public = is_public;
+        this.category = category;
+    }
+
+    // Constructor without category (for backward compatibility)
     public DeckCreateResponse(int deck_id, int user_id, String name, String description, String image_url, boolean is_public) {
         this.deck_id = deck_id;
         this.user_id = user_id;
@@ -18,6 +30,7 @@ public class DeckCreateResponse {
         this.description = description;
         this.image_url = image_url;
         this.is_public = is_public;
+        this.category = null;
     }
 
     // Getters
@@ -45,6 +58,10 @@ public class DeckCreateResponse {
         return is_public;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
     // Setters
     public void setDeck_id(int deck_id) {
         this.deck_id = deck_id;
@@ -68,5 +85,22 @@ public class DeckCreateResponse {
 
     public void setIs_public(boolean is_public) {
         this.is_public = is_public;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "DeckCreateResponse{" +
+                "deck_id=" + deck_id +
+                ", user_id=" + user_id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", image_url='" + image_url + '\'' +
+                ", is_public=" + is_public +
+                ", category='" + category + '\'' +
+                '}';
     }
 }

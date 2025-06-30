@@ -18,8 +18,15 @@ public class PublicDeck {
     @SerializedName("image_url")
     private String imageUrl;
 
+
     @SerializedName("is_public")
     private boolean isPublic;
+
+    @SerializedName("total")
+    private int totalCards;
+    @SerializedName("category")
+    private String category;
+
 
     @SerializedName("owner_username")
     private String ownerUsername;
@@ -27,12 +34,31 @@ public class PublicDeck {
     // Constructors
     public PublicDeck() {}
 
-    public PublicDeck(int deckId, String name, String description, String ownerUsername) {
+    public PublicDeck(int deckId, String name, String description, String category, int totalCards, String ownerUsername) {
         this.deckId = deckId;
         this.name = name;
         this.description = description;
         this.ownerUsername = ownerUsername;
+        this.totalCards = totalCards;
+        this.category = category;
         this.isPublic = true;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getTotal_cards() {
+        return totalCards;
+    }
+
+    public void setTotal_cards(int totalCards) {
+        this.totalCards = totalCards;
     }
 
     // Getters
@@ -46,6 +72,6 @@ public class PublicDeck {
 
     // Convert to Deck object for adapter compatibility
     public Deck toDeck() {
-        return new Deck(deckId, name, description, 0, description, false);
+        return new Deck(deckId, name, description, getTotal_cards(), false, category);
     }
 }

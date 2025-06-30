@@ -6,13 +6,18 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.memorix.data.remote.Repository.DeckLibraryRepository;
 import com.example.memorix.model.Deck;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DeckLibraryViewModel extends ViewModel {
-    private DeckLibraryRepository repository;
-    private MutableLiveData<List<Deck>> filteredDecksLiveData;
+    private final DeckLibraryRepository repository;
+    private final MutableLiveData<List<Deck>> filteredDecksLiveData;
     private List<Deck> originalDecks;
+
+    // Track current search state
+    private String currentSearchQuery = "";
+    private String currentCategory = "";
 
     public DeckLibraryViewModel() {
         repository = new DeckLibraryRepository();
@@ -37,7 +42,7 @@ public class DeckLibraryViewModel extends ViewModel {
         return repository.getError();
     }
 
-    // New methods for clone functionality
+    // Clone functionality methods
     public LiveData<Boolean> getCloneLoading() {
         return repository.getCloneLoading();
     }
@@ -50,35 +55,80 @@ public class DeckLibraryViewModel extends ViewModel {
         return repository.getCloneError();
     }
 
+    // Load all public decks (initial load)
     public void loadPublicDecks() {
         repository.fetchPublicDecks();
     }
 
+    // API-based search method
+    public void searchDecks(String searchQuery, String category) {
+        // Update current search state
+        currentSearchQuery = searchQuery != null ? searchQuery.trim() : "";
+        currentCategory = category != null ? category.trim() : "";
+
+        // Use repository to search via API
+        repository.searchPublicDecks(currentSearchQuery, currentCategory);
+    }
+
+    // Convenience methods for different search scenarios
+    public void searchByQuery(String searchQuery) {
+        searchDecks(searchQuery, currentCategory);
+    }
+
+    public void searchByCategory(String category) {
+        searchDecks(currentSearchQuery, category);
+    }
+
+    public void clearSearch() {
+        currentSearchQuery = "";
+        currentCategory = "";
+        repository.fetchPublicDecks(); // Load all decks
+    }
+
+    // Getters for current search state
+    public String getCurrentSearchQuery() {
+        return currentSearchQuery;
+    }
+
+    public String getCurrentCategory() {
+        return currentCategory;
+    }
+
+    // Keep these methods for compatibility with existing code
     public void setOriginalDecks(List<Deck> decks) {
         this.originalDecks = new ArrayList<>(decks);
         filteredDecksLiveData.setValue(decks);
     }
 
-    public void filterDecks(String query) {
-        if (originalDecks == null) return;
-
-        if (query == null || query.trim().isEmpty()) {
-            filteredDecksLiveData.setValue(originalDecks);
-        } else {
-            List<Deck> filteredList = new ArrayList<>();
-            String lowerCaseQuery = query.toLowerCase().trim();
-
-            for (Deck deck : originalDecks) {
-                if (deck.getName().toLowerCase().contains(lowerCaseQuery) ||
-                        (deck.getDescription() != null && deck.getDescription().toLowerCase().contains(lowerCaseQuery))) {
-                    filteredList.add(deck);
-                }
-            }
-
-            filteredDecksLiveData.setValue(filteredList);
-        }
+    // Legacy local filtering methods - kept for backward compatibility
+    // but now they trigger API calls instead of local filtering
+    public void filterDecksWithCategory(String searchQuery, String category) {
+        searchDecks(searchQuery, category);
     }
 
+    public void filterDecks(String query) {
+        searchDecks(query, currentCategory);
+    }
+
+    public void filterByCategory(String category) {
+        searchDecks(currentSearchQuery, category);
+    }
+
+    public void clearFilters() {
+        clearSearch();
+    }
+
+    // Utility methods
+    public int getOriginalDecksCount() {
+        return originalDecks != null ? originalDecks.size() : 0;
+    }
+
+    public int getFilteredDecksCount() {
+        List<Deck> current = filteredDecksLiveData.getValue();
+        return current != null ? current.size() : 0;
+    }
+
+    // Clone methods
     public void cloneDeck(Deck deck, String token) {
         repository.cloneDeck(deck.getId(), token);
     }

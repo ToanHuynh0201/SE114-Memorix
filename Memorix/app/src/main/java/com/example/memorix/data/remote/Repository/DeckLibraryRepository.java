@@ -1,9 +1,9 @@
 package com.example.memorix.data.remote.Repository;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.memorix.data.remote.api.DeckApi;
-import com.example.memorix.data.remote.api.ShareApi;
 import com.example.memorix.data.remote.dto.Deck.CloneResponse;
 import com.example.memorix.data.remote.dto.Deck.PublicDecksResponse;
 import com.example.memorix.data.remote.network.ApiClient;
@@ -11,8 +11,10 @@ import com.example.memorix.model.Deck;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 import java.util.ArrayList;
 import java.util.List;
+
 public class DeckLibraryRepository {
     private DeckApi apiService;
 
@@ -57,6 +59,7 @@ public class DeckLibraryRepository {
         return cloneErrorLiveData;
     }
 
+    // Original method - get all public decks
     public void fetchPublicDecks() {
         loadingLiveData.setValue(true);
 
@@ -64,22 +67,7 @@ public class DeckLibraryRepository {
             @Override
             public void onResponse(Call<PublicDecksResponse> call, Response<PublicDecksResponse> response) {
                 loadingLiveData.setValue(false);
-
-                if (response.isSuccessful() && response.body() != null) {
-                    PublicDecksResponse apiResponse = response.body();
-
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        List<Deck> deckList = new ArrayList<>();
-                        for (com.example.memorix.model.PublicDeck publicDeck : apiResponse.getData()) {
-                            deckList.add(publicDeck.toDeck());
-                        }
-                        publicDecksLiveData.setValue(deckList);
-                    } else {
-                        errorLiveData.setValue("Không thể tải danh sách deck");
-                    }
-                } else {
-                    errorLiveData.setValue("Lỗi kết nối: " + response.code());
-                }
+                handlePublicDecksResponse(response);
             }
 
             @Override
@@ -88,6 +76,63 @@ public class DeckLibraryRepository {
                 errorLiveData.setValue("Lỗi mạng: " + t.getMessage());
             }
         });
+    }
+
+    // New method - search public decks with query and/or category
+    public void searchPublicDecks(String searchQuery, String category) {
+        loadingLiveData.setValue(true);
+
+        Call<PublicDecksResponse> call;
+
+        // Determine which API method to use based on parameters
+        if ((searchQuery == null || searchQuery.trim().isEmpty()) &&
+                (category == null || category.trim().isEmpty())) {
+            // No filters - get all decks
+            call = apiService.getPublicDecks();
+        } else if (searchQuery != null && !searchQuery.trim().isEmpty() &&
+                category != null && !category.trim().isEmpty()) {
+            // Both search query and category
+            call = apiService.getPublicDecksWithSearchAndCategory(searchQuery.trim(), category);
+        } else if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            // Search query only
+            call = apiService.getPublicDecksWithSearch(searchQuery.trim());
+        } else {
+            // Category only
+            call = apiService.getPublicDecksWithCategory(category);
+        }
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<PublicDecksResponse> call, Response<PublicDecksResponse> response) {
+                loadingLiveData.setValue(false);
+                handlePublicDecksResponse(response);
+            }
+
+            @Override
+            public void onFailure(Call<PublicDecksResponse> call, Throwable t) {
+                loadingLiveData.setValue(false);
+                errorLiveData.setValue("Lỗi mạng: " + t.getMessage());
+            }
+        });
+    }
+
+    // Helper method to handle API response
+    private void handlePublicDecksResponse(Response<PublicDecksResponse> response) {
+        if (response.isSuccessful() && response.body() != null) {
+            PublicDecksResponse apiResponse = response.body();
+
+            if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                List<Deck> deckList = new ArrayList<>();
+                for (com.example.memorix.model.PublicDeck publicDeck : apiResponse.getData()) {
+                    deckList.add(publicDeck.toDeck());
+                }
+                publicDecksLiveData.setValue(deckList);
+            } else {
+                errorLiveData.setValue("Không thể tải danh sách deck");
+            }
+        } else {
+            errorLiveData.setValue("Lỗi kết nối: " + response.code());
+        }
     }
 
     public void cloneDeck(long deckId, String token) {

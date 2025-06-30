@@ -37,7 +37,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_search"
-                android:contentDescription="@string/search_icon"
+                android:contentDescription="Tìm kiếm"
                 app:tint="@color/secondary_text_color" />
 
             <EditText
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@null"
-                android:hint="@string/search_decks_hint"
+                android:hint="Tìm kiếm bộ thẻ..."
                 android:textColorHint="@color/secondary_text_color"
                 android:textColor="@color/text_color"
                 android:textSize="16sp"
@@ -62,7 +62,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_clear"
-                android:contentDescription="@string/clear_search"
+                android:contentDescription="Xóa tìm kiếm"
                 android:visibility="gone"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="4dp"
@@ -72,18 +72,70 @@
 
     </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:id="@+id/txt_my_sets"
-        android:layout_width="wrap_content"
+    <!-- Header with Category Filter -->
+    <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:text="@string/my_sets"
-        android:textColor="@color/text_color"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_search" />
+        app:layout_constraintTop_toBottomOf="@+id/card_search">
+
+        <TextView
+            android:id="@+id/txt_my_sets"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Bộ thẻ của tôi"
+            android:textColor="@color/text_color"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Category Filter Spinner -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_filter"
+                    android:contentDescription="Lọc theo thể loại"
+                    app:tint="@color/primary_color" />
+
+                <Spinner
+                    android:id="@+id/spinner_category_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:background="@null"
+                    android:minWidth="100dp"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 
     <!-- Search Results Count (Optional) -->
     <TextView
@@ -91,13 +143,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/search_results_count"
+        android:layout_marginTop="8dp"
+        android:text="Kết quả tìm kiếm"
         android:textColor="@color/secondary_text_color"
         android:textSize="14sp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_my_sets"
+        app:layout_constraintTop_toBottomOf="@+id/layout_header"
         tools:text="Tìm thấy 5 kết quả cho 'android'" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -132,7 +184,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:alpha="0.5"
-            android:contentDescription="@string/empty_state"
+            android:contentDescription="Trống"
             android:src="@drawable/ic_empty_state" />
 
         <TextView
@@ -140,7 +192,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/empty_state_title"
+            android:text="Chưa có bộ thẻ nào"
             android:textColor="@color/text_color"
             android:textSize="16sp" />
 
@@ -151,7 +203,7 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:padding="16dp"
-            android:text="@string/empty_state_description"
+            android:text="Hãy tạo bộ thẻ đầu tiên để bắt đầu học"
             android:textColor="@color/text_color"
             android:textSize="14sp" />
 
@@ -161,7 +213,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/secondary_color"
-            android:text="@string/btn_create_first_set"
+            android:text="Tạo bộ thẻ đầu tiên"
             android:textColor="@android:color/white" />
 
     </LinearLayout>
@@ -183,7 +235,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:alpha="0.5"
-            android:contentDescription="@string/no_search_results"
+            android:contentDescription="Không tìm thấy kết quả"
             android:src="@drawable/ic_search_off"
             app:tint="@color/secondary_text_color" />
 
@@ -191,7 +243,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/no_search_results_title"
+            android:text="Không tìm thấy kết quả"
             android:textColor="@color/text_color"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -203,7 +255,7 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:padding="16dp"
-            android:text="@string/no_search_results_description"
+            android:text="Thử tìm kiếm với từ khóa khác"
             android:textColor="@color/secondary_text_color"
             android:textSize="14sp"
             tools:text="Không tìm thấy kết quả nào cho 'android'" />
@@ -215,7 +267,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="@string/add_new_deck"
+        android:contentDescription="Thêm bộ thẻ mới"
         android:src="@drawable/ic_add"
         android:backgroundTint="@color/primary_color"
         app:tint="@android:color/white"

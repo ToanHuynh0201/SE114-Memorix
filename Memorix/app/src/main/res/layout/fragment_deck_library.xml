@@ -9,7 +9,7 @@
 
     <!-- Modern Header with Teal Gradient -->
     <LinearLayout
-        android:id="@+id/layout_header"
+        android:id="@+id/layout_gradient_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_gradient_teal_header"
@@ -89,6 +89,8 @@
                     android:hint="Tìm deck yêu thích của bạn..."
                     android:importantForAutofill="no"
                     android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:maxLines="1"
                     android:textColor="@color/text_color"
                     android:textColorHint="@color/secondary_text_color"
                     android:textSize="15sp" />
@@ -116,7 +118,88 @@
 
     </LinearLayout>
 
-    <!-- Main Content Area -->
+    <!-- Fixed Header with Title and Category Filter (Similar to HomeFragment) -->
+    <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/background_color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_gradient_header">
+
+        <TextView
+            android:id="@+id/tv_deck_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="✨ Khám phá các bộ deck tuyệt vời"
+            android:textColor="@color/text_color"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Category Filter Spinner -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_filter"
+                    android:contentDescription="Lọc theo thể loại"
+                    app:tint="@color/primary_color" />
+
+                <Spinner
+                    android:id="@+id/spinner_category_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:background="@null"
+                    android:minWidth="100dp"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <!-- Search Results Count (Fixed position) -->
+    <TextView
+        android:id="@+id/tv_search_results"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Kết quả tìm kiếm"
+        android:textColor="@color/secondary_text_color"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_header"
+        tools:text="Tìm thấy 5 kết quả cho 'android'" />
+
+    <!-- Scrollable Content Area -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
@@ -126,59 +209,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_header">
+        app:layout_constraintTop_toBottomOf="@+id/tv_search_results">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_all_decks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingTop="24dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="24dp">
-
-            <!-- Header with count and sort -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="✨ Khám phá các bộ deck tuyệt vời"
-                    android:textColor="@color/text_color"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <!-- Deck List -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_all_decks"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:clipToPadding="false"
-                android:paddingTop="8dp" />
-
-        </LinearLayout>
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="80dp"
+            tools:listitem="@layout/item_deck_library" />
 
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Loading State -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_header" />
 
     <!-- Empty State -->
     <LinearLayout
@@ -192,7 +236,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_header">
+        app:layout_constraintTop_toBottomOf="@+id/tv_search_results">
 
         <ImageView
             android:layout_width="120dp"
@@ -215,6 +259,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tv_empty_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"

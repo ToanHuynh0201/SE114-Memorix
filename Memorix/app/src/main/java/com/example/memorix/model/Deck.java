@@ -5,21 +5,54 @@ public class Deck {
     private String name;
     private String description;
     private int totalCards;
+    private int unlearnedCards;
+    private int learnedCards;
+    private int dueCards;
     private String imageUrl;
     private boolean isPublic;
-
+    private String category;
 
     public Deck() {}
 
+    public Deck(long id, String name, String description, int totalCards, boolean isPublic, String category) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.totalCards = totalCards;
+        this.isPublic = isPublic;
+        this.category = category;
+    }
+
+    // Constructor với tất cả fields mới
+    public Deck(long id, String name, String description, int totalCards, int unlearnedCards,
+                int learnedCards, int dueCards, String imageUrl, boolean isPublic, String category) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.totalCards = totalCards;
+        this.unlearnedCards = unlearnedCards;
+        this.learnedCards = learnedCards;
+        this.dueCards = dueCards;
+        this.imageUrl = imageUrl;
+        this.isPublic = isPublic;
+        this.category = category;
+    }
+
+    // Constructor cũ để backward compatibility
     public Deck(long id, String name, String description, int totalCards, String imageUrl, boolean isPublic) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.totalCards = totalCards;
+        this.unlearnedCards = 0;
+        this.learnedCards = 0;
+        this.dueCards = 0;
         this.imageUrl = imageUrl;
         this.isPublic = isPublic;
+        this.category = "";
     }
 
+    // Getters and Setters
     public long getId() {
         return id;
     }
@@ -43,11 +76,37 @@ public class Deck {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public int getTotalCards() {
         return totalCards;
     }
-    public void setTotalCards(int cardCount) {
-        this.totalCards = cardCount;
+
+    public void setTotalCards(int totalCards) {
+        this.totalCards = totalCards;
+    }
+
+    public int getUnlearnedCards() {
+        return unlearnedCards;
+    }
+
+    public void setUnlearnedCards(int unlearnedCards) {
+        this.unlearnedCards = unlearnedCards;
+    }
+
+    public int getLearnedCards() {
+        return learnedCards;
+    }
+
+    public void setLearnedCards(int learnedCards) {
+        this.learnedCards = learnedCards;
+    }
+
+    public int getDueCards() {
+        return dueCards;
+    }
+
+    public void setDueCards(int dueCards) {
+        this.dueCards = dueCards;
     }
 
     public String getImageUrl() {
@@ -64,5 +123,21 @@ public class Deck {
 
     public void setPublic(boolean aPublic) {
         isPublic = aPublic;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public boolean hasDueCards() {
+        return dueCards > 0;
+    }
+
+    public boolean hasUnlearnedCards() {
+        return unlearnedCards > 0;
     }
 }

@@ -27,6 +27,16 @@
     <color name="gold">#FFD700</color>
     <color name="gray">#AAAAAA</color>
 
+    <!-- Màu trạng thái -->
+    <color name="success_color">#10B981</color>      <!-- Màu xanh lá - thẻ đã học -->
+    <color name="warning_color">#F59E0B</color>      <!-- Màu vàng cam - thẻ cần ôn -->
+    <color name="error_color">#EF4444</color>        <!-- Màu đỏ - lỗi -->
+    <color name="info_color">#3B82F6</color>         <!-- Màu xanh dương - thông tin -->
+
+    <!-- Màu cho chip thể loại -->
+    <color name="category_chip_background">#F3F4F6</color>
+    <color name="category_chip_stroke">#E5E7EB</color>
+
     <color name="input_background">#3D3D3D</color>
     <color name="hint_color">#8A8A8A</color>
     <color name="bottom_sheet_background">#2D2D2D</color>

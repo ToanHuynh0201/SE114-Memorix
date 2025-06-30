@@ -44,10 +44,11 @@ public class HomeViewModel extends ViewModel {
         return deckRepository.getCreateDeckSuccess();
     }
 
-    public void createDeck(String name, String description, String imageUrl, boolean isPublic, String token) {
-        deckRepository.createDeck(name, description, imageUrl, isPublic, token);
+    public void createDeck(String name, String description, String imageUrl, boolean isPublic, String category, String token) {
+        deckRepository.createDeck(name, description, imageUrl, isPublic, category, token);
     }
 
+    // Overloaded method for backward compatibility (without imageUrl and category)
     public void createDeck(String name, String description, boolean isPublic, String token) {
         deckRepository.createDeck(name, description, isPublic, token);
     }
@@ -57,14 +58,21 @@ public class HomeViewModel extends ViewModel {
         return deckRepository.getUpdateSuccess();
     }
 
+    public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String category, String token) {
+        deckRepository.updateDeck(deckId, name, description, imageUrl, isPublic, category, token);
+    }
+
+    // Overloaded method for backward compatibility (without category)
     public void updateDeck(long deckId, String name, String description, String imageUrl, boolean isPublic, String token) {
         deckRepository.updateDeck(deckId, name, description, imageUrl, isPublic, token);
     }
 
+    // Overloaded method for backward compatibility (without imageUrl and category)
     public void updateDeck(long deckId, String name, String description, boolean isPublic, String token) {
         deckRepository.updateDeck(deckId, name, description, isPublic, token);
     }
 
+    // Old method for compatibility with existing Deck object
     public void updateDeck(long deckId, Deck updatedDeck, String token) {
         deckRepository.updateDeck(deckId, updatedDeck, token);
     }
@@ -91,13 +99,13 @@ public class HomeViewModel extends ViewModel {
         return shareRepository.getShareLoading();
     }
 
-    /**
-     * Share deck với user khác
-     * @param deckId ID của deck cần share
-     * @param receiverEmail Email của người nhận
-     * @param permissionLevel Quyền hạn ("view", "edit", etc.)
-     * @param token Auth token
-     */
+    public void searchDecksWithCategory(String token, String searchQuery, String category) {
+        deckRepository.searchDecksWithCategory(token, searchQuery, category);
+    }
+
+    public void filterDecksByCategory(String token, String category) {
+        deckRepository.filterDecksByCategory(token, category);
+    }
     public void shareDeck(long deckId, String receiverEmail, String permissionLevel, String token) {
         shareRepository.shareDeck(deckId, receiverEmail, permissionLevel, token);
     }
