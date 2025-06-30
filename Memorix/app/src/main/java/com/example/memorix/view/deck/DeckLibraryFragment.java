@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -29,6 +31,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,16 +41,17 @@ import com.example.memorix.view.deck.adapter.DeckLibraryAdapter;
 import com.example.memorix.viewmodel.DeckLibraryViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.DeckLibraryListener {
 
     private static final String TAG = "DeckLibraryFragment";
+    private static final int SEARCH_DELAY_MS = 500; // Debounce delay for search
 
     // Views
     private EditText etSearch;
     private RecyclerView rvAllDecks;
-    private ProgressBar progressBar;
     private LinearLayout layoutEmptyState;
     private NestedScrollView scrollView;
     private Spinner spinnerCategoryFilter;
@@ -58,11 +62,16 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     // Components
     private DeckLibraryAdapter deckAdapter;
     private DeckLibraryViewModel viewModel;
+    private List<Deck> deckList; // Add this for DiffUtil
 
     // State
     private String cachedAuthToken;
     private String currentSearchQuery = "";
     private String selectedCategory = "";
+
+    // Search debouncing
+    private Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     // Category options
     private final String[] categoryOptions = {
@@ -93,14 +102,13 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         setupSearchFunctionality();
         observeData();
 
-        // Load data
+        // Load initial data
         viewModel.loadPublicDecks();
     }
 
     private void initViews(View view) {
         etSearch = view.findViewById(R.id.et_search);
         rvAllDecks = view.findViewById(R.id.rv_all_decks);
-        progressBar = view.findViewById(R.id.progress_bar);
         layoutEmptyState = view.findViewById(R.id.layout_empty_state);
         scrollView = view.findViewById(R.id.scroll_view);
         spinnerCategoryFilter = view.findViewById(R.id.spinner_category_filter);
@@ -114,8 +122,15 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     }
 
     private void setupRecyclerView() {
-        deckAdapter = new DeckLibraryAdapter(new ArrayList<>(), this);
+        Log.d(TAG, "Setting up RecyclerView");
+
+        // Enable recycling and optimizations
         rvAllDecks.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvAllDecks.setHasFixedSize(true); // Performance optimization
+        rvAllDecks.setItemViewCacheSize(20); // Cache more views
+
+        deckList = new ArrayList<>();
+        deckAdapter = new DeckLibraryAdapter(deckList, this);
         rvAllDecks.setAdapter(deckAdapter);
     }
 
@@ -139,14 +154,14 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String newCategory = position == 0 ? "" : categoryOptions[position];
 
-                // Only perform filter if category actually changed
+                // Only perform search if category actually changed
                 if (!newCategory.equals(selectedCategory)) {
                     selectedCategory = newCategory;
                     Log.d(TAG, "Category filter changed to: " +
                             (selectedCategory.isEmpty() ? "All" : selectedCategory));
 
-                    // Perform local filtering
-                    performLocalFiltering();
+                    // Perform API search with new category
+                    performSearch();
 
                     // Update UI
                     updateUIForFilterState();
@@ -168,8 +183,19 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentSearchQuery = s.toString().trim();
-                performLocalFiltering();
-                updateUIForFilterState();
+
+                // Cancel previous search
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+
+                // Schedule new search with debounce
+                searchRunnable = () -> {
+                    performSearch();
+                    updateUIForFilterState();
+                };
+
+                searchHandler.postDelayed(searchRunnable, SEARCH_DELAY_MS);
             }
 
             @Override
@@ -177,14 +203,12 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         });
     }
 
-    private void performLocalFiltering() {
-        if (currentSearchQuery.isEmpty() && selectedCategory.isEmpty()) {
-            // No filters - show all decks
-            viewModel.filterDecks("");
-        } else {
-            // Apply local filtering with both search and category
-            viewModel.filterDecksWithCategory(currentSearchQuery, selectedCategory);
-        }
+    private void performSearch() {
+        Log.d(TAG, "Performing API search - Query: '" + currentSearchQuery +
+                "', Category: '" + selectedCategory + "'");
+
+        // Use API-based search
+        viewModel.searchDecks(currentSearchQuery, selectedCategory);
     }
 
     @SuppressLint("SetTextI18n")
@@ -261,27 +285,13 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     }
 
     private void observeData() {
-        // Observe public decks from API
-        viewModel.getPublicDecks().observe(getViewLifecycleOwner(), decks -> {
-            if (decks != null) {
-                viewModel.setOriginalDecks(decks);
-                Log.d(TAG, "Loaded " + decks.size() + " public decks from API");
-            }
-        });
+        // Observe public decks from API with DiffUtil
+        viewModel.getPublicDecks().observe(getViewLifecycleOwner(), this::updateDeckList);
 
-        // Observe filtered decks
-        viewModel.getFilteredDecks().observe(getViewLifecycleOwner(), decks -> {
-            if (decks != null) {
-                deckAdapter.updateData(decks);
-                updateEmptyState(decks.isEmpty());
-                updateSearchResultsCount(decks.size());
-                Log.d(TAG, "Displaying " + decks.size() + " filtered decks");
-            }
-        });
-
-        // Observe loading state
+        // Observe loading state (no UI changes needed since ProgressBar is removed)
         viewModel.getLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            updateLoadingState(isLoading);
+            Log.d(TAG, "Loading state: " + isLoading);
+            // Loading state is tracked but no UI update needed
         });
 
         // Observe errors
@@ -293,7 +303,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
 
         // Observe clone loading state
         viewModel.getCloneLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            // Optional: Show loading dialog or disable buttons during clone
             if (isLoading) {
                 Log.d(TAG, "Clone operation in progress...");
             }
@@ -318,17 +327,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         });
     }
 
-    private void updateLoadingState(boolean isLoading) {
-        if (isLoading) {
-            progressBar.setVisibility(View.VISIBLE);
-            scrollView.setVisibility(View.GONE);
-            layoutEmptyState.setVisibility(View.GONE);
-        } else {
-            progressBar.setVisibility(View.GONE);
-            scrollView.setVisibility(View.VISIBLE);
-        }
-    }
-
     private void updateEmptyState(boolean isEmpty) {
         if (isEmpty) {
             layoutEmptyState.setVisibility(View.VISIBLE);
@@ -342,6 +340,11 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     public void clearFilters() {
         Log.d(TAG, "Clearing all filters");
 
+        // Cancel any pending search
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
+
         currentSearchQuery = "";
         selectedCategory = "";
         etSearch.setText("");
@@ -350,8 +353,8 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         // Reset category filter to "All"
         spinnerCategoryFilter.setSelection(0);
 
-        // Reset filtering
-        performLocalFiltering();
+        // Load all decks
+        viewModel.clearSearch();
         updateUIForFilterState();
     }
 
@@ -447,5 +450,108 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         SharedPreferences prefs = requireActivity().getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         cachedAuthToken = prefs.getString("access_token", null);
         return cachedAuthToken;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Clean up search handler
+        if (searchHandler != null && searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
+
+        // Clear references to prevent memory leaks
+        searchHandler = null;
+        searchRunnable = null;
+        deckAdapter = null;
+        deckList = null;
+    }
+
+    // ========== DATA HANDLING METHODS ==========
+
+    // Optimized deck list update using DiffUtil
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateDeckList(List<Deck> newDecks) {
+        if (newDecks == null) return;
+
+        debugDeckData(newDecks);
+
+        if (deckList.isEmpty()) {
+            // First load - just set the data
+            deckList.addAll(newDecks);
+            deckAdapter.notifyDataSetChanged();
+        } else {
+            // Use DiffUtil for efficient updates with smooth animations
+            DeckDiffCallback diffCallback = new DeckDiffCallback(deckList, newDecks);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+            deckList.clear();
+            deckList.addAll(newDecks);
+            diffResult.dispatchUpdatesTo(deckAdapter);
+        }
+
+        // Update UI states
+        updateEmptyState(newDecks.isEmpty());
+        updateSearchResultsCount(newDecks.size());
+
+        Log.d(TAG, "Displaying " + newDecks.size() + " decks from API");
+    }
+
+    private void debugDeckData(List<Deck> decks) {
+        Log.d(TAG, "=== DEBUG DECK DATA ===");
+        Log.d(TAG, "Total decks: " + decks.size());
+        Log.d(TAG, "Search query: '" + currentSearchQuery + "'");
+        Log.d(TAG, "Selected category: '" + selectedCategory + "'");
+
+        for (int i = 0; i < Math.min(decks.size(), 3); i++) { // Show only first 3 for brevity
+            Deck deck = decks.get(i);
+            Log.d(TAG, "Deck " + i + ": " + deck.getName() +
+                    " (" + deck.getCategory() + ") - " + deck.getTotalCards() + " cards");
+        }
+        Log.d(TAG, "=== END DEBUG ===");
+    }
+
+    // ========== DIFFUTIL CALLBACK ==========
+
+    // DiffUtil callback for efficient RecyclerView updates with smooth animations
+    private static class DeckDiffCallback extends DiffUtil.Callback {
+        private final List<Deck> oldList;
+        private final List<Deck> newList;
+
+        public DeckDiffCallback(List<Deck> oldList, List<Deck> newList) {
+            this.oldList = oldList;
+            this.newList = newList;
+        }
+
+        @Override
+        public int getOldListSize() {
+            return oldList.size();
+        }
+
+        @Override
+        public int getNewListSize() {
+            return newList.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition).getId() == newList.get(newItemPosition).getId();
+        }
+
+        @Override
+        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+            Deck oldDeck = oldList.get(oldItemPosition);
+            Deck newDeck = newList.get(newItemPosition);
+
+            return Objects.equals(oldDeck.getName(), newDeck.getName()) &&
+                    Objects.equals(oldDeck.getDescription(), newDeck.getDescription()) &&
+                    oldDeck.getTotalCards() == newDeck.getTotalCards() &&
+                    oldDeck.getLearnedCards() == newDeck.getLearnedCards() &&
+                    oldDeck.getDueCards() == newDeck.getDueCards() &&
+                    oldDeck.getUnlearnedCards() == newDeck.getUnlearnedCards() &&
+                    oldDeck.isPublic() == newDeck.isPublic() &&
+                    Objects.equals(oldDeck.getImageUrl(), newDeck.getImageUrl()) &&
+                    Objects.equals(oldDeck.getCategory(), newDeck.getCategory());
+        }
     }
 }

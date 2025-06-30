@@ -4,13 +4,12 @@ import com.example.memorix.data.remote.dto.Deck.CloneResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckDeleteResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckUpdateRequest;
 import com.example.memorix.data.remote.dto.Deck.PublicDecksResponse;
-import com.example.memorix.model.Deck;
 import com.example.memorix.data.remote.dto.Deck.DeckCreateRequest;
 import com.example.memorix.data.remote.dto.Deck.DeckCreateResponse;
 import com.example.memorix.data.remote.dto.Deck.DeckResponse;
+import com.example.memorix.model.Deck;
 
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -65,7 +64,16 @@ public interface DeckApi {
 
     @GET("api/shares/public-decks")
     Call<PublicDecksResponse> getPublicDecks();
+    @GET("api/shares/public-decks")
+    Call<PublicDecksResponse> getPublicDecksWithSearch(@Query("q") String searchQuery);
 
+    @GET("api/shares/public-decks")
+    Call<PublicDecksResponse> getPublicDecksWithCategory(@Query("category") String category);
+    @GET("api/shares/public-decks")
+    Call<PublicDecksResponse> getPublicDecksWithSearchAndCategory(
+            @Query("q") String searchQuery,
+            @Query("category") String category
+    );
     @POST("api/shares/clone/{deckId}")
     Call<CloneResponse> cloneDeck(
             @Header("Authorization") String token,

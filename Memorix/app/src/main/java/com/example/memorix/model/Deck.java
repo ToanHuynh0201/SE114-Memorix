@@ -14,6 +14,15 @@ public class Deck {
 
     public Deck() {}
 
+    public Deck(long id, String name, String description, int totalCards, boolean isPublic, String category) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.totalCards = totalCards;
+        this.isPublic = isPublic;
+        this.category = category;
+    }
+
     // Constructor với tất cả fields mới
     public Deck(long id, String name, String description, int totalCards, int unlearnedCards,
                 int learnedCards, int dueCards, String imageUrl, boolean isPublic, String category) {
@@ -122,12 +131,6 @@ public class Deck {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    // Utility methods
-    public int getProgressPercentage() {
-        if (totalCards == 0) return 0;
-        return (int) ((learnedCards * 100.0) / totalCards);
     }
 
     public boolean hasDueCards() {
