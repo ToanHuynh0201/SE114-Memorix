@@ -69,10 +69,13 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
     private CardAdapter cardAdapter;
     private DeckManagementViewModel deckManagementViewModel;
 
+
+
     // Data
     private List<Card> allCards;
     private List<Card> filteredCards;
     private long deckId;
+    private String deckName;
     private String cachedAuthToken;
 
     // Delete operation tracking
@@ -113,6 +116,9 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
 
         // Lấy deck ID từ Intent
         deckId = getIntent().getLongExtra("deck_id", -1);
+        deckName = getIntent().getStringExtra("deck_name");
+
+
         if (deckId == -1) {
             Toast.makeText(this, "Không tìm thấy thông tin deck", Toast.LENGTH_SHORT).show();
             finish();
@@ -647,9 +653,6 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             Toast.makeText(this, "Chưa có thẻ nào để học!", Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent intent = new Intent(DeckManagementActivity.this, FlashcardBasicStudyActivity.class);
-        intent.putExtra("deck_id", deckId);
-        startActivity(intent);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -687,8 +690,9 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
     private void startFlashcardBasicStudy() {
         Intent intent = new Intent(this, FlashcardBasicStudyActivity.class);
         intent.putExtra("deck_id", deckId);
+        intent.putExtra("deck_name", deckName); // để hiển thị tiêu đề
         intent.putExtra("card_count", allCards.size());
-        intent.putExtra("auth_token", cachedAuthToken);
+        intent.putExtra("auth_token", cachedAuthToken);// nếu cần hiển thị tổng số thẻ (tuỳ chọn)
         startActivity(intent);
     }
 
