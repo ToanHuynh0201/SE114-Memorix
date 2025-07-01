@@ -10,6 +10,7 @@ import java.util.List;
 public class Card implements Serializable {
     @SerializedName("flashcard_id")
     private int flashcardId;
+    @SerializedName("deck_id")
     private int deckId;
     private CardType cardType;
     private JsonObject content;
