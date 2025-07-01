@@ -1,5 +1,7 @@
 package com.example.memorix.model;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
 
 public class PublicDeck {
@@ -22,12 +24,10 @@ public class PublicDeck {
     @SerializedName("is_public")
     private boolean isPublic;
 
-    @SerializedName("total")
+    @SerializedName("total_cards")
     private int totalCards;
     @SerializedName("category")
     private String category;
-
-
     @SerializedName("owner_username")
     private String ownerUsername;
 
@@ -72,6 +72,7 @@ public class PublicDeck {
 
     // Convert to Deck object for adapter compatibility
     public Deck toDeck() {
-        return new Deck(deckId, name, description, getTotal_cards(), false, category);
+        Log.e("Error", this.totalCards + " " + this.name + " " + this.category);
+        return new Deck(deckId, name, description, totalCards, false, category);
     }
 }
