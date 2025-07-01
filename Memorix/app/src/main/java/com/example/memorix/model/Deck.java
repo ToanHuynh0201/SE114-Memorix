@@ -1,6 +1,8 @@
 package com.example.memorix.model;
 
-public class Deck {
+import java.io.Serializable;
+
+public class Deck implements Serializable {
     private long id;
     private String name;
     private String description;

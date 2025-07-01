@@ -19,6 +19,7 @@ import com.example.memorix.R;
 import com.example.memorix.model.Card;
 import com.example.memorix.view.MainActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,8 @@ public class StudySummaryActivity extends AppCompatActivity {
     private ProgressBar progressAccuracy;
     private TextView tvStudyTime;
     private TextView tvAverageTime;
+    private TextView tvProgressPercent;
+
 
     private AppCompatButton btnBackToDeck;
 
@@ -41,6 +44,8 @@ public class StudySummaryActivity extends AppCompatActivity {
     private long studyEndTime;
     private int totalCorrect;
     private int totalReviewed;
+    private ArrayList<String> studiedCardsSummary;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +70,7 @@ public class StudySummaryActivity extends AppCompatActivity {
         progressAccuracy = findViewById(R.id.progress_accuracy);
         tvStudyTime = findViewById(R.id.tv_study_time);
         tvAverageTime = findViewById(R.id.tv_average_time);
+        tvProgressPercent = findViewById(R.id.tv_progress_percent);
 
 
         btnBackToDeck = findViewById(R.id.btn_back_to_deck);
@@ -73,7 +79,7 @@ public class StudySummaryActivity extends AppCompatActivity {
     private void getDataFromIntent() {
         Intent intent = getIntent();
         deckName = intent.getStringExtra("deck_name");
-        studiedCards = (List<Card>) intent.getSerializableExtra("studied_cards");
+        studiedCardsSummary = intent.getStringArrayListExtra("studied_cards");
         studyStartTime = intent.getLongExtra("study_start_time", 0);
         studyEndTime = intent.getLongExtra("study_end_time", System.currentTimeMillis());
         totalCorrect = intent.getIntExtra("total_correct", 0);
@@ -84,7 +90,7 @@ public class StudySummaryActivity extends AppCompatActivity {
         tvDeckName.setText(deckName != null ? deckName : "Bộ thẻ");
 
         // Calculate overall statistics
-        int totalCards = studiedCards != null ? studiedCards.size() : 0;
+        int totalCards = studiedCardsSummary != null ? studiedCardsSummary.size() : 0;
         double accuracyRate = totalReviewed > 0 ? (double) totalCorrect / totalReviewed * 100 : 0;
 
         // Display overall statistics
@@ -92,6 +98,13 @@ public class StudySummaryActivity extends AppCompatActivity {
         tvCorrectCount.setText(String.valueOf(totalCorrect));
         tvAccuracyRate.setText(String.format(Locale.getDefault(), "%.1f%%", accuracyRate));
         progressAccuracy.setProgress((int) accuracyRate);
+
+        int totalStudied = totalReviewed;
+        int totalAvailable = studiedCardsSummary != null ? studiedCardsSummary.size() : 0;
+        double progressRate = totalAvailable > 0 ? (double) totalStudied / totalAvailable * 100 : 0;
+
+        tvProgressPercent.setText(String.format(Locale.getDefault(),
+                "%d/%d thẻ (%.1f%%)", totalStudied, totalAvailable, progressRate));
 
         // Calculate and display study time
         displayStudyTime();
@@ -124,11 +137,12 @@ public class StudySummaryActivity extends AppCompatActivity {
         });
     }
     public static Intent createIntent(android.content.Context context, String deckName,
-                                      List<Card> studiedCards, long studyStartTime,
+                                      ArrayList<String> studiedCardsSummary,
+                                      long studyStartTime,
                                       int totalCorrect, int totalReviewed) {
         Intent intent = new Intent(context, StudySummaryActivity.class);
         intent.putExtra("deck_name", deckName);
-        intent.putExtra("studied_cards", (java.io.Serializable) studiedCards);
+        intent.putStringArrayListExtra("studied_cards", studiedCardsSummary);
         intent.putExtra("study_start_time", studyStartTime);
         intent.putExtra("study_end_time", System.currentTimeMillis());
         intent.putExtra("total_correct", totalCorrect);

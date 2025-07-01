@@ -4,6 +4,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +23,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
+import com.example.memorix.data.remote.api.DeckApi;
+import com.example.memorix.data.remote.api.ProgressApi;
+import com.example.memorix.data.remote.dto.Progress.ProgressRequest;
+import com.example.memorix.data.remote.dto.Progress.ProgressResponse;
+import com.example.memorix.data.remote.dto.Progress.ProgressUnlearnedLearnedResponse;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.model.Card;
+import com.example.memorix.model.Deck;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
@@ -32,13 +40,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialCardView flashcardView;
     private CardView cardFront, cardBack;
     private TextView tvCardFront, tvCardBack, tvProgress, tvSetTitle;
     private LinearLayout difficultyButtonsLayout;
-    private MaterialButton btnHard, btnMedium, btnEasy, btnPrevious, btnNext;
+    private MaterialButton btnHard, btnMedium, btnEasy, btnPrevious, btnNext , btnAgain;
     AnimatorSet frontAnimation, backAnimation;
 
     private boolean isShowingFront = true;
@@ -53,6 +65,13 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private final String deckName = "Sample Flashcard Set"; // Có thể lấy từ Intent
     private final List<Card> studiedCardsList = new ArrayList<>();
     private long studyStartTime;
+    private List<Card> mainFlashcardList = new ArrayList<>(); // thẻ chính
+    private List<Card> reviewAgainList = new ArrayList<>();   // thẻ đánh dấu Again
+    private final List<Card> cardsNeedReviewList = new ArrayList<>();
+
+    private boolean isReviewingAgain = false; // đang học lại thẻ Again?
+    private Deck currentDeck;
+
     private final Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
     private final Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
     @Override
@@ -64,6 +83,39 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        long deckId = getIntent().getLongExtra("deck_id", -1);
+        if (deckId == -1) {
+            Toast.makeText(this, "Không tìm thấy deck", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String token = prefs.getString("access_token", null);
+        if (token == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        DeckApi deckApi = ApiClient.getClient().create(DeckApi.class);
+        deckApi.getDeckById("Bearer " + token, deckId).enqueue(new Callback<Deck>() {
+            @Override
+            public void onResponse(Call<Deck> call, Response<Deck> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    currentDeck = response.body();
+
+                    // ✅ Cập nhật tên deck nếu muốn
+                    tvSetTitle.setText(currentDeck.getName());
+                } else {
+                    Toast.makeText(FlashcardBasicStudyActivity.this, "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Deck> call, Throwable t) {
+                Toast.makeText(FlashcardBasicStudyActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         studyStartTime = System.currentTimeMillis();
@@ -88,13 +140,51 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     }
 
     private void initFlashcardList() {
-        // Initialize the flashcard list (replace with actual data from database)
         flashcardList = new ArrayList<>();
+        mainFlashcardList = new ArrayList<>();
 
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the capital of France?", "Paris"));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "What is the largest planet in our solar system?", "Jupiter"));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who wrote 'Romeo and Juliet'?", "William Shakespeare"));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1", "Who is the author of '1984'?", "George Orwell"));
+        ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+        api.getUnlearnedAndLearned().enqueue(new Callback<ProgressUnlearnedLearnedResponse>() {
+            @Override
+            public void onResponse(Call<ProgressUnlearnedLearnedResponse> call, Response<ProgressUnlearnedLearnedResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ProgressUnlearnedLearnedResponse.UnlearnedCards unlearned = response.body().getUnlearned();
+
+                    if (unlearned != null) {
+                        if (unlearned.getTwoSided() != null) {
+                            for (Card c : unlearned.getTwoSided()) {
+                                Log.d("DEBUG_CARD", "Card ID: " + c.getFlashcardId());
+                            }
+                            mainFlashcardList.addAll(unlearned.getTwoSided());
+                        }
+                        if (unlearned.getMultipleChoice() != null) mainFlashcardList.addAll(unlearned.getMultipleChoice());
+                        if (unlearned.getFillInBlank() != null) mainFlashcardList.addAll(unlearned.getFillInBlank());
+                    }
+
+                    if (!mainFlashcardList.isEmpty()) {
+                        // ✅ Gán danh sách chính vào danh sách đang học
+                        flashcardList = new ArrayList<>(mainFlashcardList);
+
+                        currentPosition = 0;
+                        setupCard(); // reset trạng thái hiển thị
+                        displayCurrentFlashcard(); // Load thẻ đầu tiên
+                        updateProgressBar();       // Hiển thị thanh tiến độ
+                    } else {
+                        Toast.makeText(FlashcardBasicStudyActivity.this, "Không có flashcard nào để học", Toast.LENGTH_SHORT).show();
+                    }
+
+                } else {
+                    Toast.makeText(FlashcardBasicStudyActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
+                    Log.e("API_ERROR", "Response not successful");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProgressUnlearnedLearnedResponse> call, Throwable t) {
+                Toast.makeText(FlashcardBasicStudyActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("API_ERROR", t.getMessage(), t);
+            }
+        });
     }
 
     private void initViews() {
@@ -108,6 +198,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         tvCardBack = findViewById(R.id.tv_card_back);
         difficultyButtonsLayout = findViewById(R.id.difficulty_buttons_layout);
         btnHard = findViewById(R.id.btn_hard);
+        btnAgain = findViewById(R.id.btn_again);
         btnMedium = findViewById(R.id.btn_medium);
         btnEasy = findViewById(R.id.btn_easy);
         btnPrevious = findViewById(R.id.btn_previous);
@@ -211,17 +302,17 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//            tvCardFront.setText(currentCard.getQuestion());
-//            tvCardBack.setText(currentCard.getAnswer());
-//
-//            // Cập nhật thanh tiến độ và số thẻ
-//            updateProgressBar();
-//        }
-//
-//        // Kiểm tra và vô hiệu hóa các nút nếu ở đầu hoặc cuối danh sách
-//        checkButtonStatus();
+        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+        Card currentCard = flashcardList.get(currentPosition);
+
+        String front = currentCard.getContent().has("front") ? currentCard.getContent().get("front").getAsString() : "";
+        String back = currentCard.getContent().has("back") ? currentCard.getContent().get("back").getAsString() : "";
+
+        tvCardFront.setText(front);
+        tvCardBack.setText(back);
+        updateProgressBar();
+        checkButtonStatus();
+    }
     }
 
     @SuppressLint("SetTextI18n")
@@ -304,17 +395,26 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             }
         });
 
+        btnAgain.setOnClickListener(v->{
+            if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+                // Gửi đánh giá là "again" và không đúng
+                markCardAsDifficulty("again", false);
+            }
+
+            // Sang thẻ tiếp theo hoặc kết thúc
+            if (currentPosition >= flashcardList.size() - 1) {
+                finishStudySession(); // Kết thúc ngay, không học lại
+            } else {
+                moveToNextCard();
+            }
+        });
         // Xử lý các nút đánh giá mức độ khó
         btnEasy.setOnClickListener(v -> {
-            // Xử lý khi người dùng đánh giá "Dễ"
             markCardAsDifficulty("easy", true);
 
-            // Kiểm tra xem có phải thẻ cuối cùng không
             if (currentPosition >= flashcardList.size() - 1) {
-                // Thẻ cuối cùng - kết thúc session
                 finishStudySession();
             } else {
-                // Chưa phải thẻ cuối - chuyển tiếp
                 moveToNextCard();
             }
         });
@@ -344,24 +444,48 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//
-//            // Lưu độ khó và trạng thái đúng/sai
-//            cardDifficultyMap.put(currentCard.getId(), difficulty);
-//            cardCorrectMap.put(currentCard.getId(), isCorrect);
-//
-//            // Thêm thẻ vào danh sách đã học nếu chưa có
-//            if (!studiedCardsList.contains(currentCard)) {
-//                studiedCardsList.add(currentCard);
-//            }
+            Card currentCard = flashcardList.get(currentPosition);
 
-            // Cập nhật thông tin thẻ (nếu Card class có các phương thức này)
-            // currentCard.incrementReviewCount();
-            // if (isCorrect) {
-            //     currentCard.incrementCorrectCount();
-            // }
+            // Lưu độ khó và đúng/sai vào local map
+            cardDifficultyMap.put(String.valueOf(currentCard.getFlashcardId()), difficulty);
+            cardCorrectMap.put(String.valueOf(currentCard.getFlashcardId()), isCorrect);
 
-            // Lưu đánh giá vào cơ sở dữ liệu
+            if (difficulty.equals("again") || difficulty.equals("hard")) {
+                if (!cardsNeedReviewList.contains(currentCard)) {
+                    cardsNeedReviewList.add(currentCard);
+                }
+            }
+
+            // Thêm thẻ vào danh sách đã học nếu chưa có
+            if (!studiedCardsList.contains(currentCard)) {
+                studiedCardsList.add(currentCard);
+            }
+
+            // Gửi đánh giá lên server bằng Retrofit
+            ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+
+            // flashcard_id phải là số nguyên, cần chuyển từ String
+            int flashcardId = currentCard.getFlashcardId();
+
+            ProgressRequest request = new ProgressRequest(flashcardId, difficulty);
+
+            api.postProgress(request).enqueue(new Callback<ProgressResponse>() {
+                @Override
+                public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
+                    if (response.isSuccessful()) {
+                        Log.d("Progress", "Gửi đánh giá thành công: " + difficulty);
+                    } else {
+                        Log.e("Progress", "Gửi thất bại: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ProgressResponse> call, Throwable t) {
+                    Log.e("Progress", "Lỗi kết nối khi gửi đánh giá: " + t.getMessage());
+                }
+            });
+
+            // (Tuỳ chọn) Cập nhật biến đếm hoặc lưu thời gian học, nếu bạn cần
         }
     }
 
@@ -414,13 +538,18 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             int totalCorrectAnswers = 0;
             int totalReviewedCards = studiedCardsList.size();
 
-            // Đếm số câu trả lời đúng
-//            for (Card card : studiedCardsList) {
-//                Boolean isCorrect = cardCorrectMap.get(card.getId());
-//                if (isCorrect != null && isCorrect) {
-//                    totalCorrectAnswers++;
-//                }
-//            }
+            Log.d("DEBUG", "Tổng số thẻ đã học: " + totalReviewedCards);
+
+             //Đếm số câu trả lời đúng
+            for (Card card : studiedCardsList) {
+                String id = String.valueOf(card.getFlashcardId());
+                Boolean isCorrect = cardCorrectMap.get(id);
+                Log.d("DEBUG", "Card ID: " + id + ", isCorrect = " + isCorrect);
+                if (isCorrect != null && isCorrect) {
+                    totalCorrectAnswers++;
+                }
+            }
+            Log.d("DEBUG", "Tổng câu đúng: " + totalCorrectAnswers);
 
 //             Kiểm tra StudyStatisticsHelper có tồn tại không
 //             StudyStatisticsHelper.StudySessionStats stats =
@@ -429,13 +558,23 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             // Navigate to StudySummaryActivity với proper error handling
             Intent intent = new Intent(this, StudySummaryActivity.class);
             intent.putExtra("deck_name", deckName);
-            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList)); // Đảm bảo Serializable
+            ArrayList<String> studiedCardSummaries = new ArrayList<>();
+            for (Card card : studiedCardsList) {
+                studiedCardSummaries.add(card.toString());
+            }
+            intent.putStringArrayListExtra("studied_cards", studiedCardSummaries); // Đảm bảo Serializable
             intent.putExtra("study_start_time", studyStartTime);
             intent.putExtra("study_end_time", studyEndTime);
             intent.putExtra("total_correct", totalCorrectAnswers);
+            intent.putExtra("total_card_count", currentDeck.getTotalCards());
             intent.putExtra("total_reviewed", totalReviewedCards);
 
             startActivity(intent);
+
+            if (currentDeck != null) {
+                updateDeckProgress(currentDeck, studiedCardsList, cardDifficultyMap);
+            }
+
             finish(); // Optional: finish current activity
 
         } catch (Exception e) {
@@ -444,4 +583,26 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
     }
+    private void updateDeckProgress(Deck deck, List<Card> cards, Map<String, String> difficultyMap) {
+        int previouslyLearned = deck.getLearnedCards(); // lấy số đã học trước đó
+        int learned = 0;
+        int needReview = 0;
+
+        for (Card card : cards) {
+            String id = String.valueOf(card.getFlashcardId());
+            if (difficultyMap.containsKey(id)) {
+                learned++;
+                String difficulty = difficultyMap.get(id);
+                if (difficulty.equals("again") || difficulty.equals("hard")) {
+                    needReview++;
+                }
+            }
+        }
+        Log.d("UPDATE_PROGRESS", "Learned: " + learned + ", Need Review: " + needReview + ", Total: " + deck.getTotalCards());
+
+        deck.setLearnedCards(previouslyLearned + learned);
+        deck.setDueCards(needReview);
+        deck.setUnlearnedCards(deck.getTotalCards() - deck.getLearnedCards());
+    }
+
 }

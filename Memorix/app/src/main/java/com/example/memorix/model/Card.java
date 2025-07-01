@@ -2,11 +2,13 @@ package com.example.memorix.model;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.List;
 
 public class Card implements Serializable {
+    @SerializedName("flashcard_id")
     private int flashcardId;
     private int deckId;
     private CardType cardType;

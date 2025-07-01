@@ -134,45 +134,68 @@
                         android:layout_marginStart="24dp"
                         android:layout_marginEnd="24dp"
                         android:layout_marginBottom="16dp"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:visibility="visible"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_hard"
-                            android:layout_width="0dp"
+                        <!-- Hàng 1: Again - Hard -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#F44336"
-                            android:text="@string/hard"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_medium"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/accent_color"
-                            android:text="@string/medium"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_again"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:backgroundTint="#D32F2F"
+                                android:text="@string/again"
+                                android:textColor="@android:color/white"
+                                app:cornerRadius="8dp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_easy"
-                            android:layout_width="0dp"
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_hard"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:backgroundTint="#F57C00"
+                                android:text="@string/hard"
+                                android:textColor="@android:color/white"
+                                app:cornerRadius="8dp" />
+                        </LinearLayout>
+
+                        <!-- Hàng 2: Medium - Easy -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/secondary_color"
-                            android:text="@string/easy"
-                            android:textColor="@android:color/white"
-                            app:cornerRadius="8dp" />
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_medium"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:backgroundTint="#FBC02D"
+                                android:text="@string/medium"
+                                android:textColor="@android:color/white"
+                                app:cornerRadius="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_easy"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:backgroundTint="#388E3C"
+                                android:text="@string/easy"
+                                android:textColor="@android:color/white"
+                                app:cornerRadius="8dp" />
+                        </LinearLayout>
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
