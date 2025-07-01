@@ -15,14 +15,14 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header với thông tin người gửi (simplified) -->
+        <!-- Header với thông tin người gửi (ẩn user ID) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Avatar placeholder với User ID -->
+            <!-- Avatar placeholder -->
             <androidx.cardview.widget.CardView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -35,14 +35,14 @@
                     android:layout_height="match_parent"
                     android:background="@color/primary_light_color"
                     android:gravity="center"
-                    android:text="2"
+                    android:text="A"
                     android:textColor="@color/primary_color"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    tools:text="2" />
+                    tools:text="A" />
             </androidx.cardview.widget.CardView>
 
-            <!-- Sender info từ API -->
+            <!-- Sender info (ẩn email/ID) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -57,15 +57,8 @@
                     android:textColor="@color/text_color"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    tools:text="User 2" />
+                    tools:text="Anonymous User" />
 
-                <TextView
-                    android:id="@+id/txt_sender_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/secondary_text_color"
-                    android:textSize="12sp"
-                    tools:text="ID: 2" />
             </LinearLayout>
 
             <!-- Status badge -->
@@ -158,7 +151,7 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Time stamp từ shared_at field -->
+        <!-- Time stamp từ shared_at field (hiển thị theo UTC+7) -->
         <TextView
             android:id="@+id/txt_time"
             android:layout_width="wrap_content"

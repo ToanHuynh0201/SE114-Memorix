@@ -32,11 +32,11 @@ import java.util.List;
 
 public class EditCardActivity extends AppCompatActivity {
     private Toolbar toolbar;
-    private RadioGroup radioGroupCardType;
-    private RadioButton rbBasic, rbMultipleChoice, rbFillInBlank;
+
     // Basic card views
     private LinearLayout layoutBasic;
     private EditText etBasicQuestion, etBasicAnswer;
+
     // Multiple choice views
     private LinearLayout layoutMultipleChoice;
     private EditText etMcQuestion, etMcOption1, etMcOption2, etMcOption3, etMcOption4;
@@ -52,6 +52,7 @@ public class EditCardActivity extends AppCompatActivity {
     private boolean isEditMode = false;
     private EditCardViewModel viewModel;
     private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,9 +66,9 @@ public class EditCardActivity extends AppCompatActivity {
 
         initViews();
         setupToolbar();
-        setupViewModel(); // Thêm dòng này
-        setupObservers(); // Thêm dòng này
-        loadCardData(); // Sửa lại hàm này
+        setupViewModel();
+        setupObservers();
+        loadCardData();
         setupListeners();
     }
 
@@ -77,7 +78,7 @@ public class EditCardActivity extends AppCompatActivity {
                 currentCard = card;
                 isEditMode = true;
                 populateCardData(card);
-                setupListeners(); // Setup lại listeners sau khi có data
+                setupListeners();
             }
         });
 
@@ -85,7 +86,6 @@ public class EditCardActivity extends AppCompatActivity {
             if (progressBar != null) {
                 progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
-            // Disable/enable các controls khi đang loading
             setControlsEnabled(!isLoading);
         });
 
@@ -94,6 +94,7 @@ public class EditCardActivity extends AppCompatActivity {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+
         viewModel.getSaveSuccess().observe(this, success -> {
             if (success != null && success) {
                 Toast.makeText(this, "Đã cập nhật thẻ!", Toast.LENGTH_SHORT).show();
@@ -106,11 +107,9 @@ public class EditCardActivity extends AppCompatActivity {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private void setupViewModel() {
-        // Khởi tạo repository và viewModel
         FlashcardRepository repository = new FlashcardRepository();
         EditCardViewModelFactory factory = new EditCardViewModelFactory(repository);
         viewModel = new ViewModelProvider(this, factory).get(EditCardViewModel.class);
@@ -118,10 +117,6 @@ public class EditCardActivity extends AppCompatActivity {
 
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
-        radioGroupCardType = findViewById(R.id.radioGroupCardType);
-        rbBasic = findViewById(R.id.rbBasic);
-        rbMultipleChoice = findViewById(R.id.rbMultipleChoice);
-        rbFillInBlank = findViewById(R.id.rbFillInBlank);
 
         // Basic layout
         layoutBasic = findViewById(R.id.layoutBasic);
@@ -148,13 +143,13 @@ public class EditCardActivity extends AppCompatActivity {
 
         btnSaveCard = findViewById(R.id.btnSaveCard);
         btnCancel = findViewById(R.id.btnCancel);
-        progressBar = findViewById(R.id.progressBar); // Thêm dòng này
+        progressBar = findViewById(R.id.progressBar);
     }
+
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            // Kiểm tra xem có card được truyền vào không để set title
             Card card = (Card) getIntent().getSerializableExtra("card");
             String title = (card != null) ? "Chỉnh sửa thẻ" : "Thêm thẻ mới";
             getSupportActionBar().setTitle(title);
@@ -162,29 +157,20 @@ public class EditCardActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> finish());
     }
+
     private void setupListeners() {
-        radioGroupCardType.setOnCheckedChangeListener((group, checkedId) -> showLayoutForCardType());
-
-        // Disable radio buttons nếu đang edit (không cho đổi loại card)
-        if (isEditMode) {
-            rbBasic.setEnabled(false);
-            rbMultipleChoice.setEnabled(false);
-            rbFillInBlank.setEnabled(false);
-        }
-
         btnSaveCard.setOnClickListener(v -> saveCard());
         btnCancel.setOnClickListener(v -> finish());
     }
+
     private void loadCardData() {
         int cardId = getIntent().getIntExtra("card_id", -1);
 
         if (cardId == -1) {
-            // Nếu không có card_id, nghĩa là đang tạo mới
             isEditMode = false;
             return;
         }
 
-        // Load card từ API thông qua ViewModel
         viewModel.loadCard(cardId);
     }
 
@@ -196,7 +182,7 @@ public class EditCardActivity extends AppCompatActivity {
 
         switch (cardType) {
             case BASIC:
-                rbBasic.setChecked(true);
+                showLayoutForCardType(CardType.BASIC);
                 if (content.has("front")) {
                     etBasicQuestion.setText(content.get("front").getAsString());
                 }
@@ -206,7 +192,7 @@ public class EditCardActivity extends AppCompatActivity {
                 break;
 
             case MULTIPLE_CHOICE:
-                rbMultipleChoice.setChecked(true);
+                showLayoutForCardType(CardType.MULTIPLE_CHOICE);
                 if (content.has("question")) {
                     etMcQuestion.setText(content.get("question").getAsString());
                 }
@@ -220,7 +206,6 @@ public class EditCardActivity extends AppCompatActivity {
                         etMcOption4.setText(optionsArray.get(3).getAsString());
                     }
 
-                    // Tìm đáp án đúng
                     if (content.has("answer")) {
                         String correctAnswer = content.get("answer").getAsString();
                         for (int i = 0; i < optionsArray.size(); i++) {
@@ -239,7 +224,7 @@ public class EditCardActivity extends AppCompatActivity {
                 break;
 
             case FILL_IN_BLANK:
-                rbFillInBlank.setChecked(true);
+                showLayoutForCardType(CardType.FILL_IN_BLANK);
                 if (content.has("text")) {
                     etFibQuestion.setText(content.get("text").getAsString());
                 }
@@ -248,16 +233,9 @@ public class EditCardActivity extends AppCompatActivity {
                 }
                 break;
         }
-
-        showLayoutForCardType();
     }
 
-
     private void setControlsEnabled(boolean enabled) {
-        rbBasic.setEnabled(enabled && !isEditMode);
-        rbMultipleChoice.setEnabled(enabled && !isEditMode);
-        rbFillInBlank.setEnabled(enabled && !isEditMode);
-
         etBasicQuestion.setEnabled(enabled);
         etBasicAnswer.setEnabled(enabled);
         etMcQuestion.setEnabled(enabled);
@@ -272,21 +250,23 @@ public class EditCardActivity extends AppCompatActivity {
         btnCancel.setEnabled(enabled);
     }
 
-
-    private void showLayoutForCardType() {
+    private void showLayoutForCardType(CardType cardType) {
         // Ẩn tất cả layouts
         layoutBasic.setVisibility(View.GONE);
         layoutMultipleChoice.setVisibility(View.GONE);
         layoutFillInBlank.setVisibility(View.GONE);
 
-        // Hiển thị layout tương ứng
-        int checkedId = radioGroupCardType.getCheckedRadioButtonId();
-        if (checkedId == R.id.rbBasic) {
-            layoutBasic.setVisibility(View.VISIBLE);
-        } else if (checkedId == R.id.rbMultipleChoice) {
-            layoutMultipleChoice.setVisibility(View.VISIBLE);
-        } else if (checkedId == R.id.rbFillInBlank) {
-            layoutFillInBlank.setVisibility(View.VISIBLE);
+        // Hiển thị layout tương ứng với cardType
+        switch (cardType) {
+            case BASIC:
+                layoutBasic.setVisibility(View.VISIBLE);
+                break;
+            case MULTIPLE_CHOICE:
+                layoutMultipleChoice.setVisibility(View.VISIBLE);
+                break;
+            case FILL_IN_BLANK:
+                layoutFillInBlank.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
@@ -300,57 +280,70 @@ public class EditCardActivity extends AppCompatActivity {
             return;
         }
 
-        int checkedId = radioGroupCardType.getCheckedRadioButtonId();
+        CardType cardType = currentCard.getCardType();
 
-        if (checkedId == R.id.rbBasic) {
-            saveBasicCard();
-        } else if (checkedId == R.id.rbMultipleChoice) {
-            saveMultipleChoiceCard();
-        } else if (checkedId == R.id.rbFillInBlank) {
-            saveFillInBlankCard();
+        switch (cardType) {
+            case BASIC:
+                saveBasicCard();
+                break;
+            case MULTIPLE_CHOICE:
+                saveMultipleChoiceCard();
+                break;
+            case FILL_IN_BLANK:
+                saveFillInBlankCard();
+                break;
         }
 
-        // Chỉ gọi update
         viewModel.updateCard(currentCard);
     }
 
     private boolean validateInput() {
-        int checkedId = radioGroupCardType.getCheckedRadioButtonId();
+        if (currentCard == null) {
+            return false;
+        }
 
-        if (checkedId == R.id.rbBasic) {
-            if (etBasicQuestion.getText().toString().trim().isEmpty()) {
-                etBasicQuestion.setError("Vui lòng nhập câu hỏi");
-                return false;
-            }
-            if (etBasicAnswer.getText().toString().trim().isEmpty()) {
-                etBasicAnswer.setError("Vui lòng nhập câu trả lời");
-                return false;
-            }
-        } else if (checkedId == R.id.rbMultipleChoice) {
-            if (etMcQuestion.getText().toString().trim().isEmpty()) {
-                etMcQuestion.setError("Vui lòng nhập câu hỏi");
-                return false;
-            }
-            if (etMcOption1.getText().toString().trim().isEmpty() ||
-                    etMcOption2.getText().toString().trim().isEmpty() ||
-                    etMcOption3.getText().toString().trim().isEmpty() ||
-                    etMcOption4.getText().toString().trim().isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đầy đủ 4 lựa chọn", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            if (radioGroupCorrectAnswer.getCheckedRadioButtonId() == -1) {
-                Toast.makeText(this, "Vui lòng chọn đáp án đúng", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        } else if (checkedId == R.id.rbFillInBlank) {
-            if (etFibQuestion.getText().toString().trim().isEmpty()) {
-                etFibQuestion.setError("Vui lòng nhập câu hỏi");
-                return false;
-            }
-            if (etFibAnswer.getText().toString().trim().isEmpty()) {
-                etFibAnswer.setError("Vui lòng nhập đáp án");
-                return false;
-            }
+        CardType cardType = currentCard.getCardType();
+
+        switch (cardType) {
+            case BASIC:
+                if (etBasicQuestion.getText().toString().trim().isEmpty()) {
+                    etBasicQuestion.setError("Vui lòng nhập câu hỏi");
+                    return false;
+                }
+                if (etBasicAnswer.getText().toString().trim().isEmpty()) {
+                    etBasicAnswer.setError("Vui lòng nhập câu trả lời");
+                    return false;
+                }
+                break;
+
+            case MULTIPLE_CHOICE:
+                if (etMcQuestion.getText().toString().trim().isEmpty()) {
+                    etMcQuestion.setError("Vui lòng nhập câu hỏi");
+                    return false;
+                }
+                if (etMcOption1.getText().toString().trim().isEmpty() ||
+                        etMcOption2.getText().toString().trim().isEmpty() ||
+                        etMcOption3.getText().toString().trim().isEmpty() ||
+                        etMcOption4.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đầy đủ 4 lựa chọn", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                if (radioGroupCorrectAnswer.getCheckedRadioButtonId() == -1) {
+                    Toast.makeText(this, "Vui lòng chọn đáp án đúng", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                break;
+
+            case FILL_IN_BLANK:
+                if (etFibQuestion.getText().toString().trim().isEmpty()) {
+                    etFibQuestion.setError("Vui lòng nhập câu hỏi");
+                    return false;
+                }
+                if (etFibAnswer.getText().toString().trim().isEmpty()) {
+                    etFibAnswer.setError("Vui lòng nhập đáp án");
+                    return false;
+                }
+                break;
         }
 
         return true;
@@ -402,7 +395,7 @@ public class EditCardActivity extends AppCompatActivity {
         String question = etFibQuestion.getText().toString().trim();
         String answer = etFibAnswer.getText().toString().trim();
 
-        // Tạo content với field "front" thay vì "text"
+        // Tạo content với field "text" thay vì "front"
         JsonObject content = new JsonObject();
         content.addProperty("text", question);
         content.addProperty("answer", answer);

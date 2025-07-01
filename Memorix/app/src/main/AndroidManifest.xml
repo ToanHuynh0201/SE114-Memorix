@@ -28,6 +28,7 @@
             android:exported="false" />
         <activity
             android:name=".view.deck.card.AddCardActivity"
+            android:windowSoftInputMode="adjustPan|stateHidden"
             android:exported="false" />
         <activity
             android:name=".view.deck.card.EditCardActivity"

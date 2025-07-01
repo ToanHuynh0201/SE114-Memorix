@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAdapter.ViewHolder> {
 
@@ -88,7 +89,6 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView txtSenderAvatar;
         private final TextView txtSenderName;
-        private final TextView txtSenderEmail;
         private final TextView txtStatus;
         private final TextView txtDeckName;
         private final TextView txtDeckDescription;
@@ -105,7 +105,6 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
 
             txtSenderAvatar = itemView.findViewById(R.id.txt_sender_avatar);
             txtSenderName = itemView.findViewById(R.id.txt_sender_name);
-            txtSenderEmail = itemView.findViewById(R.id.txt_sender_email);
             txtStatus = itemView.findViewById(R.id.txt_status);
             txtDeckName = itemView.findViewById(R.id.txt_deck_name);
             txtDeckDescription = itemView.findViewById(R.id.txt_deck_description);
@@ -127,33 +126,25 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
         public void bind(IncomingShare share) {
             android.util.Log.d("ViewHolder", "bind() called with share: " + share);
 
-            // HIỂN THỊ THÔNG TIN CÓ SẴN TỪ API RESPONSE
+            // HIỂN THỊ THÔNG TIN NGƯỜI GỬI (bỏ user ID)
             try {
-                // Avatar: Hiển thị ID của người gửi
-                String avatarText = String.valueOf(share.getSharedByUserId());
-                txtSenderAvatar.setText(avatarText);
+                // Avatar: Hiển thị ký tự đầu của "Anonymous"
+                txtSenderAvatar.setText("A");
 
-                // Tên người gửi: Hiển thị User ID
-                String senderName = "User " + share.getSharedByUserId();
-                txtSenderName.setText(senderName);
+                // Tên người gửi: Hiển thị "Anonymous User"
+                txtSenderName.setText("Anonymous User");
 
-                // Email: Ẩn hoặc hiển thị placeholder
-                txtSenderEmail.setText("ID: " + share.getSharedByUserId());
-
-                android.util.Log.d("ViewHolder", "Set sender info from shared_by_user_id: " + share.getSharedByUserId());
+                android.util.Log.d("ViewHolder", "Set sender info as anonymous");
             } catch (Exception e) {
                 android.util.Log.e("ViewHolder", "Error setting sender info", e);
                 txtSenderAvatar.setText("?");
                 txtSenderName.setText("Unknown");
-                txtSenderEmail.setText("");
             }
 
             // Set status
             try {
                 setStatusText(share.getStatus());
-                android.util.Log.d("ViewHolder", "Set status: " + share.getStatus());
             } catch (Exception e) {
-                android.util.Log.e("ViewHolder", "Error setting status", e);
                 txtStatus.setText("Unknown");
             }
 
@@ -191,9 +182,9 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
                 txtPermission.setText("Quyền: --");
             }
 
-            // Set time - Sử dụng shared_at từ API
+            // Set time - Chuyển đổi từ UTC sang UTC+7
             try {
-                String timeText = formatTimeAgo(share.getSharedAt());
+                String timeText = formatTimeAgoUTC7(share.getSharedAt());
                 txtTime.setText(timeText);
                 android.util.Log.d("ViewHolder", "Set time: " + timeText + " (from: " + share.getSharedAt() + ")");
             } catch (Exception e) {
@@ -298,7 +289,12 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
             }
         }
 
-        private String formatTimeAgo(String sharedAt) {
+        /**
+         * Format time ago với múi giờ UTC+7 (Vietnam timezone)
+         * @param sharedAt UTC time string từ server
+         * @return Formatted time string
+         */
+        private String formatTimeAgoUTC7(String sharedAt) {
             if (sharedAt == null || sharedAt.isEmpty()) {
                 return "Không rõ thời gian";
             }
@@ -306,10 +302,17 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
             try {
                 // Parse ISO date format: "2025-06-24T12:48:41.323Z"
                 SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-                Date date = isoFormat.parse(sharedAt);
+                // Đặt timezone của parser thành UTC để parse đúng thời gian UTC
+                isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-                if (date != null) {
-                    long timeDiff = System.currentTimeMillis() - date.getTime();
+                Date utcDate = isoFormat.parse(sharedAt);
+
+                if (utcDate != null) {
+                    // Lấy thời gian hiện tại theo múi giờ UTC+7
+                    long currentTimeUTC7 = System.currentTimeMillis();
+
+                    // Tính thời gian chênh lệch
+                    long timeDiff = currentTimeUTC7 - utcDate.getTime();
                     long seconds = timeDiff / 1000;
                     long minutes = seconds / 60;
                     long hours = minutes / 60;
@@ -327,6 +330,30 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
                 }
             } catch (Exception e) {
                 android.util.Log.e("ReceivedInviteAdapter", "Error parsing date: " + sharedAt, e);
+
+                // Fallback: thử parse với format khác nếu có
+                try {
+                    // Thử format không có milliseconds
+                    SimpleDateFormat altFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+                    altFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    Date altDate = altFormat.parse(sharedAt);
+
+                    if (altDate != null) {
+                        long currentTimeUTC7 = System.currentTimeMillis();
+                        long timeDiff = currentTimeUTC7 - altDate.getTime();
+                        long hours = (timeDiff / 1000) / 3600;
+
+                        if (hours > 24) {
+                            return (hours / 24) + " ngày trước";
+                        } else if (hours > 0) {
+                            return hours + " giờ trước";
+                        } else {
+                            return "Vừa xong";
+                        }
+                    }
+                } catch (Exception fallbackException) {
+                    android.util.Log.e("ReceivedInviteAdapter", "Fallback parsing also failed", fallbackException);
+                }
             }
 
             return "Không rõ thời gian";
