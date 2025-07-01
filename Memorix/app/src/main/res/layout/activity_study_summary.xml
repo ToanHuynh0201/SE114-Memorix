@@ -191,6 +191,15 @@
                         android:progressTint="@color/secondary_color"
                         android:progressBackgroundTint="@color/primary_light_color"
                         android:max="100" />
+                    <TextView
+                        android:id="@+id/tv_progress_percent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0/0 thẻ (0%)"
+                        android:textColor="@color/secondary_text_color"
+                        android:textSize="14sp"
+                        android:layout_marginTop="8dp" />
+
 
                 </LinearLayout>
 

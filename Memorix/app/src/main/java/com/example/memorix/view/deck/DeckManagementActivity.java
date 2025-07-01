@@ -647,6 +647,9 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             Toast.makeText(this, "Chưa có thẻ nào để học!", Toast.LENGTH_SHORT).show();
             return;
         }
+        Intent intent = new Intent(DeckManagementActivity.this, FlashcardBasicStudyActivity.class);
+        intent.putExtra("deck_id", deckId);
+        startActivity(intent);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();

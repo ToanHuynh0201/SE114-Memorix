@@ -180,6 +180,7 @@
     <string name="medium">Vừa</string>
     <string name="hard">Khó</string>
     <string name="easy">Dễ</string>
+    <string name="again">Xem lại</string>
     <string name="fill_in_the_blank">Điền từ vào chỗ trống</string>
     <string name="enter_your_answer">Nhập đáp án của bạn</string>
     <string name="show_result">Nhập đáp án và nhấn vào thẻ để xem kết quả</string>
