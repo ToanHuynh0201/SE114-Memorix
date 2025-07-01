@@ -1,8 +1,34 @@
 package com.example.memorix.data.remote.dto.Progress;
 
-import java.util.List;
+
+import com.example.memorix.model.Card;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Map;
 
+import java.util.List;
+
 public class ProgressDueResponse {
-    public Map<String, List<ProgressResponse.ProgressData>> due;
+    @SerializedName("due")
+    private DueCards due;
+
+    public DueCards getDue() {
+        return due;
+    }
+
+    public static class DueCards {
+        @SerializedName("two_sided")
+        private List<Card> twoSided;
+
+        @SerializedName("multiple_choice")
+        private List<Card> multipleChoice;
+
+        public List<Card> getTwoSided() {
+            return twoSided;
+        }
+
+        public List<Card> getMultipleChoice() {
+            return multipleChoice;
+        }
+    }
 }
