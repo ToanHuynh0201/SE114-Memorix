@@ -653,6 +653,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
         Log.d(TAG, "Deck clicked: " + deck.getName());
         Intent intent = new Intent(getContext(), DeckManagementActivity.class);
         intent.putExtra("deck_id", deck.getId());
+        intent.putExtra("deck_name", deck.getName());
         startActivity(intent);
     }
 

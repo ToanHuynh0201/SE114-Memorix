@@ -342,6 +342,14 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         } else {
             ivDueIndicator.setVisibility(View.GONE);
         }
+        itemView.setOnClickListener(v -> {
+            if (listener != null && currentDeck != null) {
+                Log.d(TAG, "✅ ItemView clicked for deck: " + currentDeck.getName());
+                listener.onDeckClick(currentDeck, getAdapterPosition());
+            } else {
+                Log.w(TAG, "⚠️ Click ignored: listener or currentDeck is null");
+            }
+        });
 
         // Apply colors (progress bar will keep gradient from applyDeckColors)
         applyDeckColors(deck);

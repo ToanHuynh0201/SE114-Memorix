@@ -66,11 +66,12 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private final List<Card> studiedCardsList = new ArrayList<>();
     private long studyStartTime;
     private List<Card> mainFlashcardList = new ArrayList<>(); // thẻ chính
-    private List<Card> reviewAgainList = new ArrayList<>();   // thẻ đánh dấu Again
+
     private final List<Card> cardsNeedReviewList = new ArrayList<>();
 
-    private boolean isReviewingAgain = false; // đang học lại thẻ Again?
-    private Deck currentDeck;
+    private long deckId;
+
+
 
     private final Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
     private final Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
@@ -85,46 +86,42 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             return insets;
         });
 
-        long deckId = getIntent().getLongExtra("deck_id", -1);
-        if (deckId == -1) {
-            Toast.makeText(this, "Không tìm thấy deck", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String token = prefs.getString("access_token", null);
+        Log.d("DEBUG_TOKEN", "Access Token = " + token);
+
         if (token == null) {
             Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        DeckApi deckApi = ApiClient.getClient().create(DeckApi.class);
-        deckApi.getDeckById("Bearer " + token, deckId).enqueue(new Callback<Deck>() {
-            @Override
-            public void onResponse(Call<Deck> call, Response<Deck> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    currentDeck = response.body();
+        deckId = getIntent().getLongExtra("deck_id", -1L);
+        String deckName = getIntent().getStringExtra("deck_name");
 
-                    // ✅ Cập nhật tên deck nếu muốn
-                    tvSetTitle.setText(currentDeck.getName());
-                } else {
-                    Toast.makeText(FlashcardBasicStudyActivity.this, "Không tìm thấy bộ thẻ", Toast.LENGTH_SHORT).show();
-                }
-            }
+        Log.d("DEBUG_DECK", "Deck ID nhận từ Intent = " + deckId);
+        Log.d("DEBUG_DECK", "Deck Name nhận từ Intent = " + deckName);
 
-            @Override
-            public void onFailure(Call<Deck> call, Throwable t) {
-                Toast.makeText(FlashcardBasicStudyActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+
+//        if (deckId == -1 || deckName == null) {
+//            Toast.makeText(this, "Lỗi: Không có thông tin bộ thẻ", Toast.LENGTH_SHORT).show();
+//            finish();
+//            return;
+//        }
+
+        tvSetTitle.setText(deckName);
 
         studyStartTime = System.currentTimeMillis();
+
+
+
+
+        // Khởi tạo các view
+        initViews();
 
         // Khởi tạo danh sách flashcard (có thể được thay thế bằng dữ liệu thực tế từ database)
         initFlashcardList();
 
-        // Khởi tạo các view
-        initViews();
 
         // Thiết lập animation flip
         setupCardFlipAnimation();
@@ -140,25 +137,48 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     }
 
     private void initFlashcardList() {
+        Log.d("DEBUG_CALL", "initFlashcardList được gọi");
         flashcardList = new ArrayList<>();
         mainFlashcardList = new ArrayList<>();
 
         ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+        Log.d("DEBUG_API", "Chuẩn bị gọi getUnlearnedAndLearned()");
+
+
         api.getUnlearnedAndLearned().enqueue(new Callback<ProgressUnlearnedLearnedResponse>() {
             @Override
             public void onResponse(Call<ProgressUnlearnedLearnedResponse> call, Response<ProgressUnlearnedLearnedResponse> response) {
+                Log.d("DEBUG_DECK", "onResponse được gọi");
+                Log.d("DEBUG_DECK", "HTTP code = " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d("DEBUG_DECK", "response thành công, có body");
                     ProgressUnlearnedLearnedResponse.UnlearnedCards unlearned = response.body().getUnlearned();
 
                     if (unlearned != null) {
+                        Log.d("DEBUG_DECK", "Bắt đầu kiểm tra danh sách các thẻ unlearned");
                         if (unlearned.getTwoSided() != null) {
+                            Log.d("DEBUG_DECK", "TwoSided count = " + unlearned.getTwoSided().size());
                             for (Card c : unlearned.getTwoSided()) {
-                                Log.d("DEBUG_CARD", "Card ID: " + c.getFlashcardId());
+                                Log.d("DEBUG_DECK", "TwoSided Card: deckId = " + c.getDeckId() + ", flashcardId = " + c.getFlashcardId());
+                                if (c.getDeckId() == deckId) {
+                                    mainFlashcardList.add(c);
+                                }
                             }
-                            mainFlashcardList.addAll(unlearned.getTwoSided());
                         }
-                        if (unlearned.getMultipleChoice() != null) mainFlashcardList.addAll(unlearned.getMultipleChoice());
-                        if (unlearned.getFillInBlank() != null) mainFlashcardList.addAll(unlearned.getFillInBlank());
+                        if (unlearned.getMultipleChoice() != null){
+                            for (Card c : unlearned.getMultipleChoice()) {
+                                if (c.getDeckId() == deckId) {
+                                    mainFlashcardList.add(c);
+                                }
+                            }
+                    }
+                        if (unlearned.getFillInBlank() != null){
+                            for (Card c : unlearned.getFillInBlank()) {
+                                if (c.getDeckId() == deckId) {
+                                    mainFlashcardList.add(c);
+                                }
+                            }
+                        }
                     }
 
                     if (!mainFlashcardList.isEmpty()) {
@@ -183,6 +203,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             public void onFailure(Call<ProgressUnlearnedLearnedResponse> call, Throwable t) {
                 Toast.makeText(FlashcardBasicStudyActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("API_ERROR", t.getMessage(), t);
+                Log.e("DEBUG_DECK", "onFailure: " + t.getMessage());
             }
         });
     }
@@ -312,7 +333,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         tvCardBack.setText(back);
         updateProgressBar();
         checkButtonStatus();
-    }
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -421,7 +442,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
         btnMedium.setOnClickListener(v -> {
             // Xử lý khi người dùng đánh giá "Vừa"
-            markCardAsDifficulty("medium", true);
+            markCardAsDifficulty("good", true);
 
             if (currentPosition >= flashcardList.size() - 1) {
                 finishStudySession();
@@ -566,14 +587,11 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
             intent.putExtra("study_start_time", studyStartTime);
             intent.putExtra("study_end_time", studyEndTime);
             intent.putExtra("total_correct", totalCorrectAnswers);
-            intent.putExtra("total_card_count", currentDeck.getTotalCards());
             intent.putExtra("total_reviewed", totalReviewedCards);
 
             startActivity(intent);
 
-            if (currentDeck != null) {
-                updateDeckProgress(currentDeck, studiedCardsList, cardDifficultyMap);
-            }
+
 
             finish(); // Optional: finish current activity
 
@@ -583,26 +601,6 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
     }
-    private void updateDeckProgress(Deck deck, List<Card> cards, Map<String, String> difficultyMap) {
-        int previouslyLearned = deck.getLearnedCards(); // lấy số đã học trước đó
-        int learned = 0;
-        int needReview = 0;
 
-        for (Card card : cards) {
-            String id = String.valueOf(card.getFlashcardId());
-            if (difficultyMap.containsKey(id)) {
-                learned++;
-                String difficulty = difficultyMap.get(id);
-                if (difficulty.equals("again") || difficulty.equals("hard")) {
-                    needReview++;
-                }
-            }
-        }
-        Log.d("UPDATE_PROGRESS", "Learned: " + learned + ", Need Review: " + needReview + ", Total: " + deck.getTotalCards());
-
-        deck.setLearnedCards(previouslyLearned + learned);
-        deck.setDueCards(needReview);
-        deck.setUnlearnedCards(deck.getTotalCards() - deck.getLearnedCards());
-    }
 
 }

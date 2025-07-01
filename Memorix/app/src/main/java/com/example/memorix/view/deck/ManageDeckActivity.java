@@ -2,6 +2,7 @@ package com.example.memorix.view.deck;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -33,7 +34,7 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        Log.d("ManageDeck", "✅ ManageDeckActivity created");
         RecyclerView recyclerView = findViewById(R.id.recycler_view_decks);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -50,8 +51,10 @@ public class ManageDeckActivity extends AppCompatActivity implements DeckActionL
 
     @Override
     public void onDeckClick(Deck deck, int position) {
+        Log.d("ManageDeck", "onDeckClick called with: " + deck.getName());
         Intent intent = new Intent(this, DeckManagementActivity.class);
         intent.putExtra("deck_id", deck.getId());
+        intent.putExtra("deck_name", deck.getName());
         startActivity(intent);
     }
 
