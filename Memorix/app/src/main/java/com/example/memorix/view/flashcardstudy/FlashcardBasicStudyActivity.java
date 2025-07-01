@@ -68,10 +68,7 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
     private List<Card> mainFlashcardList = new ArrayList<>(); // thẻ chính
 
     private final List<Card> cardsNeedReviewList = new ArrayList<>();
-
     private long deckId;
-
-
 
     private final Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
     private final Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
@@ -109,19 +106,15 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        tvSetTitle.setText(deckName);
+        // Khởi tạo danh sách flashcard (có thể được thay thế bằng dữ liệu thực tế từ database)
+        initFlashcardList();
 
         studyStartTime = System.currentTimeMillis();
-
-
-
 
         // Khởi tạo các view
         initViews();
 
-        // Khởi tạo danh sách flashcard (có thể được thay thế bằng dữ liệu thực tế từ database)
-        initFlashcardList();
-
+        tvSetTitle.setText(deckName);
 
         // Thiết lập animation flip
         setupCardFlipAnimation();

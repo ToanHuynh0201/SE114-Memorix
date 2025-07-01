@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 
 public class StatisticsFragment extends Fragment {
     private TextView tvTotal7Days, tvTotal30Days, tvAverage7Days, tvAverage30Days;
@@ -288,12 +289,15 @@ public class StatisticsFragment extends Fragment {
             ArrayList<BarEntry> entries = new ArrayList<>();
             ArrayList<String> labels = new ArrayList<>();
 
-            Calendar calendar = Calendar.getInstance();
+            // Use Vietnam timezone for chart labels
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+7"));
             SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
+            dayFormat.setTimeZone(TimeZone.getTimeZone("GMT+7"));
 
             for (int i = 0; i < data.size(); i++) {
                 entries.add(new BarEntry(i, data.get(i)));
 
+                // Calculate date in local timezone
                 calendar.setTime(new Date());
                 calendar.add(Calendar.DAY_OF_YEAR, -(6-i));
                 labels.add(dayFormat.format(calendar.getTime()));
@@ -327,6 +331,7 @@ public class StatisticsFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void setupLineChartData(List<Integer> data) {
@@ -338,12 +343,15 @@ public class StatisticsFragment extends Fragment {
             ArrayList<Entry> entries = new ArrayList<>();
             ArrayList<String> labels = new ArrayList<>();
 
-            Calendar calendar = Calendar.getInstance();
+            // Use Vietnam timezone for chart labels
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+7"));
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+7"));
 
             for (int i = 0; i < data.size(); i++) {
                 entries.add(new Entry(i, data.get(i)));
 
+                // Calculate date in local timezone
                 calendar.setTime(new Date());
                 calendar.add(Calendar.DAY_OF_YEAR, -(29-i));
                 labels.add(dateFormat.format(calendar.getTime()));

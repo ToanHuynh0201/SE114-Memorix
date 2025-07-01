@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class StatisticsViewModel extends ViewModel {
     private final StatisticsRepository repository;
@@ -77,7 +78,6 @@ public class StatisticsViewModel extends ViewModel {
                 // Set random data if no response
                 last7DaysDataLiveData.setValue(generateRandomData(7));
                 last30DaysDataLiveData.setValue(generateRandomData(30));
-                // Don't calculate streaks here anymore, use API data
                 return;
             }
 
@@ -187,30 +187,51 @@ public class StatisticsViewModel extends ViewModel {
 
         // Create a map of date -> count for quick lookup
         Map<String, Integer> dateCountMap = new HashMap<>();
+
+        // Input format for UTC time from server
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+        inputFormat.setTimeZone(TimeZone.getTimeZone("UTC")); // Set timezone to UTC for parsing
+
+        // Output format for local comparison (UTC+7)
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        outputFormat.setTimeZone(TimeZone.getTimeZone("GMT+7")); // Set to Vietnam timezone
 
         for (StatisticsResponse.DailyStats dailyStats : periodStats.getDaily()) {
             try {
-                Date date = inputFormat.parse(dailyStats.getDate());
-                if (date != null) {
-                    String dateKey = outputFormat.format(date);
-                    dateCountMap.put(dateKey, dailyStats.getCountAsInt());
+                // Parse UTC date from server
+                Date utcDate = inputFormat.parse(dailyStats.getDate());
+                if (utcDate != null) {
+                    // Convert to local timezone (UTC+7) and format as date key
+                    String dateKey = outputFormat.format(utcDate);
+
+                    // Aggregate counts for the same local date
+                    Integer existingCount = dateCountMap.get(dateKey);
+                    int newCount = dailyStats.getCountAsInt();
+                    dateCountMap.put(dateKey, (existingCount != null ? existingCount : 0) + newCount);
+
+                    Log.d("StatisticsViewModel", "UTC Date: " + dailyStats.getDate() +
+                            " -> Local Date: " + dateKey + ", Count: " + newCount);
                 }
             } catch (ParseException e) {
-                Log.e("Error", e.toString());
+                Log.e("StatisticsViewModel", "Error parsing date: " + dailyStats.getDate(), e);
             }
         }
 
-        // Fill the result array with data for each day
-        Calendar calendar = Calendar.getInstance();
+        // Fill the result array with data for each day (in local timezone)
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+7"));
+        SimpleDateFormat localDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        localDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+
         for (int i = days - 1; i >= 0; i--) {
             calendar.setTime(new Date());
             calendar.add(Calendar.DAY_OF_YEAR, -i);
-            String dateKey = outputFormat.format(calendar.getTime());
+            String dateKey = localDateFormat.format(calendar.getTime());
 
             Integer count = dateCountMap.get(dateKey);
-            result.add(count != null ? count : 0);
+            int finalCount = count != null ? count : 0;
+            result.add(finalCount);
+
+            Log.d("StatisticsViewModel", "Day " + (days - i) + ": " + dateKey + " = " + finalCount);
         }
 
         return result;
