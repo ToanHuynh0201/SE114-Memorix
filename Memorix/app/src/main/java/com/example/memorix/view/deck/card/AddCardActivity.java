@@ -22,6 +22,8 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.memorix.helper.HideSoftKeyboard;
 import com.example.memorix.model.Card;
 import com.example.memorix.model.CardType;
 import com.example.memorix.viewmodel.AddCardViewModel;
@@ -68,6 +70,7 @@ public class AddCardActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        HideSoftKeyboard.setupHideKeyboard(this, findViewById(R.id.main));
 
         viewModel = new ViewModelProvider(this).get(AddCardViewModel.class);
         sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);

@@ -34,52 +34,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card Type Selection -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/card_type_label"
-                android:textColor="@color/text_color"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <RadioGroup
-                android:id="@+id/radioGroupCardType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
-
-                <RadioButton
-                    android:id="@+id/rbBasic"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/card_type_basic"
-                    android:textColor="@color/text_color"
-                    android:buttonTint="@color/primary_color" />
-
-                <RadioButton
-                    android:id="@+id/rbMultipleChoice"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/card_type_multiple_choice"
-                    android:textColor="@color/text_color"
-                    android:buttonTint="@color/primary_color" />
-
-                <RadioButton
-                    android:id="@+id/rbFillInBlank"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/card_type_fill_in_blank"
-                    android:textColor="@color/text_color"
-                    android:buttonTint="@color/primary_color" />
-
-            </RadioGroup>
-
             <!-- Basic Card Layout -->
             <LinearLayout
                 android:id="@+id/layoutBasic"
