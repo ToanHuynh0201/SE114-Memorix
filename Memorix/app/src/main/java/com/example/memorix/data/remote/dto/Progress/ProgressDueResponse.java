@@ -23,6 +23,9 @@ public class ProgressDueResponse {
         @SerializedName("multiple_choice")
         private List<Card> multipleChoice;
 
+        @SerializedName("fill_in_blank")
+        private List<Card> fillinBlank;
+
         public List<Card> getTwoSided() {
             return twoSided;
         }
@@ -30,5 +33,7 @@ public class ProgressDueResponse {
         public List<Card> getMultipleChoice() {
             return multipleChoice;
         }
+
+        public List<Card> getFillinBlank() {return fillinBlank;}
     }
 }

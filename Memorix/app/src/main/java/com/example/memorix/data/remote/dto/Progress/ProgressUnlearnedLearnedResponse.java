@@ -50,6 +50,9 @@ public class ProgressUnlearnedLearnedResponse {
         @SerializedName("multiple_choice")
         private List<Card> multipleChoice;
 
+        @SerializedName("fill_in_blank")
+        private List<Card> fillinblank;
+
         public List<Card> getTwoSided() {
             return twoSided;
         }
@@ -57,5 +60,7 @@ public class ProgressUnlearnedLearnedResponse {
         public List<Card> getMultipleChoice() {
             return multipleChoice;
         }
+
+        public List<Card> getFillInBlank() { return fillinblank; }
     }
 }
