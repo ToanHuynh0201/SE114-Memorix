@@ -20,5 +20,6 @@ public class DeviceResponse {
         public String getFcm_token() { return fcm_token; }
         public String getDevice_name() { return device_name; }
         public String getLast_used_at() { return last_used_at; }
+
     }
 }

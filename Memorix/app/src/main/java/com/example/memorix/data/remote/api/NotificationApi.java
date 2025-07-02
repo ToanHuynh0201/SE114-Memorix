@@ -10,5 +10,5 @@ import retrofit2.http.POST;
 
 public interface NotificationApi {
     @POST("api/devices")
-    Call<DeviceResponse> createDevice(@Header("Authorization") String authorization, @Body Device device);
+    Call<DeviceResponse> registerDevice(@Header("Authorization") String authorization, @Body Device device);
 }
