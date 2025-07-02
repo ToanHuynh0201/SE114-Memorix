@@ -1,9 +1,12 @@
 package com.example.memorix.view.flashcardstudy;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
@@ -20,6 +24,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
+import com.example.memorix.data.remote.api.ProgressApi;
+import com.example.memorix.data.remote.dto.Progress.ProgressDueResponse;
+import com.example.memorix.data.remote.dto.Progress.ProgressRequest;
+import com.example.memorix.data.remote.dto.Progress.ProgressResponse;
+import com.example.memorix.data.remote.dto.Progress.ProgressUnlearnedLearnedResponse;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.model.Card;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -29,6 +39,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
@@ -47,6 +62,7 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
     // List of flashcards
     private List<Card> flashcardList;
+    private List<Card> mainFlashcardList;
     // Current position in the list
     private int currentPosition = 0;
     // Animations for slide transition
@@ -57,9 +73,13 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
     private long studyStartTime;
     private final Map<String, String> cardDifficultyMap = new HashMap<>();
     private final Map<String, Boolean> cardCorrectMap = new HashMap<>();
+    private long deckId;
+    private int wrongAttemptsForCurrentCard = 0;
+
 
     // Multiple choice options for each card
     private final List<List<String>> allOptions = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +91,27 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
             return insets;
         });
 
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String token = prefs.getString("access_token", null);
+
+        if (token == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        deckId = getIntent().getLongExtra("deck_id", -1L);
+        String deckName = getIntent().getStringExtra("deck_name");
+
+        Log.d("DEBUG_DECK", "Deck ID nhận từ Intent = " + deckId);
+        Log.d("DEBUG_DECK", "Deck Name nhận từ Intent = " + deckName);
+
+
+        if (deckId == -1 || deckName == null) {
+            Toast.makeText(this, "Lỗi: Không có thông tin bộ thẻ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         studyStartTime = System.currentTimeMillis();
 
         // Initialize flashcard list and options
@@ -78,7 +119,7 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
         // Initialize views
         initViews();
-
+        tvSetTitle.setText(deckName);
         // Setup card flip animation
         setupCardFlipAnimation();
 
@@ -91,79 +132,108 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
         // Display first flashcard
         displayCurrentFlashcard();
     }
+
     private void initFlashcardList() {
         flashcardList = new ArrayList<>();
+        mainFlashcardList = new ArrayList<>();
 
-        // Tạo danh sách các câu hỏi múltiple choice mẫu
-        List<String> options1 = new ArrayList<>();
-        options1.add("London");
-        options1.add("Berlin");
-        options1.add("Paris");
-        options1.add("Madrid");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "What is the capital of France?", options1, "Paris"));
+        ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
 
-        List<String> options2 = new ArrayList<>();
-        options2.add("Mars");
-        options2.add("Jupiter");
-        options2.add("Saturn");
-        options2.add("Earth");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "What is the largest planet in our solar system?", options2, "Jupiter"));
+        Call<ProgressDueResponse> dueCall = api.getDueByDeck(deckId);
+        Call<ProgressUnlearnedLearnedResponse> unlearnedCall = api.getUnlearnedAndLearned();
 
-        List<String> options3 = new ArrayList<>();
-        options3.add("Charles Dickens");
-        options3.add("William Shakespeare");
-        options3.add("Mark Twain");
-        options3.add("Jane Austen");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "Who wrote 'Romeo and Juliet'?", options3, "William Shakespeare"));
+        dueCall.enqueue(new Callback<ProgressDueResponse>() {
+            @Override
+            public void onResponse(Call<ProgressDueResponse> call, Response<ProgressDueResponse> response) {
+                List<Card> dueCards = extractDueMultipleChoiceCards(response);
 
-        List<String> options4 = new ArrayList<>();
-        options4.add("Aldous Huxley");
-        options4.add("Ray Bradbury");
-        options4.add("George Orwell");
-        options4.add("H.G. Wells");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "Who is the author of '1984'?", options4, "George Orwell"));
+                unlearnedCall.enqueue(new Callback<ProgressUnlearnedLearnedResponse>() {
+                    @Override
+                    public void onResponse(Call<ProgressUnlearnedLearnedResponse> call, Response<ProgressUnlearnedLearnedResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            handleUnlearnedAndLearned(response.body(), dueCards);
+                        } else {
+                            Toast.makeText(FlashcardMultipleChoiceStudyActivity.this, "Lỗi tải thẻ chưa học", Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
-        List<String> options5 = new ArrayList<>();
-        options5.add("H2O");
-        options5.add("CO2");
-        options5.add("O2");
-        options5.add("N2");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "What is the chemical formula for water?", options5, "H2O"));
+                    @Override
+                    public void onFailure(Call<ProgressUnlearnedLearnedResponse> call, Throwable t) {
+                        Toast.makeText(FlashcardMultipleChoiceStudyActivity.this, "Lỗi kết nối (unlearned): " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
 
-        List<String> options6 = new ArrayList<>();
-        options6.add("1969");
-        options6.add("1967");
-        options6.add("1971");
-        options6.add("1965");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "In which year did humans first land on the moon?", options6, "1969"));
+            @Override
+            public void onFailure(Call<ProgressDueResponse> call, Throwable t) {
+                Toast.makeText(FlashcardMultipleChoiceStudyActivity.this, "Lỗi kết nối (due): " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
-        List<String> options7 = new ArrayList<>();
-        options7.add("4");
-        options7.add("6");
-        options7.add("7");
-        options7.add("8");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "How many continents are there?", options7, "7"));
+    private List<Card> extractDueMultipleChoiceCards(Response<ProgressDueResponse> response) {
+        List<Card> dueCards = new ArrayList<>();
 
-        List<String> options8 = new ArrayList<>();
-        options8.add("Vincent van Gogh");
-        options8.add("Pablo Picasso");
-        options8.add("Leonardo da Vinci");
-        options8.add("Claude Monet");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "Who painted the Mona Lisa?", options8, "Leonardo da Vinci"));
+        if (response.isSuccessful() && response.body() != null) {
+            ProgressDueResponse.DueCards due = response.body().getDue();
+            if (due != null && due.getMultipleChoice() != null) {
+                for (Card c : due.getMultipleChoice()) {
+                    if (c.getDeckId() == deckId) {
+                        dueCards.add(c);
+                    }
+                }
+            }
+        }
 
-        List<String> options9 = new ArrayList<>();
-        options9.add("Tokyo");
-        options9.add("Beijing");
-        options9.add("New Delhi");
-        options9.add("Bangkok");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "What is the capital of Japan?", options9, "Tokyo"));
+        return dueCards;
+    }
 
-        List<String> options10 = new ArrayList<>();
-        options10.add("Au");
-        options10.add("Ag");
-        options10.add("Go");
-        options10.add("Gd");
-        flashcardList.add(Card.createMultipleChoiceCard(1, "What is the chemical symbol for Gold?", options10, "Au"));
+    private void handleUnlearnedAndLearned(ProgressUnlearnedLearnedResponse body, List<Card> dueCards) {
+        List<Card> unlearnedCards = new ArrayList<>();
+        List<Card> learnedCards = new ArrayList<>();
+
+        ProgressUnlearnedLearnedResponse.UnlearnedCards unlearned = body.getUnlearned();
+        ProgressUnlearnedLearnedResponse.LearnedCards learned = body.getLearned();
+
+        if (unlearned != null) {
+            unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
+        }
+
+        if (learned != null) {
+            learnedCards.addAll(filterCardsByDeck(learned.getMultipleChoice()));
+        }
+
+        mainFlashcardList.clear();
+        mainFlashcardList.addAll(dueCards);
+        mainFlashcardList.addAll(unlearnedCards);
+
+        if (mainFlashcardList.isEmpty() && !learnedCards.isEmpty()) {
+            Toast.makeText(this, "Bạn đã học hết. Học lại từ đầu nhé!", Toast.LENGTH_LONG).show();
+            mainFlashcardList.addAll(learnedCards);
+        }
+
+        if (mainFlashcardList.isEmpty()) {
+            Toast.makeText(this, "Bộ thẻ này không có dữ liệu!", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            flashcardList = new ArrayList<>(mainFlashcardList);
+            currentPosition = 0;
+            setupCard();
+            displayCurrentFlashcard();
+            updateProgressBar();
+        }
+    }
+
+    private List<Card> filterCardsByDeck(List<Card> inputList) {
+        List<Card> result = new ArrayList<>();
+        if (inputList != null) {
+            for (Card c : inputList) {
+                if (c.getDeckId() == deckId) {
+                    result.add(c);
+                }
+            }
+        }
+        return result;
     }
 
     private void initViews() {
@@ -212,6 +282,7 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
         resetOptionButtonColors();
         enableAllOptionButtons();
     }
+
     private void enableAllOptionButtons() {
         btnOption1.setEnabled(true);
         btnOption1.setAlpha(1.0f);
@@ -241,7 +312,8 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
         slideOutLeft.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -257,12 +329,14 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {
+            }
         });
 
         slideOutRight.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -278,7 +352,8 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {
+            }
         });
     }
 
@@ -451,36 +526,51 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
         boolean isCorrect = (selectedOptionIndex == correctOptionIndex);
 
         if (isCorrect) {
-            // Đáp án đúng - highlight màu xanh và cho phép chuyển câu
             hasAnswered = true;
-            selectedButton.setBackgroundTintList(getColorStateList(R.color.secondary_color)); // Green
+            selectedButton.setBackgroundTintList(getColorStateList(R.color.secondary_color)); // xanh
 
-            // Hiển thị thông báo đúng
             showCorrectAnswerResult();
 
-            // Mark card as easy since they got it right
-            markCardAsDifficulty("easy", true);
+            // Xác định mức rating
+            int rating = calculateRating(wrongAttemptsForCurrentCard);
 
-            // Auto-advance after a short delay
+            markCardAsDifficulty(ratingToDifficulty(rating), true);
+            submitProgress(flashcardList.get(currentPosition), ratingToDifficulty(rating),isCorrect);
+
             flashcardView.postDelayed(() -> {
                 if (currentPosition >= flashcardList.size() - 1) {
                     finishStudySession();
                 } else {
                     flipCard();
                 }
-            }, 1500); // Tăng delay lên 1.5s để user có thời gian đọc kết quả
+            }, 1500);
 
         } else {
-            // Đáp án sai - highlight màu đỏ và cho phép chọn lại
+            wrongAttemptsForCurrentCard++;
             selectedButton.setBackgroundTintList(getColorStateList(android.R.color.holo_red_dark));
-
-            // Disable button đã chọn sai để không chọn lại
             selectedButton.setEnabled(false);
             selectedButton.setAlpha(0.5f);
-
-            // Hiển thị thông báo sai và khuyến khích thử lại
             showIncorrectAnswerFeedback();
+        }
+    }
 
+    private int calculateRating(int wrongAttempts) {
+        if (wrongAttempts == 0) return 3; // easy
+        else if (wrongAttempts == 1) return 2; // good
+        else if (wrongAttempts == 2) return 1; // hard
+        else return 0; // again
+    }
+
+    private String ratingToDifficulty(int rating) {
+        switch (rating) {
+            case 3:
+                return "easy";
+            case 2:
+                return "good";
+            case 1:
+                return "hard";
+            default:
+                return "again";
         }
     }
 
@@ -510,11 +600,16 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
 
     private Button getButtonByIndex(int index) {
         switch (index) {
-            case 0: return btnOption1;
-            case 1: return btnOption2;
-            case 2: return btnOption3;
-            case 3: return btnOption4;
-            default: return null;
+            case 0:
+                return btnOption1;
+            case 1:
+                return btnOption2;
+            case 2:
+                return btnOption3;
+            case 3:
+                return btnOption4;
+            default:
+                return null;
         }
     }
 
@@ -543,9 +638,8 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
         if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
             Card currentCard = flashcardList.get(currentPosition);
-
-            // Sử dụng flashcardId thay vì getId()
             String cardId = String.valueOf(currentCard.getFlashcardId());
+
             cardDifficultyMap.put(cardId, difficulty);
             cardCorrectMap.put(cardId, isCorrect);
 
@@ -555,6 +649,82 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
         }
     }
 
+    private void submitProgress(Card card, String difficulty, boolean isCorrect) {
+        if (card == null) return;
+
+        int flashcardId = card.getFlashcardId();
+
+        // Lưu local cho thống kê
+        cardDifficultyMap.put(String.valueOf(flashcardId), difficulty);
+        cardCorrectMap.put(String.valueOf(flashcardId), isCorrect);
+
+
+        if (!studiedCardsList.contains(card)) {
+            studiedCardsList.add(card);
+        }
+
+        // Tính ngày ôn tiếp theo
+        int daysLater;
+        switch (difficulty) {
+            case "easy": daysLater = 10; break;
+            case "good": daysLater = 5; break;
+            case "hard": daysLater = 2; break;
+            default: daysLater = 0; break;
+        }
+        String nextReviewDate = calculateNextReviewDate(daysLater);
+
+        ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+
+        // Gửi POST
+        ProgressRequest postRequest = new ProgressRequest(flashcardId, difficulty);
+        api.postProgress(postRequest).enqueue(new Callback<ProgressResponse>() {
+            @Override
+            public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Progress", "POST thành công: " + difficulty);
+                } else {
+                    Log.e("Progress", "POST lỗi: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProgressResponse> call, Throwable t) {
+                Log.e("Progress", "POST thất bại: " + t.getMessage());
+            }
+        });
+
+        // Gửi PUT
+        ProgressRequest putRequest = new ProgressRequest();
+        putRequest.setFlashcard_id(flashcardId);
+        putRequest.setRating(difficulty);
+        putRequest.setNext_review_at(nextReviewDate);
+
+        api.updateProgress(putRequest).enqueue(new Callback<ProgressResponse>() {
+            @Override
+            public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Progress", "PUT thành công: " + nextReviewDate);
+                } else {
+                    Log.e("Progress", "PUT lỗi: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProgressResponse> call, Throwable t) {
+                Log.e("Progress", "PUT thất bại: " + t.getMessage());
+            }
+        });
+    }
+
+    private String calculateNextReviewDate(int minutesLater) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault());
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+//        calendar.add(java.util.Calendar.DAY_OF_YEAR, daysLater);
+        calendar.add(java.util.Calendar.MINUTE, minutesLater); // Thay vì add ngày
+        return sdf.format(calendar.getTime());
+    }
+
     private void moveToNextCard() {
         if (currentPosition < flashcardList.size() - 1) {
             if (!isShowingFront) {
@@ -562,7 +732,7 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
                 mcFrontLayout.setVisibility(View.VISIBLE);
                 isShowingFront = true;
             }
-
+            wrongAttemptsForCurrentCard = 0;
             flashcardView.startAnimation(slideOutLeft);
         }
     }
@@ -574,39 +744,71 @@ public class FlashcardMultipleChoiceStudyActivity extends AppCompatActivity {
                 mcFrontLayout.setVisibility(View.VISIBLE);
                 isShowingFront = true;
             }
-
+            wrongAttemptsForCurrentCard = 0;
             flashcardView.startAnimation(slideOutRight);
         }
     }
 
     private void finishStudySession() {
-//        try {
-//            long studyEndTime = System.currentTimeMillis();
-//            int totalCorrectAnswers = 0;
-//            int totalReviewedCards = studiedCardsList.size();
-//
-//            for (Card card : studiedCardsList) {
-//                Boolean isCorrect = cardCorrectMap.get(card.getId());
-//                if (isCorrect != null && isCorrect) {
-//                    totalCorrectAnswers++;
-//                }
-//            }
-//
-//            Intent intent = new Intent(this, StudySummaryActivity.class);
-//            intent.putExtra("deck_name", deckName);
-//            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
-//            intent.putExtra("study_start_time", studyStartTime);
-//            intent.putExtra("study_end_time", studyEndTime);
-//            intent.putExtra("total_correct", totalCorrectAnswers);
-//            intent.putExtra("total_reviewed", totalReviewedCards);
-//
-//            startActivity(intent);
-//            finish();
-//
-//        } catch (Exception e) {
-//            Log.e("error", Objects.requireNonNull(e.getMessage()));
-//            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
-//                    Toast.LENGTH_LONG).show();
-//        }
+            try {
+                // Tính toán các thống kê cần thiết
+                long studyEndTime = System.currentTimeMillis();
+                int totalCorrectAnswers = 0;
+                int totalReviewedCards = studiedCardsList.size();
+
+                Log.d("DEBUG", "Tổng số thẻ đã học: " + totalReviewedCards);
+
+                //Đếm số câu trả lời đúng
+                for (Card card : studiedCardsList) {
+                    String id = String.valueOf(card.getFlashcardId());
+                    String diff = cardDifficultyMap.get(id);
+                    Log.d("StudySummary", "Card ID: " + id + ", difficulty = " + diff);
+                    if ("easy".equals(diff) || "good".equals(diff)) {
+                        totalCorrectAnswers++;
+                    }
+                }
+                Log.d("DEBUG", "Tổng câu đúng: " + totalCorrectAnswers);
+
+//             Kiểm tra StudyStatisticsHelper có tồn tại không
+//             StudyStatisticsHelper.StudySessionStats stats =
+//                     StudyStatisticsHelper.calculateStats(studiedCardsList, studyStartTime, studyEndTime);
+
+                // Navigate to StudySummaryActivity với proper error handling
+                Intent intent = new Intent(this, StudySummaryActivity.class);
+                intent.putExtra("deck_name", deckName);
+                ArrayList<String> studiedCardSummaries = new ArrayList<>();
+                for (Card card : studiedCardsList) {
+                    studiedCardSummaries.add(card.toString());
+                }
+                intent.putStringArrayListExtra("studied_cards", studiedCardSummaries); // Đảm bảo Serializable
+                intent.putExtra("study_start_time", studyStartTime);
+                intent.putExtra("study_end_time", studyEndTime);
+                intent.putExtra("total_correct", totalCorrectAnswers);
+                intent.putExtra("total_reviewed", totalReviewedCards);
+
+                startActivity(intent);
+
+
+
+                finish(); // Optional: finish current activity
+
+            } catch (Exception e) {
+                Log.e("error", Objects.requireNonNull(e.getMessage()));
+                Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+    }
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Kết thúc học?")
+                .setMessage("Bạn có chắc muốn dừng học giữa chừng?")
+                .setPositiveButton("Dừng", (dialog, which) -> {
+                    finishStudySession(); // lưu kết quả
+                    super.onBackPressed(); // thoát sau khi lưu
+                })
+                .setNegativeButton("Tiếp tục", null)
+                .show();
     }
 }

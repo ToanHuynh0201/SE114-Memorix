@@ -47,8 +47,15 @@ public class ProgressUnlearnedLearnedResponse {
         @SerializedName("two_sided")
         private List<Card> twoSided;
 
+        @SerializedName("multiple_choice")
+        private List<Card> multipleChoice;
+
         public List<Card> getTwoSided() {
             return twoSided;
+        }
+
+        public List<Card> getMultipleChoice() {
+            return multipleChoice;
         }
     }
 }

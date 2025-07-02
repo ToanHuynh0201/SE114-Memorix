@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
@@ -735,5 +736,17 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Kết thúc học?")
+                .setMessage("Bạn có chắc muốn dừng học giữa chừng?")
+                .setPositiveButton("Dừng", (dialog, which) -> {
+                    finishStudySession(); // lưu kết quả
+                    super.onBackPressed(); // thoát sau khi lưu
+                })
+                .setNegativeButton("Tiếp tục", null)
+                .show();
+    }
 
 }
