@@ -5,13 +5,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 
+import com.example.memorix.data.remote.api.NotificationApi;
+import com.example.memorix.data.remote.dto.Notification.Device;
+import com.example.memorix.data.remote.dto.Notification.DeviceResponse;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.view.MainActivity;
 
 
@@ -19,10 +22,16 @@ import com.example.memorix.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
     private static final String CHANNEL_ID = "memorix_notifications";
+    private static final String DEFAULT_DEVICE_NAME = "Android Device";
+    private String cachedAuthToken;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -49,10 +58,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         sendRegistrationToServer(token);
     }
 
+    private String getAuthToken() {
+        if (cachedAuthToken != null) {
+            return cachedAuthToken;
+        }
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        cachedAuthToken = prefs.getString("access_token", null);
+        return cachedAuthToken;
+    }
+
     private void sendRegistrationToServer(String token) {
-        // TODO: Implement method để gửi token lên backend
-        // Sử dụng API endpoint: POST /api/devices
-        Log.d(TAG, "Sending token to server: " + token);
+
     }
 
     private void sendNotification(String title, String messageBody) {
