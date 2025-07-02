@@ -284,7 +284,54 @@ public class LoginActivity extends AppCompatActivity {
 
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.code() == 403) {
-                    Toast.makeText(LoginActivity.this, "Email not verified. Please check your email.", Toast.LENGTH_SHORT).show();
+                    try {
+                        // Ưu tiên đọc từ body nếu có
+                        if (response.body() != null) {
+                            String msg = "Verification code sent to " + response.body().getEmail();
+                            showToast(msg);
+
+                            int userId = response.body().getUser().getUserId(); // đảm bảo là int
+                            Intent intent = new Intent(LoginActivity.this, VerifyEmailActivity.class);
+                            intent.putExtra("USER_ID", userId);
+                            intent.putExtra("EMAIL", response.body().getEmail());
+                            intent.putExtra("SOURCE", "manual");
+                            startActivity(intent);
+
+                            Toast.makeText(LoginActivity.this, "Email chưa được xác thực. Vui lòng kiểm tra hộp thư.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        // Nếu body null → đọc từ errorBody
+                        String errorBodyString = response.errorBody() != null ? response.errorBody().string() : "";
+                        JSONObject json = new JSONObject(errorBodyString);
+
+                        String email = json.optString("email", editTextAccount.getText().toString());
+                        String userIdStr = json.optString("user_id", null); // kiểu chuỗi
+                        Log.d("LOGIN_DEBUG", "user_id: " + userIdStr + ", email: " + email);
+
+                        if (userIdStr != null && email != null) {
+                            try {
+                                int userId = Integer.parseInt(userIdStr); // ép kiểu an toàn
+                                Intent intent = new Intent(LoginActivity.this, VerifyEmailActivity.class);
+                                intent.putExtra("USER_ID", userId);
+                                intent.putExtra("EMAIL", email);
+                                intent.putExtra("SOURCE", "manual");
+                                startActivity(intent);
+                            } catch (NumberFormatException e) {
+                                Log.e("LOGIN_DEBUG", "user_id không hợp lệ: " + userIdStr);
+                                Toast.makeText(LoginActivity.this, "Không thể mở xác thực email vì user_id không hợp lệ.", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Log.e("LOGIN_DEBUG", "Thiếu user_id hoặc email → không thể mở VerifyEmailActivity");
+                            Toast.makeText(LoginActivity.this, "Không thể mở xác thực email vì thiếu thông tin.", Toast.LENGTH_LONG).show();
+                        }
+
+                        Toast.makeText(LoginActivity.this, "Email chưa được xác thực. Vui lòng kiểm tra hộp thư.", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Lỗi khi xử lý phản hồi từ server", Toast.LENGTH_SHORT).show();
+                    }
+
                     return;
                 }
                 if (response.isSuccessful() && response.body() != null) {
@@ -406,5 +453,8 @@ public class LoginActivity extends AppCompatActivity {
             loginUser(email, password);
         });
 
+    }
+    private void showToast(String message) {
+        Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }

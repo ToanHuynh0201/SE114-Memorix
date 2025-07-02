@@ -55,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        //        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+////        prefs.edit().putString("access_token", "fake_or_expired_token").apply();
+//        prefs.edit()
+//                .putString("access_token", "fake_token")
+//                .putString("refresh_token", "invalid_refresh_token")
+//                .apply();
+
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this);
@@ -87,12 +94,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private void initializeFCM() {
-//        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-////        prefs.edit().putString("access_token", "fake_or_expired_token").apply();
-//        prefs.edit()
-//                .putString("access_token", "fake_token")
-//                .putString("refresh_token", "invalid_refresh_token")
-//                .apply();
 
         // Lấy FCM token
         FirebaseMessaging.getInstance().getToken()
