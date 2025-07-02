@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "374862059372",
+    "project_id": "memorix-d0cb2",
+    "storage_bucket": "memorix-d0cb2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374862059372:android:22987b5b26dc5f7b444549",
+        "android_client_info": {
+          "package_name": "com.example.memorix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB23xz-Z-xsfhHo-I1GDsz6OIdzWg0ODo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
