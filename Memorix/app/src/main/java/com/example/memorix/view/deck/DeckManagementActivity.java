@@ -709,6 +709,7 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         Intent intent = new Intent(this, FlashcardFillBlankStudyActivity.class);
         intent.putExtra("deck_id", deckId);
         intent.putExtra("card_count", allCards.size());
+        intent.putExtra("deck_name",deckName);
         intent.putExtra("auth_token", cachedAuthToken);
         startActivity(intent);
     }

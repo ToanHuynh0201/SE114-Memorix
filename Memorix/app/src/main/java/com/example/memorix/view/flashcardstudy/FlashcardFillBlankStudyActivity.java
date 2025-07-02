@@ -1,10 +1,18 @@
 package com.example.memorix.view.flashcardstudy;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -15,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
@@ -22,6 +31,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.memorix.R;
+import com.example.memorix.data.remote.api.ProgressApi;
+import com.example.memorix.data.remote.dto.Progress.ProgressDueResponse;
+import com.example.memorix.data.remote.dto.Progress.ProgressRequest;
+import com.example.memorix.data.remote.dto.Progress.ProgressResponse;
+import com.example.memorix.data.remote.dto.Progress.ProgressUnlearnedLearnedResponse;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.model.Card;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -34,6 +49,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialCardView flashcardView;
@@ -43,7 +62,7 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     private TextInputLayout inputLayout;
     private TextInputEditText etAnswerInput;
     private LinearLayout difficultyButtonsLayout;
-    private MaterialButton btnHard, btnMedium, btnEasy, btnPrevious, btnNext;
+    private MaterialButton btnHard, btnMedium, btnEasy, btnPrevious, btnNext , btnAgain;
     AnimatorSet frontAnimation, backAnimation;
 
     private boolean isShowingFront = true;
@@ -51,6 +70,7 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
     // List of flashcards
     private List<Card> flashcardList;
+    private List<Card> mainFlashcardList;
     // Current position in the list
     private int currentPosition = 0;
     // Animations for slide transition
@@ -59,6 +79,7 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     private final String deckName = "Tiếng Anh - Ngữ pháp cơ bản"; // Có thể lấy từ Intent
     private final List<Card> studiedCardsList = new ArrayList<>();
     private long studyStartTime;
+    private long deckId;
     private final Map<String, String> cardDifficultyMap = new HashMap<>(); // Lưu độ khó của từng thẻ
     private final Map<String, Boolean> cardCorrectMap = new HashMap<>(); // Lưu trạng thái đúng/sai của từng thẻ
     @Override
@@ -72,6 +93,28 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
             return insets;
         });
 
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String token = prefs.getString("access_token", null);
+
+        if (token == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        deckId = getIntent().getLongExtra("deck_id", -1L);
+        String deckName = getIntent().getStringExtra("deck_name");
+
+        Log.d("DEBUG_DECK", "Deck ID nhận từ Intent = " + deckId);
+        Log.d("DEBUG_DECK", "Deck Name nhận từ Intent = " + deckName);
+
+
+        if (deckId == -1 || deckName == null) {
+            Toast.makeText(this, "Lỗi: Không có thông tin bộ thẻ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+
         studyStartTime = System.currentTimeMillis();
 
         // Khởi tạo danh sách flashcard
@@ -79,6 +122,7 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
         // Khởi tạo các view
         initViews();
+        tvSetTitle.setText(deckName);
 
         // Thiết lập animation flip
         setupCardFlipAnimation();
@@ -92,22 +136,122 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
         // Hiển thị flashcard đầu tiên
         displayCurrentFlashcard();
     }
-    private void initFlashcardList() {
-        // Initialize the flashcard list with fill-in-the-blank questions
-        flashcardList = new ArrayList<>();
 
-        // Sử dụng format: question|answer|explanation (explanation có thể null)
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-//                "She _____ to school every day.", "goes", CardType.FILL_IN_BLANK));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-//                "They _____ playing football now.", "are", CardType.FILL_IN_BLANK));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-//                "I _____ finished my homework yesterday.", "have", CardType.FILL_IN_BLANK));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-//                "He _____ not like vegetables.", "does", CardType.FILL_IN_BLANK));
-//        flashcardList.add(new Card(UUID.randomUUID().toString(), "1",
-//                "We _____ watching TV when she called.", "were", CardType.FILL_IN_BLANK));
+    private void initFlashcardList() {
+        flashcardList = new ArrayList<>();
+        mainFlashcardList = new ArrayList<>();
+
+        ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+        Call<ProgressDueResponse> dueCall = api.getDueByDeck(deckId);
+        Call<ProgressUnlearnedLearnedResponse> unlearnedCall = api.getUnlearnedAndLearned();
+
+        dueCall.enqueue(new Callback<ProgressDueResponse>() {
+            @Override
+            public void onResponse(Call<ProgressDueResponse> call, Response<ProgressDueResponse> response) {
+                List<Card> dueCards = extractDueCards(response);
+
+                unlearnedCall.enqueue(new Callback<ProgressUnlearnedLearnedResponse>() {
+                    @Override
+                    public void onResponse(Call<ProgressUnlearnedLearnedResponse> call, Response<ProgressUnlearnedLearnedResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            handleUnlearnedAndLearned(response.body(), dueCards);
+                        } else {
+                            Toast.makeText(FlashcardFillBlankStudyActivity.this, "Lỗi tải thẻ chưa học", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ProgressUnlearnedLearnedResponse> call, Throwable t) {
+                        Toast.makeText(FlashcardFillBlankStudyActivity.this, "Lỗi kết nối (unlearned): " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<ProgressDueResponse> call, Throwable t) {
+                Toast.makeText(FlashcardFillBlankStudyActivity.this, "Lỗi kết nối (due): " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+    private List<Card> extractDueCards(Response<ProgressDueResponse> response) {
+        List<Card> dueCards = new ArrayList<>();
+
+        if (response.isSuccessful() && response.body() != null) {
+            ProgressDueResponse.DueCards due = response.body().getDue();
+            if (due != null) {
+                if (due.getTwoSided() != null) {
+                    for (Card c : due.getTwoSided()) {
+                        if (c.getDeckId() == deckId) dueCards.add(c);
+                    }
+                }
+                if (due.getMultipleChoice() != null) {
+                    for (Card c : due.getMultipleChoice()) {
+                        if (c.getDeckId() == deckId) dueCards.add(c);
+                    }
+                }
+                if (due.getFillinBlank() != null) {
+                    for (Card c : due.getFillinBlank()) {
+                        if (c.getDeckId() == deckId) dueCards.add(c);
+                    }
+                }
+            }
+        }
+
+        return dueCards;
+    }
+    private void handleUnlearnedAndLearned(ProgressUnlearnedLearnedResponse body, List<Card> dueCards) {
+        List<Card> unlearnedCards = new ArrayList<>();
+        List<Card> learnedCards = new ArrayList<>();
+
+        ProgressUnlearnedLearnedResponse.UnlearnedCards unlearned = body.getUnlearned();
+        ProgressUnlearnedLearnedResponse.LearnedCards learned = body.getLearned();
+
+        if (unlearned != null) {
+            unlearnedCards.addAll(filterCardsByDeck(unlearned.getTwoSided()));
+            unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
+            unlearnedCards.addAll(filterCardsByDeck(unlearned.getFillInBlank()));
+        }
+
+        if (learned != null) {
+      //      learnedCards.addAll(filterCardsByDeck(learned.getTwoSided()));
+//            learnedCards.addAll(filterCardsByDeck(learned.getMultipleChoice()));
+         learnedCards.addAll(filterCardsByDeck(learned.getFillInBlank()));
+        }
+
+        // Gộp các thẻ ưu tiên học: tới hạn + chưa học
+        mainFlashcardList.clear();
+        mainFlashcardList.addAll(dueCards);
+        mainFlashcardList.addAll(unlearnedCards);
+
+        if (mainFlashcardList.isEmpty() && !learnedCards.isEmpty()) {
+            Toast.makeText(this, "Bạn đã học hết. Học lại từ đầu nhé!", Toast.LENGTH_LONG).show();
+            mainFlashcardList.addAll(learnedCards);
+        }
+
+        if (mainFlashcardList.isEmpty()) {
+            Toast.makeText(this, "Bộ thẻ này không có dữ liệu!", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            flashcardList = new ArrayList<>(mainFlashcardList);
+            currentPosition = 0;
+            setupCard();
+            displayCurrentFlashcard();
+            updateProgressBar();
+        }
+    }
+
+    private List<Card> filterCardsByDeck(List<Card> inputList) {
+        List<Card> result = new ArrayList<>();
+        if (inputList != null) {
+            for (Card c : inputList) {
+                if (c.getDeckId() == deckId) {
+                    result.add(c);
+                }
+            }
+        }
+        return result;
+    }
+
 
     private void initViews() {
         tvSetTitle = findViewById(R.id.tv_set_title);
@@ -129,6 +273,7 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
         btnEasy = findViewById(R.id.btn_easy);
         btnPrevious = findViewById(R.id.btn_previous);
         btnNext = findViewById(R.id.btn_next);
+        btnAgain = findViewById(R.id.btn_again);
 
         // Set progress bar max value
         progressBar.setMax(flashcardList.size());
@@ -235,18 +380,18 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayCurrentFlashcard() {
-//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//            tvCardFront.setText(currentCard.getQuestion());
-//
-//            // Hiển thị câu trả lời hoàn chỉnh trên mặt sau
-//            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
-//            tvCardBack.setText(completeAnswer);
-//
-//            updateProgressBar();
-//        }
+        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+        Card currentCard = flashcardList.get(currentPosition);
 
+        String front = currentCard.getContent().has("text") ? currentCard.getContent().get("text").getAsString() : "";
+        String back = currentCard.getContent().has("answer") ? currentCard.getContent().get("answer").getAsString() : "";
+            Log.d("DEBUG_CARD_CONTENT", "Card ID = " + currentCard.getFlashcardId() + ", Content = " + currentCard.getContent().toString());
+
+        tvCardFront.setText(front);
+        tvCardBack.setText(back);
+        updateProgressBar();
         checkButtonStatus();
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -317,64 +462,71 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void displayAnswerResult() {
-//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
-//            String userAnswerLower = userAnswer.toLowerCase().trim();
-//
-//            boolean isCorrect = correctAnswer.equals(userAnswerLower);
-//
-//            // Hiển thị trạng thái đúng/sai
-//            if (isCorrect) {
-//                tvResultStatus.setText(getString(R.string.correct));
-//                tvResultStatus.setTextColor(getResources().getColor(R.color.secondary_color, null));
-//            } else {
-//                tvResultStatus.setText(getString(R.string.incorrect));
-//                tvResultStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
-//            }
-//
-//            // Hiển thị câu trả lời của người dùng
-//            tvUserAnswer.setText(getString(R.string.your_answer_is) + " " + userAnswer);
-////
-////            // Hiển thị giải thích nếu có
-////            String explanation = currentCard.getExplanation();
-////            if (!TextUtils.isEmpty(explanation)) {
-////                tvExplanation.setText("Giải thích: " + explanation);
-////                tvExplanation.setVisibility(View.VISIBLE);
-////            } else {
-////                tvExplanation.setVisibility(View.GONE);
-////            }
-//            String completeAnswer = currentCard.getQuestion().replace("_____", currentCard.getCorrectAnswer());
-//            SpannableString spannableString = new SpannableString(completeAnswer);
-//
-//            // Tìm vị trí của đáp án đúng trong câu hoàn chỉnh
-//            int startIndex = completeAnswer.indexOf(currentCard.getCorrectAnswer());
-//            int endIndex = startIndex + currentCard.getCorrectAnswer().length();
-//
-//            if (startIndex != -1) {
-//                // Chọn màu dựa trên kết quả đúng/sai
-//                int color = isCorrect ?
-//                        getResources().getColor(R.color.secondary_color, null) :
-//                        getResources().getColor(android.R.color.holo_red_dark, null);
-//
-//                // Áp dụng màu cho phần đáp án
-//                spannableString.setSpan(
-//                        new android.text.style.ForegroundColorSpan(color),
-//                        startIndex,
-//                        endIndex,
-//                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-//                );
-//
-//                // Có thể thêm bold để làm nổi bật hơn
-//                spannableString.setSpan(
-//                        new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-//                        startIndex,
-//                        endIndex,
-//                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-//                );
-//            }
-//        }
+        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+            Card currentCard = flashcardList.get(currentPosition);
+
+            String question = currentCard.getQuestion();
+            String correctAnswer = currentCard.getAnswer();
+
+            Log.d("DEBUG_ANSWER", "Question: " + question);
+            Log.d("DEBUG_ANSWER", "CorrectAnswer: " + correctAnswer);
+
+            if (question == null || correctAnswer == null) {
+                tvResultStatus.setText("❌ Thiếu dữ liệu câu hỏi hoặc đáp án");
+                tvUserAnswer.setText("");
+                tvCardBack.setText("");
+                return;
+            }
+
+            boolean isCorrect = correctAnswer.trim().equalsIgnoreCase(userAnswer.trim());
+
+            if (isCorrect) {
+                tvResultStatus.setText("✔ Chính xác!");
+                tvResultStatus.setTextColor(getResources().getColor(R.color.secondary_color, null));
+            } else {
+                tvResultStatus.setText("❌ Bạn đã trả lời sai");
+                tvResultStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
+            }
+
+            // Hiển thị câu trả lời người dùng
+            tvUserAnswer.setText("Câu trả lời của bạn: " + userAnswer);
+
+            // Xử lý định dạng câu trả lời đúng
+            String completeAnswer;
+            if (question.contains("_____")) {
+                completeAnswer = question.replace("_____", correctAnswer);
+            } else {
+                completeAnswer = question + " → " + correctAnswer; // fallback nếu không có khoảng trống
+            }
+
+            SpannableString spannableString = new SpannableString(completeAnswer);
+            int startIndex = completeAnswer.indexOf(correctAnswer);
+            int endIndex = startIndex + correctAnswer.length();
+
+            if (startIndex >= 0 && endIndex <= completeAnswer.length()) {
+                int color = isCorrect ?
+                        getResources().getColor(R.color.secondary_color, null) :
+                        getResources().getColor(android.R.color.holo_red_dark, null);
+
+                spannableString.setSpan(
+                        new android.text.style.ForegroundColorSpan(color),
+                        startIndex,
+                        endIndex,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+
+                spannableString.setSpan(
+                        new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                        startIndex,
+                        endIndex,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+            }
+
+            tvCardBack.setText(spannableString);
+        }
     }
+
 
     private void setupClickListeners() {
         // Click vào flashcard để kiểm tra đáp án (chỉ khi ở mặt trước)
@@ -401,35 +553,61 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
                 Toast.makeText(this, "Đây là thẻ đầu tiên", Toast.LENGTH_SHORT).show();
             }
         });
+        btnAgain.setOnClickListener(v->{
+            if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+                // Gửi đánh giá là "again" và không đúng
+                boolean isCorrect = checkIfAnswerCorrect();
+                markCardAsDifficulty("again", isCorrect);
+            }
 
+            // Sang thẻ tiếp theo hoặc kết thúc
+            if (currentPosition >= flashcardList.size() - 1) {
+                finishStudySession(); // Kết thúc ngay, không học lại
+            } else {
+                moveToNextCard();
+            }
+        });
         // Xử lý các nút đánh giá mức độ khó
         btnEasy.setOnClickListener(v -> {
-            boolean isCorrect = checkIfAnswerCorrect();
-            markCardAsDifficulty("easy", isCorrect);
+            if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+                // Gửi đánh giá là "again" và không đúng
+                boolean isCorrect = checkIfAnswerCorrect();
+                markCardAsDifficulty("easy", isCorrect);
+            }
 
+            // Sang thẻ tiếp theo hoặc kết thúc
             if (currentPosition >= flashcardList.size() - 1) {
-                finishStudySession();
+                finishStudySession(); // Kết thúc ngay, không học lại
             } else {
                 moveToNextCard();
             }
         });
 
         btnMedium.setOnClickListener(v -> {
-            boolean isCorrect = checkIfAnswerCorrect();
-            markCardAsDifficulty("medium", isCorrect);
+            if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+                // Gửi đánh giá là "again" và không đúng
+                boolean isCorrect = checkIfAnswerCorrect();
+                markCardAsDifficulty("good", isCorrect);
+            }
 
+            // Sang thẻ tiếp theo hoặc kết thúc
             if (currentPosition >= flashcardList.size() - 1) {
-                finishStudySession();
+                finishStudySession(); // Kết thúc ngay, không học lại
             } else {
                 moveToNextCard();
             }
         });
 
         btnHard.setOnClickListener(v -> {
-            markCardAsDifficulty("hard", false);
+            if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+                // Gửi đánh giá là "again" và không đúng
+                boolean isCorrect = checkIfAnswerCorrect();
+                markCardAsDifficulty("hard", isCorrect);
+            }
 
+            // Sang thẻ tiếp theo hoặc kết thúc
             if (currentPosition >= flashcardList.size() - 1) {
-                finishStudySession();
+                finishStudySession(); // Kết thúc ngay, không học lại
             } else {
                 moveToNextCard();
             }
@@ -437,26 +615,94 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     }
 
     private boolean checkIfAnswerCorrect() {
-//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//            String correctAnswer = currentCard.getCorrectAnswer().toLowerCase().trim();
-//            String userAnswerLower = userAnswer.toLowerCase().trim();
-//            return correctAnswer.equals(userAnswerLower);
-//        }
+        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+            Card currentCard = flashcardList.get(currentPosition);
+            String correctAnswer = currentCard.getAnswer().toLowerCase().trim();
+            String userAnswerLower = userAnswer.toLowerCase().trim();
+            return correctAnswer.equals(userAnswerLower);
+        }
         return false;
     }
 
     private void markCardAsDifficulty(String difficulty, boolean isCorrect) {
-//        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
-//            Card currentCard = flashcardList.get(currentPosition);
-//
-//            cardDifficultyMap.put(currentCard.getId(), difficulty);
-//            cardCorrectMap.put(currentCard.getId(), isCorrect);
-//
-//            if (!studiedCardsList.contains(currentCard)) {
-//                studiedCardsList.add(currentCard);
-//            }
-//        }
+        if (currentPosition >= 0 && currentPosition < flashcardList.size()) {
+            Card currentCard = flashcardList.get(currentPosition);
+            submitProgress(currentCard, difficulty, isCorrect);
+        }
+    }
+    private void submitProgress(Card card, String difficulty, boolean isCorrect) {
+        if (card == null) return;
+
+        int flashcardId = card.getFlashcardId();
+
+        // Lưu local cho thống kê
+        cardDifficultyMap.put(String.valueOf(flashcardId), difficulty);
+        cardCorrectMap.put(String.valueOf(flashcardId), isCorrect);
+
+
+        if (!studiedCardsList.contains(card)) {
+            studiedCardsList.add(card);
+        }
+
+        // Tính ngày ôn tiếp theo
+        int daysLater;
+        switch (difficulty) {
+            case "easy": daysLater = 10; break;
+            case "good": daysLater = 5; break;
+            case "hard": daysLater = 2; break;
+            default: daysLater = 0; break;
+        }
+        String nextReviewDate = calculateNextReviewDate(daysLater);
+
+        ProgressApi api = ApiClient.getClient().create(ProgressApi.class);
+
+        // Gửi POST
+        ProgressRequest postRequest = new ProgressRequest(flashcardId, difficulty);
+        api.postProgress(postRequest).enqueue(new Callback<ProgressResponse>() {
+            @Override
+            public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Progress", "POST thành công: " + difficulty);
+                } else {
+                    Log.e("Progress", "POST lỗi: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProgressResponse> call, Throwable t) {
+                Log.e("Progress", "POST thất bại: " + t.getMessage());
+            }
+        });
+
+        // Gửi PUT
+        ProgressRequest putRequest = new ProgressRequest();
+        putRequest.setFlashcard_id(flashcardId);
+        putRequest.setRating(difficulty);
+        putRequest.setNext_review_at(nextReviewDate);
+
+        api.updateProgress(putRequest).enqueue(new Callback<ProgressResponse>() {
+            @Override
+            public void onResponse(Call<ProgressResponse> call, Response<ProgressResponse> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Progress", "PUT thành công: " + nextReviewDate);
+                } else {
+                    Log.e("Progress", "PUT lỗi: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProgressResponse> call, Throwable t) {
+                Log.e("Progress", "PUT thất bại: " + t.getMessage());
+            }
+        });
+    }
+    private String calculateNextReviewDate(int minutesLater) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault());
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+//        calendar.add(java.util.Calendar.DAY_OF_YEAR, daysLater);
+        calendar.add(java.util.Calendar.MINUTE, minutesLater); // Thay vì add ngày
+        return sdf.format(calendar.getTime());
     }
 
     private void moveToNextCard() {
@@ -492,33 +738,64 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
     }
 
     private void finishStudySession() {
-//        try {
-//            long studyEndTime = System.currentTimeMillis();
-//            int totalCorrectAnswers = 0;
-//            int totalReviewedCards = studiedCardsList.size();
-//
-//            for (Card card : studiedCardsList) {
-//                Boolean isCorrect = cardCorrectMap.get(card.getId());
-//                if (isCorrect != null && isCorrect) {
-//                    totalCorrectAnswers++;
-//                }
-//            }
-//
-//            Intent intent = new Intent(this, StudySummaryActivity.class);
-//            intent.putExtra("deck_name", deckName);
-//            intent.putExtra("studied_cards", new ArrayList<>(studiedCardsList));
-//            intent.putExtra("study_start_time", studyStartTime);
-//            intent.putExtra("study_end_time", studyEndTime);
-//            intent.putExtra("total_correct", totalCorrectAnswers);
-//            intent.putExtra("total_reviewed", totalReviewedCards);
-//
-//            startActivity(intent);
-//            finish();
-//
-//        } catch (Exception e) {
-//            Log.e("error", Objects.requireNonNull(e.getMessage()));
-//            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
-//                    Toast.LENGTH_LONG).show();
-//        }
+        try {
+            // Tính toán các thống kê cần thiết
+            long studyEndTime = System.currentTimeMillis();
+            int totalCorrectAnswers = 0;
+            int totalReviewedCards = studiedCardsList.size();
+
+            Log.d("DEBUG", "Tổng số thẻ đã học: " + totalReviewedCards);
+
+             //Đếm số câu trả lời đúng
+            for (Card card : studiedCardsList) {
+                String id = String.valueOf(card.getFlashcardId());
+                Boolean isCorrect = cardCorrectMap.get(id);
+                Log.d("DEBUG", "Card ID: " + id + ", isCorrect = " + isCorrect);
+                if (isCorrect != null && isCorrect) {
+                    totalCorrectAnswers++;
+                }
+            }
+            Log.d("DEBUG", "Tổng câu đúng: " + totalCorrectAnswers);
+
+//             Kiểm tra StudyStatisticsHelper có tồn tại không
+//             StudyStatisticsHelper.StudySessionStats stats =
+//                     StudyStatisticsHelper.calculateStats(studiedCardsList, studyStartTime, studyEndTime);
+
+            // Navigate to StudySummaryActivity với proper error handling
+            Intent intent = new Intent(this, StudySummaryActivity.class);
+            intent.putExtra("deck_name", deckName);
+            ArrayList<String> studiedCardSummaries = new ArrayList<>();
+            for (Card card : studiedCardsList) {
+                studiedCardSummaries.add(card.toString());
+            }
+            intent.putStringArrayListExtra("studied_cards", studiedCardSummaries); // Đảm bảo Serializable
+            intent.putExtra("study_start_time", studyStartTime);
+            intent.putExtra("study_end_time", studyEndTime);
+            intent.putExtra("total_correct", totalCorrectAnswers);
+            intent.putExtra("total_reviewed", totalReviewedCards);
+
+            startActivity(intent);
+
+
+
+            finish(); // Optional: finish current activity
+
+        } catch (Exception e) {
+            Log.e("error", Objects.requireNonNull(e.getMessage()));
+            Toast.makeText(this, "Lỗi khi chuyển đến trang tóm tắt: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Kết thúc học?")
+                .setMessage("Bạn có chắc muốn dừng học giữa chừng?")
+                .setPositiveButton("Dừng", (dialog, which) -> {
+                    finishStudySession(); // lưu kết quả
+                    super.onBackPressed(); // thoát sau khi lưu
+                })
+                .setNegativeButton("Tiếp tục", null)
+                .show();
     }
 }

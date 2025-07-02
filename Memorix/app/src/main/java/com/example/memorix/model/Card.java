@@ -12,6 +12,8 @@ public class Card implements Serializable {
     private int flashcardId;
     @SerializedName("deck_id")
     private int deckId;
+
+    @SerializedName("card_type")
     private CardType cardType;
     private JsonObject content;
 
@@ -129,5 +131,40 @@ public class Card implements Serializable {
                 ", cardType=" + cardType +
                 ", question='" + question + '\'' +
                 '}';
+    }
+
+    public String getAnswer() {
+        if (content == null) return "";
+
+        switch (cardType) {
+            case BASIC:
+                return content.has("back") ? content.get("back").getAsString() : "";
+
+            case MULTIPLE_CHOICE:
+                return content.has("answer") ? content.get("answer").getAsString() : "";
+
+            case FILL_IN_BLANK:
+                return content.has("answer") ? content.get("answer").getAsString() : "";
+
+            default:
+                return "";
+        }
+    }
+    public String getQuestion() {
+        if (content == null) return "";
+
+        switch (cardType) {
+            case BASIC:
+                return content.has("front") ? content.get("front").getAsString() : "";
+
+            case MULTIPLE_CHOICE:
+                return content.has("question") ? content.get("question").getAsString() : "";
+
+            case FILL_IN_BLANK:
+                return content.has("text") ? content.get("text").getAsString() : "";
+
+            default:
+                return "";
+        }
     }
 }
