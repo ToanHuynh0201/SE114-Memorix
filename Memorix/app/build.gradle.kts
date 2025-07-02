@@ -32,7 +32,8 @@ android {
 }
 
 dependencies {
-
+    implementation("com.google.firebase:firebase-messaging:23.2.1")
+    implementation("com.google.firebase:firebase-analytics:21.3.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -47,11 +48,13 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.circleimageview)
     implementation(libs.constraintlayout)
+    implementation(libs.work.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
 
 }
