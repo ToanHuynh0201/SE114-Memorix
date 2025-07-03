@@ -50,11 +50,11 @@ public class AccountManagementFragment extends Fragment {
     private TextView userNameTextView;
     private TextView userEmailTextView;
     private TextView userPhoneTextView;
-    private TextView currentLanguageTextView;
+    private TextView learningMethodTextView; // Thay đổi từ currentLanguageTextView
     private MaterialButton editProfileButton;
     private MaterialButton logoutButton;
     private View changePasswordLayout;
-    private View languageLayout;
+    private View learningMethodLayout; // Thay đổi từ languageLayout
 
     private ImageView userAvatarImageView;
 
@@ -93,10 +93,10 @@ public class AccountManagementFragment extends Fragment {
         observeUser();
         userViewModel.fetchUser();
 
-
         // Thiết lập các sự kiện click
         setupClickListeners();
     }
+
     private void setupToolbar(View view) {
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         if (toolbar != null && getActivity() != null) {
@@ -146,12 +146,15 @@ public class AccountManagementFragment extends Fragment {
         userNameTextView = view.findViewById(R.id.user_name);
         userEmailTextView = view.findViewById(R.id.user_email);
         userPhoneTextView = view.findViewById(R.id.user_phone);
-        currentLanguageTextView = view.findViewById(R.id.text_current_language);
+        learningMethodTextView = view.findViewById(R.id.text_current_language); // Sử dụng lại ID cũ
         editProfileButton = view.findViewById(R.id.btn_edit_profile);
         logoutButton = view.findViewById(R.id.btn_logout);
         changePasswordLayout = view.findViewById(R.id.layout_change_password);
-        languageLayout = view.findViewById(R.id.layout_language);
+        learningMethodLayout = view.findViewById(R.id.layout_language); // Sử dụng lại ID cũ
         userAvatarImageView = view.findViewById(R.id.profile_image);
+
+        // Cập nhật text hiển thị cho phương pháp học tập
+        learningMethodTextView.setText("Spaced Repetition");
     }
 
     private void loadUserData() {
@@ -189,41 +192,22 @@ public class AccountManagementFragment extends Fragment {
             }
         });
 
-        // Xử lý sự kiện khi click vào mục Ngôn ngữ
-        languageLayout.setOnClickListener(v -> showLanguageDialog());
+        // Xử lý sự kiện khi click vào mục Phương pháp học tập (trước đây là Ngôn ngữ)
+        learningMethodLayout.setOnClickListener(v -> openSpacedRepetitionInfo());
 
         // Xử lý sự kiện khi click vào nút Đăng xuất
         logoutButton.setOnClickListener(v -> showLogoutConfirmationDialog());
     }
 
-    private void showLanguageDialog() {
-        if (getContext() == null) return;
-
-        final String[] languages = {getString(R.string.vietnamese), getString(R.string.english)};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(getString(R.string.language))
-                .setItems(languages, (dialog, which) -> {
-                    // Lưu lựa chọn ngôn ngữ vào SharedPreferences
-                    if (getContext() != null) {
-                        SharedPreferences.Editor editor = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE).edit();
-                        editor.putString("language", languages[which]);
-                        editor.apply();
-
-                        // Cập nhật hiển thị trên UI
-                        currentLanguageTextView.setText(languages[which]);
-
-                        // Hiển thị thông báo
-                        Toast.makeText(getContext(),
-                                "Đã chọn: " + languages[which], Toast.LENGTH_SHORT).show();
-
-                        // TODO: Thực hiện thay đổi ngôn ngữ ứng dụng
-                        // Đoạn code thay đổi ngôn ngữ thực tế sẽ phức tạp hơn,
-                        // cần cấu hình lại LocaleConfig hoặc restart Activity
-                    }
-                });
-        builder.create().show();
+    // Phương thức mới để mở màn hình giới thiệu Spaced Repetition
+    private void openSpacedRepetitionInfo() {
+        if (getActivity() != null) {
+            Intent intent = new Intent(getActivity(), SpacedRepetitionInfoActivity.class);
+            startActivity(intent);
+        }
     }
+
+    // Xóa phương thức showLanguageDialog() cũ vì không còn cần thiết
 
     private void showLogoutConfirmationDialog() {
         if (getContext() == null) return;
@@ -252,8 +236,6 @@ public class AccountManagementFragment extends Fragment {
         AuthApi apiService = ApiClient.getClient().create(AuthApi.class);
         Call<Void> call = apiService.logout("Bearer " + accessToken ,new LogoutRequest(refreshToken));
 
-
-
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -272,13 +254,13 @@ public class AccountManagementFragment extends Fragment {
             }
         });
     }
+
     private void clearTokenAndNavigateToLogin() {
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         SharedPreferences userPrefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         userPrefs.edit().clear().apply();
-
 
         editor.remove("access_token");
         editor.remove("refresh_token");
@@ -292,9 +274,9 @@ public class AccountManagementFragment extends Fragment {
         getActivity().finish();
     }
 
-    @Override public void onResume(){
+    @Override
+    public void onResume(){
         super.onResume();
         userViewModel.fetchUser();
     }
-
 }

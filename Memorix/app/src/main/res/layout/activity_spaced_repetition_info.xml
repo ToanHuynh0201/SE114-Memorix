@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color"
+    tools:context=".view.profile.SpacedRepetitionInfoActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary_color">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:titleTextColor="@android:color/white"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Forgetting Curve Image -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <ImageView
+                    android:id="@+id/forgetting_curve_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"
+                    android:padding="8dp"
+                    android:src="@drawable/forgetting_curve"
+                    android:contentDescription="Forgetting Curve Diagram" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Spaced Repetition Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1.1. Kỹ thuật Spaced Repetition"
+                        android:textColor="@color/primary_color"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#E0E0E0" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Spaced Repetition (Lặp lại ngắt quãng) là một phương pháp học tập dựa trên nguyên tắc ôn tập thông tin vào những thời điểm tối ưu để tăng cường khả năng ghi nhớ lâu dài. Kỹ thuật này tận dụng đường cong lãng quên của Hermann Ebbinghaus, trong đó thông tin mới học sẽ dần bị quên nếu không được ôn tập."
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Bằng cách ôn lại nội dung vào các khoảng thời gian tăng dần (ví dụ: sau 1 ngày, 3 ngày, 7 ngày), Spaced Repetition giúp củng cố kiến thức hiệu quả, đặc biệt trong các ứng dụng học tập ghi nhớ."
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Trong ngữ cảnh ứng dụng di động, Spaced Repetition được tích hợp để hỗ trợ người học tiếp cận nội dung một cách khoa học, tối ưu hóa thời gian và nâng cao hiệu quả học tập. Các ứng dụng di động tận dụng giao diện thân thiện, thông báo nhắc nhở và thuật toán thông minh để triển khai kỹ thuật này."
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SM2 Algorithm Image -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <ImageView
+                    android:id="@+id/sm2_algorithm_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"
+                    android:padding="8dp"
+                    android:src="@drawable/sm2_algorithm"
+                    android:contentDescription="SM2 Algorithm Diagram" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- SM2 Algorithm Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1.2. Thuật toán SM2"
+                        android:textColor="@color/primary_color"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#E0E0E0" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="SM-2 (SuperMemo 2) là một thuật toán phổ biến được sử dụng trong các hệ thống Spaced Repetition, được phát triển bởi Piotr Wozniak. Thuật toán này xác định thời điểm tối ưu để ôn tập dựa trên hiệu suất học tập của người dùng."
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Các đặc điểm chính của SM-2:"
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:lineSpacingExtra="4dp" />
+
+                    <!-- Feature 1 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="• "
+                            android:textColor="@color/accent_color"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Độ khó của thẻ (Ease Factor): Mỗi thẻ (flashcard) được gán một giá trị độ khó, thay đổi dựa trên mức độ chính xác khi người dùng trả lời."
+                            android:textColor="@color/text_color"
+                            android:textSize="16sp"
+                            android:lineSpacingExtra="4dp" />
+                    </LinearLayout>
+
+                    <!-- Feature 2 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="• "
+                            android:textColor="@color/accent_color"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Khoảng thời gian ôn tập (Interval): SM-2 tính toán khoảng thời gian giữa các lần ôn tập, tăng dần nếu người dùng trả lời đúng và giảm nếu trả lời sai."
+                            android:textColor="@color/text_color"
+                            android:textSize="16sp"
+                            android:lineSpacingExtra="4dp" />
+                    </LinearLayout>
+
+                    <!-- Feature 3 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="• "
+                            android:textColor="@color/accent_color"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Chất lượng phản hồi (Quality): Người dùng đánh giá chất lượng câu trả lời của mình (thường từ 0-5), từ đó thuật toán điều chỉnh lịch trình ôn tập."
+                            android:textColor="@color/text_color"
+                            android:textSize="16sp"
+                            android:lineSpacingExtra="4dp" />
+                    </LinearLayout>
+
+                    <!-- Feature 4 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="• "
+                            android:textColor="@color/accent_color"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Công thức tính toán: SM-2 sử dụng công thức để cập nhật khoảng thời gian ôn tập:"
+                                android:textColor="@color/text_color"
+                                android:textSize="16sp"
+                                android:lineSpacingExtra="4dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:layout_marginStart="16dp"
+                                android:text="○ Nếu trả lời đúng: New Interval = Old Interval × Ease Factor."
+                                android:textColor="@color/text_color"
+                                android:textSize="15sp"
+                                android:lineSpacingExtra="2dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:layout_marginStart="16dp"
+                                android:text="○ Nếu trả lời sai: Thẻ được đưa về lịch trình ôn tập ngắn hơn."
+                                android:textColor="@color/text_color"
+                                android:textSize="15sp"
+                                android:lineSpacingExtra="2dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Trong các ứng dụng di động, SM-2 được tích hợp để tự động điều chỉnh lịch trình ôn tập, giúp người học tập trung vào những nội dung khó và giảm thiểu thời gian ôn lại những nội dung đã nắm vững."
+                        android:textColor="@color/text_color"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

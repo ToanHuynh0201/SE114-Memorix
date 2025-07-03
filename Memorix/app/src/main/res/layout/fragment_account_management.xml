@@ -195,7 +195,7 @@
                         android:layout_height="1dp"
                         android:background="#E0E0E0" />
 
-                    <!-- Language Option -->
+                    <!-- Learning Method Option (Previously Language) -->
                     <LinearLayout
                         android:id="@+id/layout_language"
                         android:layout_width="match_parent"
@@ -210,7 +210,7 @@
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_language"
+                            android:src="@drawable/ic_school"
                             app:tint="@color/primary_color"
                             tools:ignore="ContentDescription" />
 
@@ -219,7 +219,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:layout_weight="1"
-                            android:text="@string/language"
+                            android:text="Phương pháp học tập"
                             android:textColor="@color/text_color"
                             android:textSize="16sp" />
 
@@ -228,7 +228,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
-                            android:text="@string/vietnamese"
+                            android:text="Spaced Repetition"
                             android:textColor="@color/accent_color"
                             android:textSize="14sp" />
 

@@ -151,7 +151,7 @@ public class EditCardActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             Card card = (Card) getIntent().getSerializableExtra("card");
-            String title = (card != null) ? "Chỉnh sửa thẻ" : "Thêm thẻ mới";
+            String title = (card != null) ? "Chỉnh sửa thẻ" : "Chỉnh sửa thẻ";
             getSupportActionBar().setTitle(title);
         }
 

@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -32,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import java.io.InputStream;
+import java.util.Objects;
 
 
 public class EditProfileActivity extends AppCompatActivity {
@@ -53,6 +56,8 @@ public class EditProfileActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        setupToolbar();
 
         // Ánh xạ các view
         de.hdodenhof.circleimageview.CircleImageView profileImage = findViewById(R.id.profile_image);
@@ -90,10 +95,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 editor.apply();
             }
         });
-
-
-
-
 
         // Bắt sự kiện chọn ảnh mới
         findViewById(R.id.btn_change_photo).setOnClickListener(v -> {
@@ -136,6 +137,22 @@ public class EditProfileActivity extends AppCompatActivity {
             userViewModel.updateUser(request);
             Toast.makeText(this, "Đã gửi yêu cầu cập nhật", Toast.LENGTH_SHORT).show();
             finish();
+        });
+    }
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Hiển thị nút back
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle("Quản lý tài khoản");
+        }
+
+        // Xử lý sự kiện nút back
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
         });
     }
 

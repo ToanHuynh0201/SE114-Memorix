@@ -2,15 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Thêm permission -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-
-    <!-- Thêm permission -->
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
-
 
     <application
         android:name=".MemorixApplication"
@@ -24,6 +20,10 @@
         android:theme="@style/Theme.Memorix"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".view.profile.SpacedRepetitionInfoActivity"
+            android:exported="false" />
+
         <service
             android:name=".helper.MyFirebaseMessagingService"
             android:exported="false">
@@ -31,6 +31,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <activity
             android:name=".view.deck.ManageDeckActivity"
             android:exported="false" />
@@ -39,8 +40,8 @@
             android:exported="false" />
         <activity
             android:name=".view.deck.card.AddCardActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
             android:name=".view.deck.card.EditCardActivity"
             android:exported="false" />
@@ -64,7 +65,7 @@
             android:exported="false" />
         <activity
             android:name=".view.SplashActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -79,16 +80,16 @@
             android:exported="false" />
         <activity
             android:name=".view.login.VerifyEmailActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".view.login.ResetPasswordActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".view.MainActivity"
             android:exported="true" />
         <activity
             android:name=".view.login.LoginActivity"
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 
 </manifest>
