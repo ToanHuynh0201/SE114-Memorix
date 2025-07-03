@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -109,6 +110,7 @@ public class AuthInterceptor implements Interceptor {
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove("access_token");
         editor.remove("refresh_token");
+        editor.remove("isLoggedIn");
         editor.apply();
 
         // Optional: gửi broadcast logout
@@ -117,6 +119,7 @@ public class AuthInterceptor implements Interceptor {
 
         // ✅ Đảm bảo gọi LoginActivity trên Main Thread
         new Handler(Looper.getMainLooper()).post(() -> {
+            Toast.makeText(context, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(context, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             context.startActivity(intent);

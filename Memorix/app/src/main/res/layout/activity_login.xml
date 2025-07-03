@@ -122,7 +122,12 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_subtitle"
                 app:startIconDrawable="@drawable/ic_person"
-                app:startIconTint="@color/primary_color">
+                app:startIconTint="@color/primary_color"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_fingerprint"
+                app:endIconTint="@color/primary_color"
+                app:endIconContentDescription="Xác thực vân tay"
+                app:endIconCheckable="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_text_account"
@@ -133,6 +138,7 @@
                     android:paddingVertical="16dp"
                     android:textColor="@color/text_color"
                     android:textSize="16sp"/>
+
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password input with animated outline -->

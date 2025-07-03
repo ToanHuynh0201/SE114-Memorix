@@ -13,6 +13,7 @@ import android.util.Patterns;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -34,6 +35,7 @@ import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 
 
 import org.json.JSONObject;
@@ -73,11 +75,9 @@ public class LoginActivity extends AppCompatActivity {
 
         SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
         boolean remember = loginPrefs.getBoolean("remember_password", false);
-        if (remember) {
-            editTextAccount.setText(loginPrefs.getString("saved_email", ""));
-            editTextPassword.setText(loginPrefs.getString("saved_password", ""));
-            checkboxRememberPassword.setChecked(true);
-        }
+        checkboxRememberPassword.setChecked(remember);
+        editTextAccount.setText("");
+        editTextPassword.setText("");
         setupClickListeners();
         String passedEmail = getIntent().getStringExtra("EMAIL");
         if (passedEmail != null) {
@@ -119,21 +119,47 @@ public class LoginActivity extends AppCompatActivity {
 
         setupClickListeners();
 
+        TextInputLayout emailInputLayout = findViewById(R.id.text_input_layout_email);
+
+        emailInputLayout.setEndIconOnClickListener(v -> {
+            SharedPreferences LoginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String savedEmail =LoginPrefs.getString("saved_email", "");
+            String savedPassword = LoginPrefs.getString("saved_password", "");
+
+            String currentEmail = editTextAccount.getText().toString().trim();
+
+            if (currentEmail.equals(savedEmail) && !savedPassword.isEmpty()) {
+                showBiometricPrompt(() -> {
+                    editTextPassword.setText(savedPassword);
+                }); // ✅ Hàm đã có rồi
+            } else {
+                Toast.makeText(this, "Email không khớp hoặc chưa lưu mật khẩu", Toast.LENGTH_SHORT).show();
+            }
+        });
+        emailInputLayout.setEndIconVisible(false);
         // Thêm TextWatcher cho editTextAccount để khi nhập đúng email đã lưu thì load password
         editTextAccount.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                biometricPromptShown = false;
                 String inputEmail = s.toString().trim();
+
                 if (Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches()) {
                     SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
                     String savedEmail = prefs.getString("saved_email", "");
                     String savedPassword = prefs.getString("saved_password", "");
+                    boolean remember = prefs.getBoolean("remember_password", false);
 
-                    if (inputEmail.equals(savedEmail) && !savedPassword.isEmpty()) {
-                        editTextPassword.setText(savedPassword);
+                    if (inputEmail.equals(savedEmail) && remember && !biometricPromptShown) {
+                        emailInputLayout.setEndIconVisible(true);
+                        biometricPromptShown = true; // tránh gọi lại nhiều lần
+
+                        showBiometricPrompt(() -> {
+                            editTextPassword.setText(savedPassword);
+                        });
                     } else {
                         editTextPassword.setText("");
                     }
@@ -143,9 +169,45 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) { }
+            public void afterTextChanged(Editable s) {}
         });
     }
+
+    private void showBiometricPrompt(Runnable onSuccess) {
+        androidx.biometric.BiometricPrompt biometricPrompt = new androidx.biometric.BiometricPrompt(
+                this,
+                ContextCompat.getMainExecutor(this),
+                new androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(androidx.biometric.BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        runOnUiThread(onSuccess); // callback
+                    }
+
+                    @Override
+                    public void onAuthenticationFailed() {
+                        super.onAuthenticationFailed();
+                        Toast.makeText(LoginActivity.this, "Xác thực thất bại", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                        Toast.makeText(LoginActivity.this, "Lỗi xác thực: " + errString, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        androidx.biometric.BiometricPrompt.PromptInfo promptInfo =
+                new androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                        .setTitle("Xác thực vân tay")
+                        .setSubtitle("Xác thực để tự động điền mật khẩu")
+                        .setNegativeButtonText("Hủy")
+                        .build();
+
+        biometricPrompt.authenticate(promptInfo);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -15,15 +16,24 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.example.memorix.R;
+import com.example.memorix.data.remote.api.AuthApi;
+import com.example.memorix.data.remote.dto.Login.LoginResponse;
+import com.example.memorix.data.remote.dto.Token.RefreshTokenRequest;
+import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.view.login.LoginActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import retrofit2.Call;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
@@ -56,6 +66,7 @@ public class SplashActivity extends AppCompatActivity {
         flashcards.add(findViewById(R.id.flashcard4));
         flashcards.add(findViewById(R.id.flashcard5));
 
+
         // Hide elements initially for animation
         logoImageView.setAlpha(0f);
         appNameTextView.setAlpha(0f);
@@ -67,27 +78,111 @@ public class SplashActivity extends AppCompatActivity {
             card.setScaleY(0.5f);
         }
 
+
         // Start animations after a short delay
         new Handler().postDelayed(this::startAnimations, 100);
 
         // Navigate to main activity after splash duration
         new Handler().postDelayed(() -> {
             if (isLoggedIn()) {
-                // Đã đăng nhập => vào MainActivity
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                startActivity(intent);
+
+                checkTokenValidity(); // ← thêm dòng này
             } else {
-                // Chưa đăng nhập => vào LoginActivity
-                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-                startActivity(intent);
+                goToLogin();
             }
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            finish();
         }, SPLASH_DURATION);
     }
+    private void checkTokenValidity() {
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        String refreshToken = prefs.getString("refresh_token", null);
 
+        if (refreshToken == null) {
+            goToLogin(); // Không có refresh token => chưa đăng nhập => Login
+            return;
+        }
+
+        AuthApi api = ApiClient.getClient().create(AuthApi.class);
+        Call<LoginResponse> call = api.refreshToken(new RefreshTokenRequest(refreshToken));
+
+        call.enqueue(new retrofit2.Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, retrofit2.Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Lưu token mới
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("access_token", response.body().getAccess_token());
+                    editor.putString("refresh_token", response.body().getRefresh_token());
+                    editor.apply();
+
+                    // ✅ Token còn hạn → tiếp tục gọi xác thực vân tay
+                    authenticateAndProceed();
+                } else {
+                    // ❌ Refresh token hết hạn → logout & vào Login luôn
+                    logoutAndGoToLogin();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                // ❌ Lỗi mạng → cũng logout an toàn
+                logoutAndGoToLogin();
+            }
+        });
+    }
+    private void authenticateAndProceed() {
+        BiometricPrompt biometricPrompt = new BiometricPrompt(
+                this,
+                ContextCompat.getMainExecutor(this),
+                new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        goToMain(); // Thành công → vào MainActivity
+                    }
+
+                    @Override
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                        logoutAndGoToLogin(); // Hủy hoặc lỗi → logout
+                    }
+
+                    @Override
+                    public void onAuthenticationFailed() {
+                        super.onAuthenticationFailed();
+                        // Có thể cho Toast nhẹ nếu muốn
+                    }
+                }
+        );
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Xác thực để tiếp tục")
+                .setSubtitle("Xác nhận vân tay để vào ứng dụng")
+                .setNegativeButtonText("Hủy")
+                .build();
+
+        biometricPrompt.authenticate(promptInfo);
+    }
+
+    private void goToMain() {
+        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        finish();
+    }
+
+    private void goToLogin() {
+        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+        finish();
+    }
+
+    private void logoutAndGoToLogin() {
+        // Xoá toàn bộ token và trạng thái đăng nhập
+        getSharedPreferences("MyAppPrefs", MODE_PRIVATE).edit().clear().apply();
+        getSharedPreferences("LoginPrefs", MODE_PRIVATE).edit().clear().apply();
+        getSharedPreferences("UserPrefs", MODE_PRIVATE).edit().clear().apply();
+
+        goToLogin();
+    }
     private boolean isLoggedIn() {
-        return getSharedPreferences("MyPrefs", MODE_PRIVATE)
+        return getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
                 .getBoolean("isLoggedIn", false);
     }
 

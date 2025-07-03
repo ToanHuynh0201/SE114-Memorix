@@ -279,23 +279,46 @@ public class AccountManagementFragment extends Fragment {
     private void clearTokenAndNavigateToLogin() {
         SharedPreferences prefs = getContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-
-        SharedPreferences userPrefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        userPrefs.edit().clear().apply();
-
         editor.remove("access_token");
         editor.remove("refresh_token");
         editor.remove("isLoggedIn");
         editor.apply();
 
-        Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+        // Xóa user info (nếu có)
+        SharedPreferences userPrefs = getContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        userPrefs.edit().clear().apply();
 
+        // Kiểm tra nếu trước đó user đã tick "nhớ mật khẩu"
+        SharedPreferences loginPrefs = getContext().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        boolean remember = loginPrefs.getBoolean("remember_password", false);
+
+        if (remember) {
+            // Nếu đã tick nhớ → hỏi người dùng
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Xóa mật khẩu đã lưu?")
+                    .setMessage("Bạn đã lưu mật khẩu trước đó. Bạn có muốn xóa mật khẩu này không?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+                        // Xóa toàn bộ loginPrefs
+                        loginPrefs.edit().clear().apply();
+                        proceedToLogin();
+                    })
+                    .setNegativeButton("Giữ lại", (dialog, which) -> {
+                        // Không xóa loginPrefs
+                        proceedToLogin();
+                    })
+                    .setCancelable(false)
+                    .show();
+        } else {
+            proceedToLogin();
+        }
+    }
+    private void proceedToLogin() {
+        Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         getActivity().finish();
     }
-
     @Override
     public void onResume(){
         super.onResume();
