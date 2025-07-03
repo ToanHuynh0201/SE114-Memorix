@@ -117,7 +117,12 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/email"
-                            android:inputType="textEmailAddress" />
+                            android:inputType="textEmailAddress"
+                            android:focusable="false"
+                            android:clickable="false"
+                            android:cursorVisible="false"
+                            android:longClickable="false"
+                            android:text="example@gmail.com" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Phone Number -->
