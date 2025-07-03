@@ -65,8 +65,6 @@ public class StatisticsFragment extends Fragment {
 
             return view;
         } catch (Exception e) {
-            e.printStackTrace();
-
             // Tạo view đơn giản với text để debug
             TextView errorView = new TextView(requireContext());
             errorView.setText("Error loading statistics: " + e.getMessage());
@@ -77,7 +75,6 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        try {
             tvTotal7Days = view.findViewById(R.id.tv_total_7_days);
             tvTotal30Days = view.findViewById(R.id.tv_total_30_days);
             tvAverage7Days = view.findViewById(R.id.tv_average_7_days);
@@ -87,9 +84,6 @@ public class StatisticsFragment extends Fragment {
             barChart7Days = view.findViewById(R.id.bar_chart_7_days);
             lineChart30Days = view.findViewById(R.id.line_chart_30_days);
             progressBar = view.findViewById(R.id.progress_bar);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void initViewModel() {
@@ -100,7 +94,6 @@ public class StatisticsFragment extends Fragment {
         try {
             // Observe statistics data
             viewModel.getStatisticsLiveData().observe(getViewLifecycleOwner(), statisticsResponse -> {
-                try {
                     if (statisticsResponse != null) {
                         viewModel.processStatisticsData(statisticsResponse);
                         updateStatisticsText(statisticsResponse);
@@ -111,9 +104,6 @@ public class StatisticsFragment extends Fragment {
                         }
                         viewModel.processStatisticsData(null);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             });
 
             // Observe streak data
@@ -130,7 +120,7 @@ public class StatisticsFragment extends Fragment {
                         viewModel.processStreakData(null);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -141,7 +131,7 @@ public class StatisticsFragment extends Fragment {
                         setupBarChartData(data);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -152,7 +142,7 @@ public class StatisticsFragment extends Fragment {
                         setupLineChartData(data);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -163,7 +153,7 @@ public class StatisticsFragment extends Fragment {
                         tvCurrentStreak.setText(String.format(Locale.getDefault(), "%d ngày", currentStreak));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -173,7 +163,7 @@ public class StatisticsFragment extends Fragment {
                         tvLongestStreak.setText(String.format(Locale.getDefault(), "%d ngày", longestStreak));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -184,7 +174,7 @@ public class StatisticsFragment extends Fragment {
                         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
 
@@ -198,11 +188,11 @@ public class StatisticsFragment extends Fragment {
                         viewModel.processStreakData(null);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -276,7 +266,7 @@ public class StatisticsFragment extends Fragment {
                 tvLongestStreak.setText(String.format(Locale.getDefault(), "%d ngày", streakResponse.getMaxStreak()));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -329,7 +319,7 @@ public class StatisticsFragment extends Fragment {
             barChart7Days.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
             barChart7Days.invalidate();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
     }
@@ -391,14 +381,14 @@ public class StatisticsFragment extends Fragment {
                         }
                         return "";
                     } catch (Exception e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         return "";
                     }
                 }
             });
             lineChart30Days.invalidate();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -448,7 +438,7 @@ public class StatisticsFragment extends Fragment {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -461,7 +451,7 @@ public class StatisticsFragment extends Fragment {
                 loadStatistics();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

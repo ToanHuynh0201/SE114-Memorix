@@ -93,7 +93,7 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
     private boolean isFilterExpanded = false;
     private int currentFilterPosition = 0;
     private String currentSearchQuery = "";
-    private boolean isSearching = false; // Track search state for UI updates
+    private boolean isSearching = false;
 
     // Debounce handling cho local search
     private Handler searchHandler;
@@ -575,19 +575,15 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
 
         // Use DiffUtil for efficient updates
         updateCardListWithDiff(newFilteredCards);
-
-        Log.d(TAG, "Local search completed. Query: '" + currentSearchQuery +
-                "', Filter: " + currentFilterPosition +
-                ", Results: " + filteredCards.size() + "/" + allCards.size());
     }
 
     // Optimized card list update using DiffUtil
+    @SuppressLint("NotifyDataSetChanged")
     private void updateCardListWithDiff(List<Card> newCards) {
         if (filteredCards.isEmpty()) {
             // First load - just set the data
             filteredCards.addAll(newCards);
             cardAdapter.notifyDataSetChanged();
-            // Add animation for initial load
             animateRecyclerView();
         } else {
             // Use DiffUtil for efficient updates
@@ -909,14 +905,6 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
 
     @SuppressLint("SetTextI18n")
     private void showDeleteConfirmDialog(Card card) {
-        // Prevent multiple delete operations
-        if (isDeletingCard) {
-            Log.d(TAG, "Delete operation already in progress, ignoring new request");
-            return;
-        }
-
-        Log.d(TAG, "Showing delete dialog for card ID: " + card.getFlashcardId());
-
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_card, null);
 
         TextView tvCardTypeBadge = dialogView.findViewById(R.id.tvCardTypeBadge);
@@ -998,7 +986,6 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
         btnDelete.setOnClickListener(v -> {
             // Prevent multiple delete calls
             if (isDeletingCard) {
-                Log.d(TAG, "Delete already in progress");
                 return;
             }
 
@@ -1010,7 +997,6 @@ public class DeckManagementActivity extends AppCompatActivity implements CardAda
             btnDelete.setText("Đang xóa...");
             btnCancel.setEnabled(false);
 
-            Log.d(TAG, "Starting delete for card ID: " + card.getFlashcardId());
 
             // Call ViewModel to delete flashcard via API
             deckManagementViewModel.deleteFlashcard(card.getFlashcardId(), cachedAuthToken);

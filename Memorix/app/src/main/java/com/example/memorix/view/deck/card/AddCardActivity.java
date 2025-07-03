@@ -1,5 +1,6 @@
 package com.example.memorix.view.deck.card;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -276,6 +277,7 @@ public class AddCardActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateQuestionLabel(CardType cardType) {
         switch (cardType) {
             case BASIC:
@@ -319,7 +321,7 @@ public class AddCardActivity extends AppCompatActivity {
             }
 
             if (card != null) {
-                saveCardToDatabase(card);
+                saveCard(card);
             }
         } catch (IllegalArgumentException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -404,7 +406,7 @@ public class AddCardActivity extends AppCompatActivity {
         return null;
     }
 
-    private void saveCardToDatabase(Card card) {
+    private void saveCard(Card card) {
         String token = sharedPreferences.getString("access_token", null);
         if (token == null) {
             Toast.makeText(this, "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();

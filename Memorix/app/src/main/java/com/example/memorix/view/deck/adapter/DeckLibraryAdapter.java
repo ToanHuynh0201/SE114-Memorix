@@ -56,7 +56,6 @@ public class DeckLibraryAdapter extends RecyclerView.Adapter<DeckLibraryAdapter.
         private TextView tvCategory;
         private TextView tvAuthor;
 
-        // Card containers
         private CardView cardCategory;
         private CardView cardTotalBadge;
         private CardView btnClone;
@@ -113,6 +112,7 @@ public class DeckLibraryAdapter extends RecyclerView.Adapter<DeckLibraryAdapter.
             }
         }
 
+        @SuppressLint("SetTextI18n")
         private void setupDescription(Deck deck) {
             String description = deck.getDescription();
             if (description == null || description.trim().isEmpty()) {
@@ -122,6 +122,7 @@ public class DeckLibraryAdapter extends RecyclerView.Adapter<DeckLibraryAdapter.
             }
         }
 
+        @SuppressLint("SetTextI18n")
         private void setupAuthorInfo(Deck deck) {
             // Default author text
             tvAuthor.setText("Tác giả không xác định");
@@ -151,11 +152,4 @@ public class DeckLibraryAdapter extends RecyclerView.Adapter<DeckLibraryAdapter.
         return deckList == null || deckList.isEmpty();
     }
 
-
-    public Deck getDeckAt(int position) {
-        if (position >= 0 && position < deckList.size()) {
-            return deckList.get(position);
-        }
-        return null;
-    }
 }

@@ -16,8 +16,6 @@ public class ShareViewModel extends ViewModel {
         shareRepository = new ShareRepository();
     }
 
-    // ==================== SHARE OPERATIONS ====================
-    // Getters for share operations LiveData
     public LiveData<Boolean> getShareSuccess() {
         return shareRepository.getShareSuccess();
     }
@@ -34,8 +32,6 @@ public class ShareViewModel extends ViewModel {
         shareRepository.shareDeck(deckId, receiverEmail, permissionLevel, token);
     }
 
-    // ==================== INCOMING SHARES ====================
-    // Getters for incoming shares LiveData
     public LiveData<List<IncomingShare>> getIncomingShares() {
         return shareRepository.getIncomingShares();
     }
@@ -48,25 +44,15 @@ public class ShareViewModel extends ViewModel {
         return shareRepository.getIncomingSharesLoading();
     }
 
-    /**
-     * Lấy danh sách các deck được share đến tài khoản của user
-     * @param token Auth token
-     */
     public void loadIncomingShares(String token) {
         shareRepository.getIncomingShares(token);
     }
 
-    /**
-     * Refresh lại danh sách incoming shares
-     * @param token Auth token
-     */
     public void refreshIncomingShares(String token) {
         shareRepository.resetIncomingSharesStates();
         shareRepository.getIncomingShares(token);
     }
 
-    // ==================== ACCEPT SHARE OPERATIONS ====================
-    // Getters for accept operations LiveData
     public LiveData<Boolean> getAcceptSuccess() {
         return shareRepository.getAcceptSuccess();
     }
@@ -83,17 +69,10 @@ public class ShareViewModel extends ViewModel {
         return shareRepository.getClonedDeck();
     }
 
-    /**
-     * Chấp nhận lời mời share deck
-     * @param shareId ID của share
-     * @param token Auth token
-     */
     public void acceptShare(long shareId, String token) {
         shareRepository.acceptShare(shareId, token);
     }
 
-    // ==================== DECLINE SHARE OPERATIONS ====================
-    // Getters for decline operations LiveData
     public LiveData<Boolean> getDeclineSuccess() {
         return shareRepository.getDeclineSuccess();
     }
@@ -106,47 +85,25 @@ public class ShareViewModel extends ViewModel {
         return shareRepository.getDeclineLoading();
     }
 
-    /**
-     * Từ chối lời mời share deck
-     * @param shareId ID của share
-     * @param token Auth token
-     */
     public void declineShare(long shareId, String token) {
         shareRepository.declineShare(shareId, token);
     }
 
-    // ==================== STATE MANAGEMENT ====================
-    /**
-     * Reset share states - useful when starting a new share operation
-     */
     public void resetShareStates() {
         shareRepository.resetShareStates();
     }
 
-    /**
-     * Reset incoming shares states
-     */
     public void resetIncomingSharesStates() {
         shareRepository.resetIncomingSharesStates();
     }
 
-    /**
-     * Reset accept states
-     */
     public void resetAcceptStates() {
         shareRepository.resetAcceptStates();
     }
 
-    /**
-     * Reset decline states
-     */
     public void resetDeclineStates() {
         shareRepository.resetDeclineStates();
     }
-
-    /**
-     * Clear all states - for complete cleanup
-     */
     public void clearAllStates() {
         shareRepository.clearStates();
     }

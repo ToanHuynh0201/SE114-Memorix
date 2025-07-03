@@ -44,26 +44,6 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
         notifyDataSetChanged();
     }
 
-    public void addIncomingShare(IncomingShare share) {
-        if (share != null) {
-            this.incomingShares.add(share);
-            notifyItemInserted(incomingShares.size() - 1);
-        }
-    }
-
-    public void removeIncomingShare(int position) {
-        if (position >= 0 && position < incomingShares.size()) {
-            incomingShares.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
-    public void updateIncomingShare(int position, IncomingShare share) {
-        if (position >= 0 && position < incomingShares.size() && share != null) {
-            incomingShares.set(position, share);
-            notifyItemChanged(position);
-        }
-    }
 
     @NonNull
     @Override
@@ -282,11 +262,6 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
             }
         }
 
-        /**
-         * Format time ago với múi giờ UTC+7 (Vietnam timezone)
-         * @param sharedAt UTC time string từ server
-         * @return Formatted time string
-         */
         private String formatTimeAgoUTC7(String sharedAt) {
             if (sharedAt == null || sharedAt.isEmpty()) {
                 return "Không rõ thời gian";

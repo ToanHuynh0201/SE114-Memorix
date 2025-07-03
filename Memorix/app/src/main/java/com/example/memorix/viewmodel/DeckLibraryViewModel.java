@@ -99,9 +99,6 @@ public class DeckLibraryViewModel extends ViewModel {
         this.originalDecks = new ArrayList<>(decks);
         filteredDecksLiveData.setValue(decks);
     }
-
-    // Legacy local filtering methods - kept for backward compatibility
-    // but now they trigger API calls instead of local filtering
     public void filterDecksWithCategory(String searchQuery, String category) {
         searchDecks(searchQuery, category);
     }

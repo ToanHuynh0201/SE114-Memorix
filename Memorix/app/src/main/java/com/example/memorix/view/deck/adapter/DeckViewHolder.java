@@ -123,12 +123,7 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         popupWindow.showAsDropDown(btnOverflowMenu, -150, 0);
     }
 
-    /**
-     * Extract color ID from image URL với improved logic
-     */
     private int extractColorIdFromImageUrl(String imageUrl) {
-        Log.d(TAG, "Extracting color ID from imageUrl: " + imageUrl);
-
         if (imageUrl == null || imageUrl.isEmpty()) {
             Log.d(TAG, "ImageUrl is null/empty, using default color 1");
             return 1;
@@ -178,17 +173,12 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         return (int) ((currentDeck.getId() % 6) + 1);
     }
 
-    /**
-     * Áp dụng bộ màu dựa trên deck với gradient border
-     */
     private void applyDeckColors(Deck deck) {
         // Store current position for fallback use
         this.currentPosition = getAdapterPosition();
 
         int colorId = extractColorIdFromImageUrl(deck.getImageUrl());
 
-        Log.d(TAG, "Applying color ID: " + colorId + " for deck: " + deck.getName() +
-                " (ID: " + deck.getId() + ") at position: " + currentPosition);
 
         // Ensure colorId is within valid range (1-6)
         if (colorId < 1 || colorId > 6) {
@@ -211,9 +201,6 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         updateProgressBarColor(colors);
     }
 
-    /**
-     * Tạo gradient border cho deck item
-     */
     private void createGradientBorder(int[] colors) {
         try {
             int borderWidth = dpToPx(3);
@@ -245,13 +232,8 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
             // 5. Áp dụng lên itemView
             itemView.setBackground(layerDrawable);
 
-            Log.d(TAG, "Gradient border created successfully with colors: " +
-                    String.format("#%06X", colors[0] & 0xFFFFFF) + " -> " +
-                    String.format("#%06X", colors[1] & 0xFFFFFF));
 
         } catch (Exception e) {
-            Log.e(TAG, "Error creating gradient border", e);
-
             // Fallback to simple border if gradient fails
             GradientDrawable fallbackDrawable = new GradientDrawable();
             fallbackDrawable.setShape(GradientDrawable.RECTANGLE);
@@ -262,9 +244,6 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
         }
     }
 
-    /**
-     * Cập nhật màu progress bar theo border
-     */
     private void updateProgressBarColor(int[] colors) {
         try {
             // Tạo gradient cho progress bar
@@ -294,10 +273,6 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
             Log.e(TAG, "Error updating progress bar color", e);
         }
     }
-
-    /**
-     * Convert dp to pixels
-     */
     private int dpToPx(int dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
@@ -307,14 +282,6 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
     public void bind(Deck deck, int position) {
         this.currentDeck = deck; // Lưu deck reference
         this.currentPosition = position; // Lưu position for fallback
-
-        // Debug log để kiểm tra dữ liệu
-        Log.d(TAG, "Binding deck: " + deck.getName());
-        Log.d(TAG, "Total cards: " + deck.getTotalCards());
-        Log.d(TAG, "Learned cards: " + deck.getLearnedCards());
-        Log.d(TAG, "Due cards: " + deck.getDueCards());
-        Log.d(TAG, "Unlearned cards: " + deck.getUnlearnedCards());
-        Log.d(TAG, "Category: " + deck.getCategory());
 
         // Set basic info
         tvDeckName.setText(deck.getName());

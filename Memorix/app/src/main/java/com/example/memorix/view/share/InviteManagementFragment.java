@@ -22,7 +22,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.memorix.R;
 import com.example.memorix.data.remote.dto.Share.IncomingShare;
-import com.example.memorix.data.remote.dto.Share.AcceptShareResponse;
 import com.example.memorix.viewmodel.ShareViewModel;
 
 import java.util.List;
@@ -120,7 +119,6 @@ public class InviteManagementFragment extends Fragment implements ReceivedInvite
         // Observe errors
         shareViewModel.getIncomingSharesError().observe(getViewLifecycleOwner(), this::handleError);
 
-        // ==================== OBSERVE ACCEPT OPERATIONS ====================
         // Observe accept success
         shareViewModel.getAcceptSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success != null && success) {
@@ -162,11 +160,9 @@ public class InviteManagementFragment extends Fragment implements ReceivedInvite
             }
         });
 
-        // ==================== OBSERVE DECLINE OPERATIONS ====================
         // Observe decline success
         shareViewModel.getDeclineSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success != null && success) {
-                android.util.Log.d("InviteManagementFragment", "Decline successful");
                 showToast("Từ chối lời mời thành công!");
 
                 // Refresh data to update UI

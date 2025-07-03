@@ -17,8 +17,6 @@ public class HomeViewModel extends ViewModel {
         deckRepository = new DeckRepository();
         shareRepository = new ShareRepository();
     }
-
-    // ========== DECK OPERATIONS ==========
     public LiveData<List<Deck>> getDecks() {
         return deckRepository.getDecks();
     }
@@ -38,7 +36,6 @@ public class HomeViewModel extends ViewModel {
     public void searchDecks(String token, String searchQuery) {
         deckRepository.searchDecks(token, searchQuery);
     }
-
     // Create Deck
     public LiveData<DeckCreateResponse> getCreateDeckSuccess() {
         return deckRepository.getCreateDeckSuccess();
@@ -109,10 +106,6 @@ public class HomeViewModel extends ViewModel {
     public void shareDeck(long deckId, String receiverEmail, String permissionLevel, String token) {
         shareRepository.shareDeck(deckId, receiverEmail, permissionLevel, token);
     }
-
-    /**
-     * Reset share states - useful when starting a new share operation
-     */
     public void resetShareStates() {
         shareRepository.resetShareStates();
     }

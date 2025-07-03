@@ -257,53 +257,20 @@ public class DeckRepository {
         }
     }
 
-    private String extractColorIdFromImageUrl(String imageUrl) {
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            return "1"; // Default color ID
-        }
-
-        // Check if it's already a color ID (1-6)
-        try {
-            int id = Integer.parseInt(imageUrl);
-            if (id >= 1 && id <= 6) {
-                return imageUrl; // It's already a color ID
-            }
-        } catch (NumberFormatException e) {
-            // It's a URL, try to extract color ID from it
-        }
-
-        // Extract color ID from placeholder URL
-        if (imageUrl.contains("Color1")) return "1";
-        if (imageUrl.contains("Color2")) return "2";
-        if (imageUrl.contains("Color3")) return "3";
-        if (imageUrl.contains("Color4")) return "4";
-        if (imageUrl.contains("Color5")) return "5";
-        if (imageUrl.contains("Color6")) return "6";
-
-        return "1"; // Default fallback
-    }
 
     // Updated createDeck method to handle color ID conversion
     public void createDeck(String name, String description, String imageUrl, boolean isPublic, String category, String token) {
-        Log.d(TAG, "Creating deck with params:");
-        Log.d(TAG, "Name: " + name);
-        Log.d(TAG, "Description: " + description);
-        Log.d(TAG, "ImageUrl: " + imageUrl);
-        Log.d(TAG, "IsPublic: " + isPublic);
-        Log.d(TAG, "Category: " + category);
 
         loadingState.setValue(true);
 
         // Validate input parameters
         if (name == null || name.trim().isEmpty()) {
-            Log.e(TAG, "Deck name is null or empty");
             loadingState.setValue(false);
             errorMessage.setValue("Tên bộ thẻ không được để trống");
             return;
         }
 
         if (token == null || token.trim().isEmpty()) {
-            Log.e(TAG, "Token is null or empty");
             loadingState.setValue(false);
             errorMessage.setValue("Phiên đăng nhập đã hết hạn");
             return;
@@ -311,7 +278,6 @@ public class DeckRepository {
 
         // Convert color ID to valid image URL if needed
         String finalImageUrl = convertColorIdToImageUrl(imageUrl);
-        Log.d(TAG, "Converted imageUrl " + imageUrl + " to finalImageUrl: " + finalImageUrl);
 
         // Create request with category
         DeckCreateRequest request = new DeckCreateRequest(
@@ -321,8 +287,6 @@ public class DeckRepository {
                 isPublic,
                 category
         );
-
-        Log.d(TAG, "Request object: " + request.toString());
 
         Call<DeckCreateResponse> call = apiService.createDeck("Bearer " + token, request);
         call.enqueue(new Callback<>() {
@@ -339,8 +303,6 @@ public class DeckRepository {
                     // Refresh danh sách decks sau khi tạo thành công
                     fetchDecks(token);
                 } else {
-                    Log.e(TAG, "Create deck failed with code: " + response.code());
-
                     // Log error body if available
                     if (response.errorBody() != null) {
                         try {
@@ -358,7 +320,6 @@ public class DeckRepository {
             @Override
             public void onFailure(@NonNull Call<DeckCreateResponse> call, @NonNull Throwable t) {
                 loadingState.setValue(false);
-                Log.e(TAG, "Network error during deck creation", t);
                 errorMessage.setValue("Network error: " + t.getMessage());
             }
         });
@@ -366,7 +327,6 @@ public class DeckRepository {
 
     // Overloaded method for backward compatibility (without colorId)
     public void createDeck(String name, String description, boolean isPublic, String token) {
-        Log.d(TAG, "Creating deck without imageUrl and category - using defaults");
         createDeck(name, description, "1", isPublic, null, token); // Default to color ID 1
     }
 

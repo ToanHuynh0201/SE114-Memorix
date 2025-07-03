@@ -52,9 +52,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
         }
 
         Card card = cards.get(position);
-        Log.d(TAG, "Binding card at position " + position +
-                ", ID: " + card.getFlashcardId() +
-                ", Type: " + card.getCardType());
 
         holder.bind(card);
     }
@@ -71,28 +68,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             return cards.get(position).getFlashcardId();
         }
         return RecyclerView.NO_ID;
-    }
-
-    /**
-     * Lấy card theo position một cách an toàn
-     */
-    public Card getCardAt(int position) {
-        if (position >= 0 && position < cards.size()) {
-            return cards.get(position);
-        }
-        return null;
-    }
-
-    /**
-     * Tìm position của card theo ID
-     */
-    public int findPositionByCardId(long cardId) {
-        for (int i = 0; i < cards.size(); i++) {
-            if (cards.get(i).getFlashcardId() == cardId) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     class CardViewHolder extends RecyclerView.ViewHolder {

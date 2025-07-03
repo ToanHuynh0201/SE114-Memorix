@@ -115,7 +115,6 @@ public class FlashcardRepository {
 
     private List<Card> convertToCards(List<FlashcardDto> flashcardDtos) {
         List<Card> cards = new ArrayList<>();
-
         for (FlashcardDto dto : flashcardDtos) {
             Card card = convertToCard(dto);
             if (card != null) {
@@ -167,12 +166,6 @@ public class FlashcardRepository {
             );
             String authHeader = "Bearer " + token;
 
-            // Debug log request
-            Log.d("FlashcardRepository", "Creating flashcard with request: " +
-                    "DeckId=" + request.getDeckId() +
-                    ", CardType=" + request.getCardType() +
-                    ", Content=" + request.getContent().toString());
-
             Call<CreateFlashcardResponse> call = flashcardApi.createFlashcard(request, authHeader);
 
             call.enqueue(new Callback<>() {
@@ -180,10 +173,7 @@ public class FlashcardRepository {
                 public void onResponse(@NonNull Call<CreateFlashcardResponse> call, @NonNull Response<CreateFlashcardResponse> response) {
                     loadingStateLiveData.setValue(false);
 
-                    Log.d("FlashcardRepository", "Response code: " + response.code());
-
                     if (response.isSuccessful() && response.body() != null) {
-                        Log.d("FlashcardRepository", "Success: " + response.body().toString());
                         Card createdCard = convertResponseToCard(response.body());
                         createdCardLiveData.setValue(createdCard);
                         createCardSuccessLiveData.setValue(true);
@@ -198,10 +188,6 @@ public class FlashcardRepository {
                             Log.e("FlashcardRepository", "Error reading error body", e);
                         }
 
-                        Log.e("FlashcardRepository", "API Error - Code: " + response.code() +
-                                ", Message: " + response.message() +
-                                ", Body: " + errorBody);
-
                         createCardSuccessLiveData.setValue(false);
                         errorMessageLiveData.setValue("Lỗi API: " + response.code() + " - " + errorBody);
                     }
@@ -212,7 +198,6 @@ public class FlashcardRepository {
                     loadingStateLiveData.setValue(false);
                     createCardSuccessLiveData.setValue(false);
 
-                    Log.e("FlashcardRepository", "Network error", t);
                     errorMessageLiveData.setValue("Lỗi kết nối: " + t.getMessage());
                 }
             });
@@ -268,16 +253,11 @@ public class FlashcardRepository {
     public LiveData<UpdateFlashcardResponse> updateCard(int flashcardId, String cardType, JsonObject content) {
         MutableLiveData<UpdateFlashcardResponse> result = new MutableLiveData<>();
 
-        // Debug logging
-        Log.d("UpdateCard", "flashcardId: " + flashcardId);
-        Log.d("UpdateCard", "cardType: " + cardType);
-        Log.d("UpdateCard", "content: " + content.toString());
-
         // Tạo request DTO
         UpdateFlashcardRequest request = new UpdateFlashcardRequest(cardType, content);
 
         // Gọi API PUT
-        flashcardApi.updateFlashcard(flashcardId, request).enqueue(new Callback<UpdateFlashcardResponse>() {
+        flashcardApi.updateFlashcard(flashcardId, request).enqueue(new Callback<>() {
 
             @Override
             public void onResponse(Call<UpdateFlashcardResponse> call, Response<UpdateFlashcardResponse> response) {
@@ -286,22 +266,12 @@ public class FlashcardRepository {
                     Log.d("UpdateCard", "Update successful");
                     result.setValue(response.body());
                 } else {
-                    Log.e("UpdateCard", "Update failed - Response not successful or body null");
-                    if (response.errorBody() != null) {
-                        try {
-                            String errorBody = response.errorBody().string();
-                            Log.e("UpdateCard", "Error body: " + errorBody);
-                        } catch (Exception e) {
-                            Log.e("UpdateCard", "Error reading error body", e);
-                        }
-                    }
                     result.setValue(null);
                 }
             }
 
             @Override
             public void onFailure(Call<UpdateFlashcardResponse> call, Throwable t) {
-                Log.e("UpdateCard", "Network error", t);
                 result.setValue(null);
             }
         });

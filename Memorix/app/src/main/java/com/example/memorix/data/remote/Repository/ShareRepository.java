@@ -104,11 +104,6 @@ public class ShareRepository {
         return declineLoading;
     }
 
-    /**
-     * Chấp nhận lời mời share deck
-     * @param shareId ID của share
-     * @param token Auth token
-     */
     public void acceptShare(long shareId, String token) {
         // Reset previous states
         acceptSuccess.setValue(null);
@@ -133,9 +128,6 @@ public class ShareRepository {
         // Format token with "Bearer " prefix if not already present
         String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
 
-        // Log request for debugging
-        android.util.Log.d("ShareRepository", "Accepting share with ID: " + shareId);
-
         // Make API call
         Call<AcceptShareResponse> call = shareApiService.acceptShare(authToken, shareId);
 
@@ -143,9 +135,6 @@ public class ShareRepository {
             @Override
             public void onResponse(Call<AcceptShareResponse> call, Response<AcceptShareResponse> response) {
                 acceptLoading.setValue(false);
-
-                // Log response for debugging
-                android.util.Log.d("ShareRepository", "Accept share response code: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
                     AcceptShareResponse acceptResponse = response.body();
@@ -155,7 +144,6 @@ public class ShareRepository {
                         acceptSuccess.setValue(true);
                         acceptError.setValue(null);
                         clonedDeck.setValue(acceptResponse.getData());
-                        android.util.Log.d("ShareRepository", "Successfully accepted share");
                     } else {
                         acceptSuccess.setValue(false);
                         acceptError.setValue("Không thể chấp nhận lời mời. Vui lòng thử lại.");
@@ -186,10 +174,6 @@ public class ShareRepository {
             public void onFailure(Call<AcceptShareResponse> call, Throwable t) {
                 acceptLoading.setValue(false);
                 acceptSuccess.setValue(false);
-
-                // Log failure for debugging
-                android.util.Log.e("ShareRepository", "Network failure for accept share", t);
-
                 // Handle network errors
                 String errorMessage = handleNetworkError(t);
                 acceptError.setValue(errorMessage);
@@ -197,11 +181,6 @@ public class ShareRepository {
         });
     }
 
-    /**
-     * Từ chối lời mời share deck
-     * @param shareId ID của share
-     * @param token Auth token
-     */
     public void declineShare(long shareId, String token) {
         // Reset previous states
         declineSuccess.setValue(null);
@@ -225,9 +204,6 @@ public class ShareRepository {
         // Format token with "Bearer " prefix if not already present
         String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
 
-        // Log request for debugging
-        android.util.Log.d("ShareRepository", "Declining share with ID: " + shareId);
-
         // Make API call
         Call<DeclineShareResponse> call = shareApiService.declineShare(authToken, shareId);
 
@@ -236,9 +212,6 @@ public class ShareRepository {
             public void onResponse(Call<DeclineShareResponse> call, Response<DeclineShareResponse> response) {
                 declineLoading.setValue(false);
 
-                // Log response for debugging
-                android.util.Log.d("ShareRepository", "Decline share response code: " + response.code());
-
                 if (response.isSuccessful() && response.body() != null) {
                     DeclineShareResponse declineResponse = response.body();
                     android.util.Log.d("ShareRepository", "Decline response: " + declineResponse.toString());
@@ -246,7 +219,6 @@ public class ShareRepository {
                     if (declineResponse.isSuccess()) {
                         declineSuccess.setValue(true);
                         declineError.setValue(null);
-                        android.util.Log.d("ShareRepository", "Successfully declined share");
                     } else {
                         declineSuccess.setValue(false);
                         declineError.setValue("Không thể từ chối lời mời. Vui lòng thử lại.");
@@ -261,7 +233,6 @@ public class ShareRepository {
                     if (response.errorBody() != null) {
                         try {
                             errorBody = response.errorBody().string();
-                            android.util.Log.e("ShareRepository", "Decline error body: " + errorBody);
                             detailedErrorMessage = parseErrorResponse(errorBody);
                         } catch (Exception e) {
                             android.util.Log.e("ShareRepository", "Could not read error body", e);
@@ -278,9 +249,6 @@ public class ShareRepository {
                 declineLoading.setValue(false);
                 declineSuccess.setValue(false);
 
-                // Log failure for debugging
-                android.util.Log.e("ShareRepository", "Network failure for decline share", t);
-
                 // Handle network errors
                 String errorMessage = handleNetworkError(t);
                 declineError.setValue(errorMessage);
@@ -288,10 +256,6 @@ public class ShareRepository {
         });
     }
 
-    /**
-     * Lấy danh sách các deck được share đến tài khoản của user
-     * @param token Auth token
-     */
     public void getIncomingShares(String token) {
         // Reset previous states
         incomingShares.setValue(null);
@@ -308,9 +272,6 @@ public class ShareRepository {
         // Format token with "Bearer " prefix if not already present
         String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
 
-        // Log request for debugging
-        android.util.Log.d("ShareRepository", "Getting incoming shares");
-
         // Make API call
         Call<IncomingSharesResponse> call = shareApiService.getIncomingShares(authToken);
 
@@ -324,14 +285,11 @@ public class ShareRepository {
 
                 if (response.isSuccessful() && response.body() != null) {
                     IncomingSharesResponse sharesResponse = response.body();
-                    android.util.Log.d("ShareRepository", "Response success: " + sharesResponse.isSuccess());
 
                     // LOG CHI TIẾT DATA
                     if (sharesResponse.getData() != null) {
-                        android.util.Log.d("ShareRepository", "Data size: " + sharesResponse.getData().size());
                         for (int i = 0; i < sharesResponse.getData().size(); i++) {
                             IncomingShare share = sharesResponse.getData().get(i);
-                            android.util.Log.d("ShareRepository", "Share " + i + ": " + share.toString());
                         }
                     } else {
                         android.util.Log.d("ShareRepository", "Data is null");
@@ -340,8 +298,6 @@ public class ShareRepository {
                     if (sharesResponse.isSuccess()) {
                         incomingShares.setValue(sharesResponse.getData());
                         incomingSharesError.setValue(null);
-                        android.util.Log.d("ShareRepository", "Successfully loaded " +
-                                (sharesResponse.getData() != null ? sharesResponse.getData().size() : 0) + " incoming shares");
                     } else {
                         incomingShares.setValue(null);
                         incomingSharesError.setValue("Không thể lấy danh sách chia sẻ. Vui lòng thử lại.");
@@ -384,13 +340,6 @@ public class ShareRepository {
         });
     }
 
-    /**
-     * Share deck với user khác
-     * @param deckId ID của deck cần share
-     * @param receiverEmail Email của người nhận
-     * @param permissionLevel Quyền hạn ("view", "edit", etc.)
-     * @param token Auth token
-     */
     public void shareDeck(long deckId, String receiverEmail, String permissionLevel, String token) {
         // Reset previous states
         shareSuccess.setValue(null);
@@ -411,19 +360,11 @@ public class ShareRepository {
         // Format email
         String formattedEmail = ShareValidationHelper.formatEmail(receiverEmail);
 
-        // Log request for debugging (remove in production)
-        ShareValidationHelper.logShareRequest(deckId, formattedEmail, permissionLevel, token);
-        ShareValidationHelper.debugShareIssues(deckId, formattedEmail, permissionLevel, token);
-
         // Create request
         ShareRequest request = new ShareRequest(deckId, formattedEmail, permissionLevel);
 
         // Format token with "Bearer " prefix if not already present
         String authToken = token.startsWith("Bearer ") ? token : "Bearer " + token;
-
-        // Log request for debugging
-        android.util.Log.d("ShareRepository", "Sharing deck - ID: " + deckId +
-                ", Email: " + formattedEmail + ", Permission: " + permissionLevel);
 
         // Make API call
         Call<ShareResponse> call = shareApiService.shareDeck(authToken, request);
@@ -551,9 +492,6 @@ public class ShareRepository {
         return baseMessage;
     }
 
-    /**
-     * Handle different HTTP error codes for incoming shares operation
-     */
     private String handleIncomingSharesError(int code, String errorBody, String detailedError) {
         android.util.Log.e("ShareRepository", "Incoming shares HTTP Error " + code + ", Body: " + errorBody);
 
@@ -592,9 +530,6 @@ public class ShareRepository {
         return baseMessage;
     }
 
-    /**
-     * Parse error response JSON to get detailed error message
-     */
     private String parseErrorResponse(String errorBody) {
         if (errorBody == null || errorBody.isEmpty()) {
             return null;
@@ -621,13 +556,6 @@ public class ShareRepository {
 
         return null;
     }
-
-    /**
-     * Handle different HTTP error codes for share operation
-     * @param code HTTP status code
-     * @param errorBody Response error body (có thể chứa thông tin chi tiết từ server)
-     * @param detailedError Chi tiết lỗi từ server nếu có
-     */
     private String handleShareError(int code, String errorBody, String detailedError) {
         // Log error details for debugging
         android.util.Log.e("ShareRepository", "HTTP Error " + code + ", Body: " + errorBody);
@@ -686,28 +614,18 @@ public class ShareRepository {
 
         return baseMessage;
     }
-
-    /**
-     * Reset share states - useful when starting a new share operation
-     */
     public void resetShareStates() {
         shareSuccess.setValue(null);
         shareError.setValue(null);
         shareLoading.setValue(false);
     }
 
-    /**
-     * Reset incoming shares states
-     */
     public void resetIncomingSharesStates() {
         incomingShares.setValue(null);
         incomingSharesError.setValue(null);
         incomingSharesLoading.setValue(false);
     }
 
-    /**
-     * Reset accept states
-     */
     public void resetAcceptStates() {
         acceptSuccess.setValue(null);
         acceptError.setValue(null);
@@ -715,18 +633,12 @@ public class ShareRepository {
         clonedDeck.setValue(null);
     }
 
-    /**
-     * Reset decline states
-     */
     public void resetDeclineStates() {
         declineSuccess.setValue(null);
         declineError.setValue(null);
         declineLoading.setValue(false);
     }
 
-    /**
-     * Clear all states - useful for cleanup
-     */
     public void clearStates() {
         shareSuccess.setValue(null);
         shareError.setValue(null);

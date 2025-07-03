@@ -27,7 +27,6 @@ public class UserViewModel extends ViewModel {
     public void updateUser(UpdateUserRequest request) {
         userRepository.updateMe(request).observeForever(userLiveData::setValue);
     }
-
     @Override
     protected void onCleared() {
         super.onCleared();

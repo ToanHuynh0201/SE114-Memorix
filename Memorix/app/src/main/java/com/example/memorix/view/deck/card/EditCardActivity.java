@@ -150,8 +150,7 @@ public class EditCardActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            Card card = (Card) getIntent().getSerializableExtra("card");
-            String title = (card != null) ? "Chỉnh sửa thẻ" : "Chỉnh sửa thẻ";
+            String title = "Chỉnh sửa thẻ";
             getSupportActionBar().setTitle(title);
         }
 
@@ -276,7 +275,6 @@ public class EditCardActivity extends AppCompatActivity {
         }
 
         if (currentCard == null) {
-            Toast.makeText(this, "Không có thẻ để cập nhật", Toast.LENGTH_SHORT).show();
             return;
         }
 

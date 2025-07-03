@@ -1,5 +1,6 @@
 package com.example.memorix.data.remote.Repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -8,6 +9,8 @@ import com.example.memorix.data.remote.dto.Deck.CloneResponse;
 import com.example.memorix.data.remote.dto.Deck.PublicDecksResponse;
 import com.example.memorix.data.remote.network.ApiClient;
 import com.example.memorix.model.Deck;
+import com.example.memorix.model.PublicDeck;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -16,14 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeckLibraryRepository {
-    private DeckApi apiService;
+    private final DeckApi apiService;
 
-    private MutableLiveData<List<Deck>> publicDecksLiveData;
-    private MutableLiveData<Boolean> loadingLiveData;
-    private MutableLiveData<String> errorLiveData;
-    private MutableLiveData<Boolean> cloneLoadingLiveData;
-    private MutableLiveData<String> cloneSuccessLiveData;
-    private MutableLiveData<String> cloneErrorLiveData;
+    private final MutableLiveData<List<Deck>> publicDecksLiveData;
+    private final MutableLiveData<Boolean> loadingLiveData;
+    private final MutableLiveData<String> errorLiveData;
+    private final MutableLiveData<Boolean> cloneLoadingLiveData;
+    private final MutableLiveData<String> cloneSuccessLiveData;
+    private final MutableLiveData<String> cloneErrorLiveData;
 
     public DeckLibraryRepository() {
         apiService = ApiClient.getClient().create(DeckApi.class);
@@ -65,13 +68,13 @@ public class DeckLibraryRepository {
 
         apiService.getPublicDecks().enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<PublicDecksResponse> call, Response<PublicDecksResponse> response) {
+            public void onResponse(@NonNull Call<PublicDecksResponse> call, @NonNull Response<PublicDecksResponse> response) {
                 loadingLiveData.setValue(false);
                 handlePublicDecksResponse(response);
             }
 
             @Override
-            public void onFailure(Call<PublicDecksResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<PublicDecksResponse> call, @NonNull Throwable t) {
                 loadingLiveData.setValue(false);
                 errorLiveData.setValue("Lỗi mạng: " + t.getMessage());
             }
@@ -87,7 +90,6 @@ public class DeckLibraryRepository {
         // Determine which API method to use based on parameters
         if ((searchQuery == null || searchQuery.trim().isEmpty()) &&
                 (category == null || category.trim().isEmpty())) {
-            // No filters - get all decks
             call = apiService.getPublicDecks();
         } else if (searchQuery != null && !searchQuery.trim().isEmpty() &&
                 category != null && !category.trim().isEmpty()) {
@@ -103,13 +105,13 @@ public class DeckLibraryRepository {
 
         call.enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<PublicDecksResponse> call, Response<PublicDecksResponse> response) {
+            public void onResponse(@NonNull Call<PublicDecksResponse> call, @NonNull Response<PublicDecksResponse> response) {
                 loadingLiveData.setValue(false);
                 handlePublicDecksResponse(response);
             }
 
             @Override
-            public void onFailure(Call<PublicDecksResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<PublicDecksResponse> call, @NonNull Throwable t) {
                 loadingLiveData.setValue(false);
                 errorLiveData.setValue("Lỗi mạng: " + t.getMessage());
             }
@@ -123,7 +125,7 @@ public class DeckLibraryRepository {
 
             if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                 List<Deck> deckList = new ArrayList<>();
-                for (com.example.memorix.model.PublicDeck publicDeck : apiResponse.getData()) {
+                for (PublicDeck publicDeck : apiResponse.getData()) {
                     deckList.add(publicDeck.toDeck());
                 }
                 publicDecksLiveData.setValue(deckList);
@@ -138,9 +140,9 @@ public class DeckLibraryRepository {
     public void cloneDeck(long deckId, String token) {
         cloneLoadingLiveData.setValue(true);
 
-        apiService.cloneDeck(token, deckId).enqueue(new Callback<CloneResponse>() {
+        apiService.cloneDeck(token, deckId).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<CloneResponse> call, Response<CloneResponse> response) {
+            public void onResponse(@NonNull Call<CloneResponse> call, @NonNull Response<CloneResponse> response) {
                 cloneLoadingLiveData.setValue(false);
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -157,7 +159,7 @@ public class DeckLibraryRepository {
             }
 
             @Override
-            public void onFailure(Call<CloneResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<CloneResponse> call, @NonNull Throwable t) {
                 cloneLoadingLiveData.setValue(false);
                 cloneErrorLiveData.setValue("Lỗi mạng: " + t.getMessage());
             }

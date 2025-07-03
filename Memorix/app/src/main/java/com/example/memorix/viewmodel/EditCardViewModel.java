@@ -58,11 +58,6 @@ public class EditCardViewModel extends ViewModel {
     public void updateCard(Card card) {
         isLoading.setValue(true);
 
-        // Debug logging
-        Log.d("EditCardViewModel", "Card type: " + card.getCardType());
-        Log.d("EditCardViewModel", "Card content: " + card.getContent().toString());
-
-        // Tạo JsonObject cho content dựa trên card type
         JsonObject content = new JsonObject();
 
         switch (card.getCardType()) {
@@ -86,13 +81,9 @@ public class EditCardViewModel extends ViewModel {
                 break;
         }
 
-        // Debug final content
-        Log.d("EditCardViewModel", "Final content to send: " + content);
 
         // Sử dụng CardType.getCode() thay vì switch case
         String cardTypeString = card.getCardType().getCode();
-
-        Log.d("EditCardViewModel", "Card type string: " + cardTypeString);
 
         // Gọi API update
         cardRepository.updateCard(card.getFlashcardId(), cardTypeString, content)

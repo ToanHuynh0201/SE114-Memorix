@@ -47,18 +47,6 @@ public class DeckAdapter extends RecyclerView.Adapter<DeckViewHolder>{
 
         holder.bind(deck, position);
 
-        // Set click listener
-//        holder.itemView.setOnClickListener(v -> {
-//            int currentPosition = holder.getAdapterPosition();
-//            if (currentPosition != RecyclerView.NO_POSITION &&
-//                    currentPosition < deckList.size() &&
-//                    listener != null) {
-//
-//                Deck clickedDeck = deckList.get(currentPosition);
-//                Log.d(TAG, "Deck clicked at position: " + currentPosition + ", deck: " + clickedDeck.getName());
-//                listener.onDeckClick(clickedDeck, currentPosition);
-//            }
-//        });
     }
 
     @Override

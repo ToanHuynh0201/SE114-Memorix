@@ -19,7 +19,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -337,27 +336,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         }
     }
 
-    public void clearFilters() {
-        Log.d(TAG, "Clearing all filters");
-
-        // Cancel any pending search
-        if (searchRunnable != null) {
-            searchHandler.removeCallbacks(searchRunnable);
-        }
-
-        currentSearchQuery = "";
-        selectedCategory = "";
-        etSearch.setText("");
-        etSearch.clearFocus();
-
-        // Reset category filter to "All"
-        spinnerCategoryFilter.setSelection(0);
-
-        // Load all decks
-        viewModel.clearSearch();
-        updateUIForFilterState();
-    }
-
     // Implement DeckLibraryListener methods
     @Override
     public void onDeckClick(Deck deck, int position) {
@@ -419,10 +397,10 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
 
     private void showCloneConfirmationDialog(Deck deck) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("🚀 Clone Deck");
+        builder.setTitle("Clone Deck");
         builder.setMessage("Bạn có muốn clone deck \"" + deck.getName() + "\" vào thư viện cá nhân không?\n\nDeck sẽ được thêm vào bộ sưu tập của bạn và bạn có thể tùy chỉnh nội dung.");
 
-        builder.setPositiveButton("✨ Clone ngay", (dialog, which) -> {
+        builder.setPositiveButton("Clone ngay", (dialog, which) -> {
             cloneDeck(deck);
         });
 
@@ -439,7 +417,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
     }
 
     private void cloneDeck(Deck deck) {
-        Log.d(TAG, "Cloning deck: " + deck.getName());
         viewModel.cloneDeck(deck, cachedAuthToken);
     }
 
@@ -467,9 +444,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         deckList = null;
     }
 
-    // ========== DATA HANDLING METHODS ==========
-
-    // Optimized deck list update using DiffUtil
     @SuppressLint("NotifyDataSetChanged")
     private void updateDeckList(List<Deck> newDecks) {
         if (newDecks == null) return;
@@ -493,16 +467,9 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         // Update UI states
         updateEmptyState(newDecks.isEmpty());
         updateSearchResultsCount(newDecks.size());
-
-        Log.d(TAG, "Displaying " + newDecks.size() + " decks from API");
     }
 
     private void debugDeckData(List<Deck> decks) {
-        Log.d(TAG, "=== DEBUG DECK DATA ===");
-        Log.d(TAG, "Total decks: " + decks.size());
-        Log.d(TAG, "Search query: '" + currentSearchQuery + "'");
-        Log.d(TAG, "Selected category: '" + selectedCategory + "'");
-
         for (int i = 0; i < Math.min(decks.size(), 3); i++) { // Show only first 3 for brevity
             Deck deck = decks.get(i);
             Log.d(TAG, "Deck " + i + ": " + deck.getName() +
@@ -510,10 +477,6 @@ public class DeckLibraryFragment extends Fragment implements DeckLibraryAdapter.
         }
         Log.d(TAG, "=== END DEBUG ===");
     }
-
-    // ========== DIFFUTIL CALLBACK ==========
-
-    // DiffUtil callback for efficient RecyclerView updates with smooth animations
     private static class DeckDiffCallback extends DiffUtil.Callback {
         private final List<Deck> oldList;
         private final List<Deck> newList;
