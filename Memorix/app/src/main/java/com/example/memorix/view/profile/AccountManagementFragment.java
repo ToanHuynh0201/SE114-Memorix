@@ -227,6 +227,7 @@ public class AccountManagementFragment extends Fragment {
         String accessToken = prefs.getString("access_token", null);
         String refreshToken = prefs.getString("refresh_token", null);
 
+
         if (accessToken == null || refreshToken == null) {
             // Nếu thiếu token thì logout luôn
             clearTokenAndNavigateToLogin();
@@ -264,6 +265,7 @@ public class AccountManagementFragment extends Fragment {
 
         editor.remove("access_token");
         editor.remove("refresh_token");
+        editor.remove("isLoggedIn");
         editor.apply();
 
         Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
