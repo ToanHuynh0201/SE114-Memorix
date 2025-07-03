@@ -55,13 +55,6 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
-        //        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-////        prefs.edit().putString("access_token", "fake_or_expired_token").apply();
-//        prefs.edit()
-//                .putString("access_token", "fake_token")
-//                .putString("refresh_token", "invalid_refresh_token")
-//                .apply();
-
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this);
