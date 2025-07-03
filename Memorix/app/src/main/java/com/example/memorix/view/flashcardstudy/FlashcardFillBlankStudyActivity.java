@@ -207,8 +207,8 @@ public class FlashcardFillBlankStudyActivity extends AppCompatActivity {
         ProgressUnlearnedLearnedResponse.LearnedCards learned = body.getLearned();
 
         if (unlearned != null) {
-            unlearnedCards.addAll(filterCardsByDeck(unlearned.getTwoSided()));
-            unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
+            //unlearnedCards.addAll(filterCardsByDeck(unlearned.getTwoSided()));
+            //unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
             unlearnedCards.addAll(filterCardsByDeck(unlearned.getFillInBlank()));
         }
 

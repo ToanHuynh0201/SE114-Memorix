@@ -241,8 +241,8 @@ public class FlashcardBasicStudyActivity extends AppCompatActivity {
 
         if (unlearned != null) {
             unlearnedCards.addAll(filterCardsByDeck(unlearned.getTwoSided()));
-            unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
-            unlearnedCards.addAll(filterCardsByDeck(unlearned.getFillInBlank()));
+            //unlearnedCards.addAll(filterCardsByDeck(unlearned.getMultipleChoice()));
+            //unlearnedCards.addAll(filterCardsByDeck(unlearned.getFillInBlank()));
         }
 
         if (learned != null) {
