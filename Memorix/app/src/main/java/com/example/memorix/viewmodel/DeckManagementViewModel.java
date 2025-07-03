@@ -1,5 +1,7 @@
 package com.example.memorix.viewmodel;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -94,6 +96,7 @@ public class DeckManagementViewModel extends ViewModel {
                     if (response.code() == 404) {
                         errorMsg = "Không tìm thấy flashcard";
                     } else if (response.code() == 401) {
+
                         errorMsg = "Phiên đăng nhập đã hết hạn";
                     } else if (response.code() == 403) {
                         errorMsg = "Không có quyền xóa flashcard này";

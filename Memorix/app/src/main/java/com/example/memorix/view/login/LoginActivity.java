@@ -85,9 +85,9 @@ public class LoginActivity extends AppCompatActivity {
         }
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String savedToken = prefs.getString("access_token", null);
+        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
 
-
-        if (savedToken != null) {
+        if (savedToken != null && isLoggedIn) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -204,6 +204,7 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("user_email", loginResponse.getUser().getEmail());
                         editor.putString("user_phone", loginResponse.getUser().getPhone());
                         editor.putString("user_image", loginResponse.getUser().getImageUrl());
+                        editor.putBoolean("isLoggedIn", true);
                         editor.apply();
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -354,6 +355,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("user_email", loginResponse.getUser().getEmail());
                     editor.putString("user_phone", loginResponse.getUser().getPhone());
                     editor.putString("user_image", loginResponse.getUser().getImageUrl());
+                    editor.putBoolean("isLoggedIn", true);
 
 
                     if (checkboxRememberPassword.isChecked()) {
