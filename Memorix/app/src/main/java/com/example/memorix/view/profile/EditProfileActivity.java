@@ -79,7 +79,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 if (currentImageUrl != null && !currentImageUrl.isEmpty()) {
                     Glide.with(this)
-                            .load(currentImageUrl)
+                            .load("http://192.168.200.9:3000" + currentImageUrl)
                             .placeholder(R.drawable.ic_memorix_logo)
                             .error(R.drawable.ic_memorix_logo)
                             .into(profileImage);
@@ -136,6 +136,7 @@ public class EditProfileActivity extends AppCompatActivity {
             Log.d("UPDATE_DEBUG", "Body: " + new Gson().toJson(request));
             userViewModel.updateUser(request);
             Toast.makeText(this, "Đã gửi yêu cầu cập nhật", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK); // báo hiệu thành công
             finish();
         });
     }
@@ -164,19 +165,18 @@ public class EditProfileActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
             if (selectedImageUri != null) {
+                // Hiển thị ảnh preview lên ô avatar
                 de.hdodenhof.circleimageview.CircleImageView profileImage = findViewById(R.id.profile_image);
                 profileImage.setImageURI(selectedImageUri);
-                String base64 = convertImageToBase64(selectedImageUri);
 
+                // Convert thành base64 và gán vào image_base64 (not image_url)
+                String base64 = convertImageToBase64(selectedImageUri);
                 if (base64 != null) {
-                    currentImageUrl = base64;
-                    Toast.makeText(this, "Đã chọn ảnh và chuẩn bị upload", Toast.LENGTH_SHORT).show();
+                    currentImageUrl = base64; // Dùng để gửi đi backend
+                    Log.d("IMAGE_BASE64", "Đã chuẩn bị chuỗi base64 để gửi backend");
                 } else {
                     Toast.makeText(this, "Lỗi khi chuyển ảnh", Toast.LENGTH_SHORT).show();
                 }
-                currentImageUrl = convertImageToBase64(selectedImageUri);
-
-
             }
         }
     }

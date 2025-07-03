@@ -1,11 +1,14 @@
 package com.example.memorix.view.profile;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +36,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.Objects;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,6 +61,8 @@ public class AccountManagementFragment extends Fragment {
     private View learningMethodLayout; // Thay đổi từ languageLayout
 
     private ImageView userAvatarImageView;
+    private ActivityResultLauncher<Intent> editProfileLauncher;
+
 
 
     public AccountManagementFragment() {
@@ -82,6 +88,15 @@ public class AccountManagementFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        editProfileLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        userViewModel.fetchUser(); // Gọi lại API sau khi EditProfile xong
+                    }
+                }
+        );
+
         // Thiết lập Toolbar (nếu cần)
         setupToolbar(view);
 
@@ -92,6 +107,9 @@ public class AccountManagementFragment extends Fragment {
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         observeUser();
         userViewModel.fetchUser();
+
+
+
 
         // Thiết lập các sự kiện click
         setupClickListeners();
@@ -124,10 +142,12 @@ public class AccountManagementFragment extends Fragment {
                 String imageUrl = u.getImage_url();
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(this)
-                            .load(imageUrl)
+                            .load("http://192.168.200.9:3000" + imageUrl)
                             .placeholder(R.drawable.ic_memorix_logo)
                             .error(R.drawable.ic_memorix_logo)
                             .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(userAvatarImageView);
                 }
 
@@ -179,7 +199,7 @@ public class AccountManagementFragment extends Fragment {
             // Mở activity chỉnh sửa hồ sơ
             if (getActivity() != null) {
                 Intent intent = new Intent(getActivity(), EditProfileActivity.class);
-                startActivity(intent);
+                editProfileLauncher.launch(new Intent(getActivity(), EditProfileActivity.class));
             }
         });
 
@@ -280,5 +300,25 @@ public class AccountManagementFragment extends Fragment {
     public void onResume(){
         super.onResume();
         userViewModel.fetchUser();
+        userViewModel.user().removeObservers(getViewLifecycleOwner());
+        userViewModel.user().observe(getViewLifecycleOwner(), u -> {
+            if (u != null) {
+                userNameTextView.setText(u.getUsername());
+                userEmailTextView.setText(u.getEmail());
+                userPhoneTextView.setText(u.getPhone() != null ? u.getPhone() : "Chưa có");
+
+                String imageUrl = u.getImage_url();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Glide.with(this)
+                            .load("http://192.168.200.9:3000" + imageUrl)
+                            .placeholder(R.drawable.ic_memorix_logo)
+                            .error(R.drawable.ic_memorix_logo)
+                            .skipMemoryCache(true) // không dùng cache
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .circleCrop()
+                            .into(userAvatarImageView);
+                }
+            }
+        });
     }
 }
