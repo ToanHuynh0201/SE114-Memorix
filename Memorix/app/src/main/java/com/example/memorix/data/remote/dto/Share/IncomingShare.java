@@ -33,6 +33,8 @@ public class IncomingShare {
 
     @SerializedName("deck_description")
     private String deckDescription;
+    @SerializedName("shared_by_username")
+    private String shareByUsername;
 
     // Constructors
     public IncomingShare() {}
@@ -52,6 +54,14 @@ public class IncomingShare {
 
     public void setDeckId(long deckId) {
         this.deckId = deckId;
+    }
+
+    public String getShareByUsername() {
+        return shareByUsername;
+    }
+
+    public void setShareByUsername(String shareByUsername) {
+        this.shareByUsername = shareByUsername;
     }
 
     public long getSharedByUserId() {

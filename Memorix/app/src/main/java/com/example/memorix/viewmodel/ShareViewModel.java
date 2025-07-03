@@ -30,13 +30,6 @@ public class ShareViewModel extends ViewModel {
         return shareRepository.getShareLoading();
     }
 
-    /**
-     * Share deck với user khác
-     * @param deckId ID của deck cần share
-     * @param receiverEmail Email của người nhận
-     * @param permissionLevel Quyền hạn ("view", "edit", etc.)
-     * @param token Auth token
-     */
     public void shareDeck(long deckId, String receiverEmail, String permissionLevel, String token) {
         shareRepository.shareDeck(deckId, receiverEmail, permissionLevel, token);
     }

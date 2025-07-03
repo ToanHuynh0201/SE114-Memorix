@@ -644,7 +644,7 @@ public class ShareRepository {
                 baseMessage = "Bạn không có quyền chia sẻ bộ thẻ này";
                 break;
             case 404:
-                baseMessage = "Bộ thẻ không tồn tại hoặc đã bị xóa";
+                baseMessage = "Bộ thẻ hoặc người dùng không tồn tại hoặc đã bị xóa";
                 break;
             case 409:
                 baseMessage = "Bạn đã chia sẻ bộ thẻ này với người dùng này rồi";

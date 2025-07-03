@@ -705,7 +705,7 @@ public class HomeFragment extends Fragment implements DeckActionListener,
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     if (cachedAuthToken != null && !cachedAuthToken.isEmpty()) {
                         homeViewModel.deleteDeck(deckId, cachedAuthToken);
-                        Toast.makeText(getContext(), "Đang xóa bộ thẻ...", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Đang xóa bộ thẻ...", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "Lỗi xác thực. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
                     }

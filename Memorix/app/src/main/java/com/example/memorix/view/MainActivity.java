@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "MyAppPrefs";
     private static final String ACCESS_TOKEN_KEY = "access_token";
     private static final String PENDING_FCM_TOKEN_KEY = "pending_fcm_token";
-
+ 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

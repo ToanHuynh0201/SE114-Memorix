@@ -114,17 +114,10 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
             btnDecline = itemView.findViewById(R.id.btn_decline);
             layoutActions = itemView.findViewById(R.id.layout_actions);
 
-            // LOG KIỂM TRA VIEWS
-            android.util.Log.d("ViewHolder", "txtSenderAvatar: " + (txtSenderAvatar != null));
-            android.util.Log.d("ViewHolder", "txtSenderName: " + (txtSenderName != null));
-            android.util.Log.d("ViewHolder", "txtDeckName: " + (txtDeckName != null));
-            android.util.Log.d("ViewHolder", "btnAccept: " + (btnAccept != null));
-            android.util.Log.d("ViewHolder", "layoutActions: " + (layoutActions != null));
         }
 
         @SuppressLint("SetTextI18n")
         public void bind(IncomingShare share) {
-            android.util.Log.d("ViewHolder", "bind() called with share: " + share);
 
             // HIỂN THỊ THÔNG TIN NGƯỜI GỬI (bỏ user ID)
             try {
@@ -132,7 +125,7 @@ public class ReceivedInviteAdapter extends RecyclerView.Adapter<ReceivedInviteAd
                 txtSenderAvatar.setText("A");
 
                 // Tên người gửi: Hiển thị "Anonymous User"
-                txtSenderName.setText("Anonymous User");
+                txtSenderName.setText(share.getShareByUsername());
 
                 android.util.Log.d("ViewHolder", "Set sender info as anonymous");
             } catch (Exception e) {
