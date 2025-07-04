@@ -267,6 +267,7 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("user_phone", loginResponse.getUser().getPhone());
                         editor.putString("user_image", loginResponse.getUser().getImageUrl());
                         editor.putBoolean("isLoggedIn", true);
+
                         editor.apply();
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -418,6 +419,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("user_phone", loginResponse.getUser().getPhone());
                     editor.putString("user_image", loginResponse.getUser().getImageUrl());
                     editor.putBoolean("isLoggedIn", true);
+
 
 
                     if (checkboxRememberPassword.isChecked()) {

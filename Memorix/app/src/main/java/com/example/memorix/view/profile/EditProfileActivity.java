@@ -79,7 +79,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 if (currentImageUrl != null && !currentImageUrl.isEmpty()) {
                     Glide.with(this)
-                            .load("http://192.168.200.9:3000" + currentImageUrl)
+                            .load("http://192.168.86.138:3000" + currentImageUrl)
                             .placeholder(R.drawable.ic_memorix_logo)
                             .error(R.drawable.ic_memorix_logo)
                             .into(profileImage);
@@ -136,8 +136,15 @@ public class EditProfileActivity extends AppCompatActivity {
             Log.d("UPDATE_DEBUG", "Body: " + new Gson().toJson(request));
             userViewModel.updateUser(request);
             Toast.makeText(this, "Đã gửi yêu cầu cập nhật", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK); // báo hiệu thành công
-            finish();
+            userViewModel.updateSuccess().observe(this, success -> {
+                if (success != null && success) {
+                    Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                } else if (success != null) {
+                    Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
     private void setupToolbar() {

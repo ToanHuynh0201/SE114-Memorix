@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateOvershootInterpolator;
@@ -71,6 +72,8 @@ public class SplashActivity extends AppCompatActivity {
         logoImageView.setAlpha(0f);
         appNameTextView.setAlpha(0f);
         taglineTextView.setAlpha(0f);
+        Log.d("SPLASH_DEBUG", "SplashActivity.onCreate() được gọi");
+
 
         for (CardView card : flashcards) {
             card.setAlpha(0f);
@@ -85,7 +88,6 @@ public class SplashActivity extends AppCompatActivity {
         // Navigate to main activity after splash duration
         new Handler().postDelayed(() -> {
             if (isLoggedIn()) {
-
                 checkTokenValidity(); // ← thêm dòng này
             } else {
                 goToLogin();
@@ -95,8 +97,9 @@ public class SplashActivity extends AppCompatActivity {
     private void checkTokenValidity() {
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         String refreshToken = prefs.getString("refresh_token", null);
-
+        Log.d("SPLASH_DEBUG", "checkTokenValidity() -> refresh_token: " + refreshToken);
         if (refreshToken == null) {
+            Log.d("SPLASH_DEBUG", "No refresh token → redirect to login");
             goToLogin(); // Không có refresh token => chưa đăng nhập => Login
             return;
         }
@@ -108,15 +111,18 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<LoginResponse> call, retrofit2.Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d("SPLASH_DEBUG", "Token refresh success");
                     // Lưu token mới
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("access_token", response.body().getAccess_token());
                     editor.putString("refresh_token", response.body().getRefresh_token());
                     editor.apply();
 
+                    Log.d("SPLASH_DEBUG", "→ Gọi xác thực vân tay");
                     // ✅ Token còn hạn → tiếp tục gọi xác thực vân tay
                     authenticateAndProceed();
                 } else {
+                    Log.d("SPLASH_DEBUG", "Token refresh failed: " + response.code());
                     // ❌ Refresh token hết hạn → logout & vào Login luôn
                     logoutAndGoToLogin();
                 }
@@ -124,6 +130,7 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.d("SPLASH_DEBUG", "Token refresh failed (network): " + t.getMessage());
                 // ❌ Lỗi mạng → cũng logout an toàn
                 logoutAndGoToLogin();
             }
@@ -134,6 +141,8 @@ public class SplashActivity extends AppCompatActivity {
                 this,
                 ContextCompat.getMainExecutor(this),
                 new BiometricPrompt.AuthenticationCallback() {
+
+
                     @Override
                     public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                         super.onAuthenticationSucceeded(result);
@@ -153,7 +162,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }
         );
-
+        Log.d("SPLASH_DEBUG", "Gọi xác thực vân tay");
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Xác thực để tiếp tục")
                 .setSubtitle("Xác nhận vân tay để vào ứng dụng")
@@ -182,9 +191,13 @@ public class SplashActivity extends AppCompatActivity {
         goToLogin();
     }
     private boolean isLoggedIn() {
-        return getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        boolean result = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
                 .getBoolean("isLoggedIn", false);
+
+        Log.d("SPLASH_DEBUG", "isLoggedIn() -> " + result);
+        return result;
     }
+
 
     private void startAnimations() {
         // Tạo AnimatorSet riêng cho từng loại animation

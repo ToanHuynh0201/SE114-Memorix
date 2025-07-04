@@ -333,7 +333,7 @@ public class AccountManagementFragment extends Fragment {
                 String imageUrl = u.getImage_url();
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(this)
-                            .load("http://192.168.200.9:3000" + imageUrl)
+                            .load("http://192.168.86.138:3000" + imageUrl)
                             .placeholder(R.drawable.ic_memorix_logo)
                             .error(R.drawable.ic_memorix_logo)
                             .skipMemoryCache(true) // không dùng cache
