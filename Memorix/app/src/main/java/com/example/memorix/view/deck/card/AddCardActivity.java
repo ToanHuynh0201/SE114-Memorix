@@ -382,7 +382,7 @@ public class AddCardActivity extends AppCompatActivity {
             throw new IllegalArgumentException("Vui lòng nhập đáp án đúng");
         }
 
-        if (!question.contains("_")) {
+        if (!question.contains(" _ ")) {
             etQuestion.requestFocus();
             throw new IllegalArgumentException("Câu hỏi điền từ phải có ít nhất một dấu gạch dưới (_)");
         }
