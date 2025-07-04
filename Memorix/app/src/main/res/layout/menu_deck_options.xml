@@ -47,17 +47,17 @@
             android:layout_height="0.5dp"
             android:background="#E0E0E0" />
 
-        <TextView
-            android:id="@+id/menu_item_reset_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawablePadding="16dp"
-            android:padding="16dp"
-            android:text="@string/reset_progress"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            app:drawableStartCompat="@drawable/ic_refresh" />
+<!--        <TextView-->
+<!--            android:id="@+id/menu_item_reset_progress"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:drawablePadding="16dp"-->
+<!--            android:padding="16dp"-->
+<!--            android:text="@string/reset_progress"-->
+<!--            android:textSize="14sp"-->
+<!--            android:background="?attr/selectableItemBackground"-->
+<!--            android:gravity="center_vertical"-->
+<!--            app:drawableStartCompat="@drawable/ic_refresh" />-->
 
         <View
             android:layout_width="match_parent"

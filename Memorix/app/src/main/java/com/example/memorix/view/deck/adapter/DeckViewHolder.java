@@ -85,7 +85,7 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
 
         TextView itemEdit = customMenuView.findViewById(R.id.menu_item_edit);
         TextView itemShare = customMenuView.findViewById(R.id.menu_item_share);
-        TextView itemResetProgress = customMenuView.findViewById(R.id.menu_item_reset_progress);
+//        TextView itemResetProgress = customMenuView.findViewById(R.id.menu_item_reset_progress);
         TextView itemDelete = customMenuView.findViewById(R.id.menu_item_delete);
 
         itemEdit.setOnClickListener(v -> {
@@ -104,13 +104,13 @@ public class DeckViewHolder extends RecyclerView.ViewHolder{
             popupWindow.dismiss();
         });
 
-        itemResetProgress.setOnClickListener(v -> {
-            if (listener != null && currentDeck != null) {
-                Log.d(TAG, "Reset progress clicked for deck ID: " + currentDeck.getId());
-                listener.onResetProgress(currentDeck.getId());
-            }
-            popupWindow.dismiss();
-        });
+//        itemResetProgress.setOnClickListener(v -> {
+//            if (listener != null && currentDeck != null) {
+//                Log.d(TAG, "Reset progress clicked for deck ID: " + currentDeck.getId());
+//                listener.onResetProgress(currentDeck.getId());
+//            }
+//            popupWindow.dismiss();
+//        });
 
         itemDelete.setOnClickListener(v -> {
             if (listener != null && currentDeck != null) {
